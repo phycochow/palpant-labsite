@@ -1,6 +1,13 @@
+# if file already present - sudo rm /etc/nginx/sites-enabled/flaskapp /etc/nginx/sites-available/flaskapp
+
+# sudo cp flaskapp "/etc/nginx/sites-available/"
+# then do: sudo ln -s /etc/nginx/sites-available/flaskapp /etc/nginx/sites-enabled/
+# then check for errors: sudo nginx -t
+# then: sudo systemctl restart nginx
+
 server {
     listen 80;
-    server_name palpantlab.duckdns.org;
+    server_name palpantlab.duckdns.org 13.229.69.154 _;
 
     location / {
         proxy_pass http://127.0.0.1:8000;
@@ -12,10 +19,3 @@ server {
         alias /home/ubuntu/palpant-labsite/static;
     }
 }
-
-# if file already present - sudo rm /etc/nginx/sites-enabled/flaskapp /etc/nginx/sites-available/flaskapp
-
-# sudo cp flaskapp "/etc/nginx/sites-available/"
-# then do: sudo ln -s /etc/nginx/sites-available/flaskapp /etc/nginx/sites-enabled/
-# then check for errors: sudo nginx -t
-# then: sudo systemctl restart nginx
