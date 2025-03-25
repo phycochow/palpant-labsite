@@ -11,3 +11,5 @@ ExecStart=/home/ubuntu/palpant-labsite/venv/bin/gunicorn --workers 3 --bind 127.
 
 [Install]
 WantedBy=multi-user.target
+
+# sudo cp this file to "/etc/systemd/system/"

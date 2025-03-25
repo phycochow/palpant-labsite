@@ -12,3 +12,8 @@ server {
         alias /home/ubuntu/palpant-labsite/static;
     }
 }
+
+# sudo cp this file to "/etc/nginx/sites-available/"
+# then do: sudo ln -s /etc/nginx/sites-available/flaskapp /etc/nginx/sites-enabled/
+# then check for errors: sudo nginx -t
+# then: sudo systemctl restart nginx
