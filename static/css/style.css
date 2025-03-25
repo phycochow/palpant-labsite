@@ -1,59 +1,30 @@
 body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
 
-	    font-family: Arial, sans-serif;
+header {
+    background-color: #333;
+    padding: 1rem;
+}
 
-	        line-height: 1.6;
+nav a {
+    color: white;
+    margin-right: 15px;
+    text-decoration: none;
+}
 
-		    margin: 0;
+nav a:hover {
+    text-decoration: underline;
+}
 
-		        padding: 0;
+main {
+    padding: 2rem;
+}
 
-			    color: #333;
-
-		    }
-
-
-
-		    header {
-
-			        background-color: #333;
-
-				    padding: 1rem;
-
-			    }
-
-
-
-			    nav a {
-
-				        color: white;
-
-					    margin-right: 15px;
-
-					        text-decoration: none;
-
-					}
-
-
-
-					nav a:hover {
-
-						    text-decoration: underline;
-
-					    }
-
-
-
-					    main {
-
-						        padding: 2rem;
-
-						}
-
-
-
-						h1 {
-
-							    color: #0275d8;
-
-						    }
+h1 {
+    color: #0275d8;
+}
