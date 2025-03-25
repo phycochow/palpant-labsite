@@ -13,6 +13,8 @@ server {
     }
 }
 
+# if file already present - sudo rm /etc/nginx/sites-enabled/flaskapp and /etc/nginx/sites-available/flaskapp
+
 # sudo cp this file to "/etc/nginx/sites-available/"
 # then do: sudo ln -s /etc/nginx/sites-available/flaskapp /etc/nginx/sites-enabled/
 # then check for errors: sudo nginx -t
