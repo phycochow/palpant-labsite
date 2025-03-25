@@ -186,7 +186,7 @@ cd ~/palpant-labsite
 source venv/bin/activate
 gunicorn --bind 127.0.0.1:8000 app:app
 
-
+sudo rm /etc/nginx/sites-enabled/default
 ---
 
 ✅ All done! You now have a Flask app deployed with Nginx + Gunicorn on Lightsail.
