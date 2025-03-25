@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name 13.229.69.154;
+    server_name palpantlab.duckdns.org;
 
     location / {
         proxy_pass http://127.0.0.1:8000;
@@ -15,7 +15,7 @@ server {
 
 # if file already present - sudo rm /etc/nginx/sites-enabled/flaskapp /etc/nginx/sites-available/flaskapp
 
-# sudo cp this file to "/etc/nginx/sites-available/"
+# sudo cp flaskapp "/etc/nginx/sites-available/"
 # then do: sudo ln -s /etc/nginx/sites-available/flaskapp /etc/nginx/sites-enabled/
 # then check for errors: sudo nginx -t
 # then: sudo systemctl restart nginx
