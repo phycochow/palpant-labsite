@@ -17,16 +17,6 @@ sudo apt upgrade -y
 sudo apt install -y python3 python3-pip python3-venv nginx
 ```
 
-### Optional: For Jupyter Notebook support
-```bash
-sudo pip3 install jupyter
-```
-
-### Web frameworks
-```bash
-sudo pip3 install flask django gunicorn
-```
-
 ---
 
 ## Step 3 – Set Up Your Python Environment
@@ -56,7 +46,7 @@ mkdir -p ~/home/ubuntu/palpant-labsite/templates ~/home/ubuntu/palpant-labsite/s
 - Create `app.py` with Flask code
 - Create `index.html`, `about.html` under `templates/`
 - Create `style.css` under `static/css/`
-- Create `flaskapp`
+- Create `flaskapp` which contains the web domain
 - Create `flaskapp.service`
 
 OR
@@ -120,6 +110,10 @@ sudo systemctl enable flaskapp
 sudo systemctl status flaskapp
 ```
 
+check
+sudo systemctl status flaskapp
+
+
 ---
 
 ## Step 8 – Test Deployment
@@ -139,6 +133,8 @@ http://<your-public-ip>
 ---
 ## Step 9 – Add HTTPS web domain
 ---
+
+Go back to step 4 to change web domain
 
 ### Install Certbot for HTTPS
 ```bash
@@ -178,9 +174,17 @@ sudo certbot renew --dry-run
 Certbot sets up a cron job for auto-renewal every 60 days.
 
 ---
+check if Gunicorn Still Running?
 
-✅ Done! Your Flask app is now running with HTTPS and a free DuckDNS domain.
+ps aux | grep gunicorn
 
+restart witj
+pkill gunicorn
+
+
+cd ~/palpant-labsite
+source venv/bin/activate
+gunicorn --bind 127.0.0.1:8000 app:app
 
 
 ---
