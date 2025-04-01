@@ -104,7 +104,7 @@ nav ul li a:hover {
 
 /* Hero Card */
 .hero {
-  height: 500px;
+  min-height: 500px;
   background-image: url('https://via.placeholder.com/1200x500');
   background-size: cover;
   background-position: center;

@@ -8,6 +8,12 @@
 </head>
 
 <body>
+
+  <!-- Widget to display screen size -->
+  <div id="screen-widget" style="position:fixed; top:10px; right:10px; background:#fff; border:1px solid #ccc; padding:5px; z-index:9999;">
+    Screen: <span id="screen-size">Loading...</span>
+  </div>
+
   <header>
     <div class="container header-container">
       <div class="logo">
@@ -369,5 +375,29 @@
       <p>© 2025 Palpant Group. All rights reserved. | Privacy Policy | Accessibility Statement</p>
     </div>
   </footer>
+
+    <!-- Responsive Widget Script -->
+  <script>
+    function updateScreenSize() {
+      // Get the current screen width
+      const width = window.innerWidth;
+      // Update the widget display
+      document.getElementById('screen-size').textContent = width + 'px';
+      // Set a data attribute on the body based on the screen width
+      let sizeClass;
+      if (width < 768) {
+        sizeClass = 'small';
+      } else if (width < 1024) {
+        sizeClass = 'medium';
+      } else {
+        sizeClass = 'large';
+      }
+      document.body.setAttribute('data-screen', sizeClass);
+    }
+    // Update on load and on window resize
+    window.addEventListener('resize', updateScreenSize);
+    updateScreenSize();
+  </script>
+
 </body>
 </html>
