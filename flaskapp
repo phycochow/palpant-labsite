@@ -15,7 +15,7 @@ server {
         proxy_redirect off;
     }
 
-    location /static/ {
-        alias /home/ubuntu/palpant-labsite/static/;
+    location /static {
+        alias /home/ubuntu/palpant-labsite/static;
     }
 }
