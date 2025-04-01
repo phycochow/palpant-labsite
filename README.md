@@ -191,3 +191,9 @@ sudo rm /etc/nginx/sites-enabled/default
 
 ✅ All done! You now have a Flask app deployed with Nginx + Gunicorn on Lightsail.
 
+---
+Changed html code
+
+git pull
+sudo systemctl daemon-reload
+sudo systemctl restart flaskapp
