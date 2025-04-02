@@ -244,7 +244,7 @@
         $('.tab-content').removeClass('active');
         $('#tab-viewer').addClass('active');
         
-        // Function to initialize a DataTable with enhanced features
+        // Function to initialize a DataTable with enhanced features and dynamic columns
         function initializeDataTable(tableType) {
             var apiEndpoint = '/api/' + tableType;
             
@@ -253,26 +253,23 @@
                 // Create HTML table structure
                 var tableHTML = '<table id="table-' + tableType + '" class="table-compact display" style="width:100%">';
                 
-                // Create column definitions and headers
+                // Create column definitions and headers dynamically
                 var columns = [];
                 if (data.length > 0) {
-                    // Extract column headers
                     tableHTML += '<thead><tr>';
                     Object.keys(data[0]).forEach(function(key) {
                         tableHTML += '<th>' + key + '</th>';
                         columns.push({ data: key, title: key });
                     });
-                    
                     tableHTML += '</tr></thead>';
                 }
                 
-                // Create table body
                 tableHTML += '<tbody></tbody></table>';
                 
                 // Add table to container
                 $('#table-' + tableType + '-container').html(tableHTML);
                 
-                // Initialize DataTable with enhanced options
+                // Initialize DataTable
                 $('#table-' + tableType).DataTable({
                     data: data,
                     columns: columns,
@@ -308,10 +305,7 @@
                             targets: '_all',
                             className: 'dt-nowrap',
                             render: function(data, type, row) {
-                                if (data === null || data === '') {
-                                    return 'NaN';
-                                }
-                                return data;
+                                return (data === null || data === '') ? 'NaN' : data;
                             }
                         }
                     ]
@@ -322,6 +316,6 @@
                 $('#table-' + tableType + '-container').html('<div class="alert alert-danger">Error loading data. Please try again later.</div>');
             });
         }
-        
+    });
     </script>
 {% endblock %}
