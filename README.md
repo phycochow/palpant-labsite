@@ -79,7 +79,7 @@ Visit `http://<your-public-ip>` after setting up Nginx.
 ## Step 6 – Configure Nginx as a Reverse Proxy
 ### Create config file:
 ```bash
-sudo nano /etc/nginx/sites-available/flaskapp
+sudo vi /etc/nginx/sites-available/flaskapp
 ```
 Add reverse proxy pointing to `127.0.0.1:8000`.
 
@@ -154,7 +154,7 @@ Follow the prompts:
 Then update the public IP with the web domain, e.g. palpantlab.duckdns.org
 ```bash
 sudo vi /etc/nginx/sites-available/flaskapp
-sudo rm /etc/nginx/sites-enabled/flaskapp 
+sudo rm /etc/nginx/sites-enabled/flaskapp
 sudo ln -s /etc/nginx/sites-available/flaskapp /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl restart nginx
@@ -178,7 +178,7 @@ check if Gunicorn Still Running?
 
 ps aux | grep gunicorn
 
-restart witj
+restart with
 pkill gunicorn
 
 
@@ -206,5 +206,6 @@ sudo chmod 755 /home/ubuntu
 sudo chmod 755 /home/ubuntu/palpant-labsite
 
 ---
+website not working in a sudden
 
-
+cat /etc/nginx/sites-enabled/default
