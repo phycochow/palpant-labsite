@@ -1,3 +1,40 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cmportal.css') }}">
+
+{% extends "dashboard.html" %}
+
+{% block Title %}
+    CM Portal - Database Modules
+{% endblock %}
+
+{% block Logo %}
+    <div class="logo">CM<span>Portal</span></div>
+{% endblock %}
+
+{% block Sidebar %}
+    <nav class="sidebar-menu">
+        <a href="#" class="menu-item active">
+            <span class="icon icon-database"></span>
+            CMPortal
+        </a>
+        <a href="#" class="menu-item">
+            <span class="icon icon-enrichment"></span>
+            EpiCop
+        </a>
+        <a href="#" class="menu-item">
+            <span class="icon icon-search"></span>
+            Study 3
+        </a>
+        <a href="#" class="menu-item">
+            <span class="icon icon-benchmark"></span>
+            Study 4
+        </a>
+        <a href="https://palpantlab.duckdns.org/" class="menu-item">
+            <span class="icon icon-dashboard"></span>
+            Exit Dashboard
+        </a>
+    </nav>
+{% endblock %}
+
 {% extends "dashboard.html" %}
 
 {% block Title %}
@@ -81,17 +118,9 @@
                 <div class="visualization mb-3">
                     UMAP Projection of Protocol Parameters (Fig. 2c)
                 </div>
-                <table id="table-viewer" class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Protocol ID</th>
-                            <th>Media Type</th>
-                            <th>Cell Line</th>
-                            <th>Maturation</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+                <div class="well">
+                    <div id="table-viewer-container"></div>
+                </div>
             </div>
             
             <!-- Database Enrichment -->
@@ -114,18 +143,9 @@
                 <div class="visualization mb-3">
                     Feature Enrichment Visualization (Fig. 2d)
                 </div>
-                <table id="table-enrichment" class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Protocol ID</th>
-                            <th>Media Type</th>
-                            <th>Cell Line</th>
-                            <th>Maturation</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+                <div class="well">
+                    <div id="table-enrichment-container"></div>
+                </div>
             </div>
             
             <!-- Protocol Search -->
@@ -153,18 +173,9 @@
                         <button class="btn btn-primary">Find Protocols</button>
                     </div>
                 </div>
-                <table id="table-search" class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Protocol ID</th>
-                            <th>Media Type</th>
-                            <th>Cell Line</th>
-                            <th>Maturation</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+                <div class="well">
+                    <div id="table-search-container"></div>
+                </div>
             </div>
             
             <!-- Protocol Benchmarking -->
@@ -192,30 +203,24 @@
                 <div class="visualization">
                     Protocol Benchmarking Visualization
                 </div>
+                <div class="well">
+                    <div id="table-benchmark-container"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- jQuery, Popper.js, Bootstrap JS, and DataTables JS -->
+    <!-- jQuery, Popper.js, Bootstrap JS, and DataTables JS with extensions -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.html5.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.colVis.min.js"></script>
+    
     <script>
     $(document).ready(function() {
-        // Add CSS for tab display
-        $('<style>')
-            .prop('type', 'text/css')
-            .html(`
-                .tab-content {
-                    display: none;
-                }
-                .tab-content.active {
-                    display: block;
-                }
-            `)
-            .appendTo('head');
-            
         // Tab navigation functionality
         $('.tab-link').click(function(){
             var tab_id = $(this).attr('data-tab');
@@ -228,12 +233,9 @@
             $('#' + tab_id).addClass('active');
             $(this).addClass('active');
             
-            // Reinitialize DataTable for the newly displayed tab if not already initialized
-            var tableId = 'table-' + tab_id.replace('tab-', '');
-            if ($.fn.dataTable.isDataTable('#' + tableId)) {
-                // Table already initialized, no need to do anything
-            } else if ($('#' + tableId).length > 0) {
-                // Initialize table if it exists in this tab
+            // Initialize DataTable for the newly displayed tab if not already initialized
+            var tableId = tab_id.replace('tab-', '');
+            if (!$.fn.dataTable.isDataTable('#table-' + tableId)) {
                 initializeDataTable(tableId);
             }
         });
@@ -242,30 +244,213 @@
         $('.tab-content').removeClass('active');
         $('#tab-viewer').addClass('active');
         
-        // Function to initialize a DataTable with dynamic columns from the API response
-        function initializeDataTable(tableId) {
-            var apiEndpoint = '/api/' + tableId.replace('table-', '');
+        // Function to initialize a DataTable with enhanced features
+        function initializeDataTable(tableType) {
+            var apiEndpoint = '/api/' + tableType;
             
             // Fetch data from the API
             $.getJSON(apiEndpoint, function(data) {
-                // Create column definitions dynamically using keys from the first record
-                var dynamicColumns = [];
+                // Create HTML table structure
+                var tableHTML = '<table id="table-' + tableType + '" class="table-compact display" style="width:100%">';
+                
+                // Create column definitions and headers
+                var columns = [];
                 if (data.length > 0) {
-                    dynamicColumns = Object.keys(data[0]).map(function(key) {
-                        return { data: key, title: key };
+                    // Extract column headers
+                    tableHTML += '<thead><tr>';
+                    Object.keys(data[0]).forEach(function(key) {
+                        tableHTML += '<th>' + key + '</th>';
+                        columns.push({ data: key, title: key });
                     });
+                    
+                    // Add Actions column if not present
+                    if (!Object.keys(data[0]).includes('Actions')) {
+                        tableHTML += '<th>Actions</th>';
+                        columns.push({ 
+                            data: null, 
+                            title: 'Actions',
+                            defaultContent: '<button class="btn btn-sm btn-link p-0">View</button>',
+                            orderable: false
+                        });
+                    }
+                    
+                    tableHTML += '</tr></thead>';
                 }
                 
-                // Initialize DataTable with the fetched data and dynamic columns
-                $('#' + tableId).DataTable({
+                // Create table body
+                tableHTML += '<tbody></tbody></table>';
+                
+                // Add table to container
+                $('#table-' + tableType + '-container').html(tableHTML);
+                
+                // Initialize DataTable with enhanced options
+                $('#table-' + tableType).DataTable({
                     data: data,
-                    columns: dynamicColumns
+                    columns: columns,
+                    scrollX: true,
+                    pageLength: 10,
+                    lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+                    autoWidth: false,
+                    dom: 'Bfrtip',
+                    buttons: [
+                        {
+                            extend: 'colvis',
+                            className: 'btn btn-primary',
+                            text: 'Select Features'
+                        },
+                        {
+                            extend: 'csv',
+                            className: 'btn btn-secondary',
+                            text: 'Export CSV'
+                        }
+                    ],
+                    language: {
+                        search: "_INPUT_",
+                        searchPlaceholder: "Search...",
+                        paginate: {
+                            first: "First",
+                            last: "Last",
+                            next: "→",
+                            previous: "←"
+                        }
+                    },
+                    columnDefs: [
+                        {
+                            targets: '_all',
+                            className: 'dt-nowrap',
+                            render: function(data, type, row) {
+                                if (data === null || data === '') {
+                                    return 'NaN';
+                                }
+                                return data;
+                            }
+                        }
+                    ]
                 });
+            })
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                console.error('Error fetching data from API:', errorThrown);
+                $('#table-' + tableType + '-container').html('<div class="alert alert-danger">Error loading data. Please try again later.</div>');
             });
         }
         
-        // Initialize DataTables for all tables in the active tab
-        initializeDataTable('table-viewer');
+        // Alternative TSV data loading for testing/backup
+        function loadTSVData(tableType) {
+            let tsvURL;
+            
+            // Set appropriate TSV URL based on table type
+            switch(tableType) {
+                case 'viewer':
+                    tsvURL = 'https://phycochow.github.io/palpantlab_hiPSC_database/datasets/0_Summary_CSYChow_21Aug24.tsv';
+                    break;
+                // Add cases for other table types as needed
+                default:
+                    tsvURL = 'https://phycochow.github.io/palpantlab_hiPSC_database/datasets/0_Summary_CSYChow_21Aug24.tsv';
+            }
+            
+            fetch(tsvURL)
+                .then(response => response.text())
+                .then(tsvText => {
+                    const rows = tsvText.split('\n').map(row => 
+                        row.split('\t').map(cell => cell === '' ? 'NaN' : cell)
+                    );
+                    
+                    // Extract headers and data
+                    const headers = rows[0];
+                    const dataRows = rows.slice(1).filter(row => row.length > 1); // Filter out empty rows
+                    
+                    // Create data objects
+                    const data = dataRows.map(row => {
+                        const obj = {};
+                        headers.forEach((header, index) => {
+                            obj[header] = row[index] || 'NaN';
+                        });
+                        return obj;
+                    });
+                    
+                    // Create HTML table structure
+                    var tableHTML = '<table id="table-' + tableType + '" class="table-compact display" style="width:100%">';
+                    
+                    // Add headers
+                    tableHTML += '<thead><tr>';
+                    headers.forEach(header => {
+                        tableHTML += '<th>' + header + '</th>';
+                    });
+                    
+                    // Add Actions column
+                    tableHTML += '<th>Actions</th>';
+                    tableHTML += '</tr></thead><tbody></tbody></table>';
+                    
+                    // Add table to container
+                    $('#table-' + tableType + '-container').html(tableHTML);
+                    
+                    // Initialize DataTable
+                    $('#table-' + tableType).DataTable({
+                        data: data,
+                        columns: [
+                            ...headers.map(header => ({ data: header, title: header })),
+                            { 
+                                data: null, 
+                                title: 'Actions',
+                                defaultContent: '<button class="btn btn-sm btn-link p-0">View</button>',
+                                orderable: false
+                            }
+                        ],
+                        scrollX: true,
+                        pageLength: 10,
+                        lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+                        autoWidth: false,
+                        dom: 'Bfrtip',
+                        buttons: [
+                            {
+                                extend: 'colvis',
+                                className: 'btn btn-primary',
+                                text: 'Select Features'
+                            },
+                            {
+                                extend: 'csv',
+                                className: 'btn btn-secondary',
+                                text: 'Export CSV'
+                            }
+                        ],
+                        language: {
+                            search: "_INPUT_",
+                            searchPlaceholder: "Search...",
+                            paginate: {
+                                first: "First",
+                                last: "Last",
+                                next: "→",
+                                previous: "←"
+                            }
+                        },
+                        columnDefs: [
+                            {
+                                targets: '_all',
+                                className: 'dt-nowrap'
+                            }
+                        ]
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading TSV:', error);
+                    $('#table-' + tableType + '-container').html('<div class="alert alert-danger">Error loading TSV data. Please try again later.</div>');
+                });
+        }
+        
+        // Try to initialize the first DataTable with API data
+        // If it fails, fall back to TSV loading
+        initializeDataTable('viewer');
+        
+        // Uncomment the line below to use TSV loading instead of API
+        // loadTSVData('viewer');
+        
+        // Handle button click events for DataTable rows
+        $(document).on('click', '.btn-link', function() {
+            var table = $(this).closest('table').DataTable();
+            var data = table.row($(this).parents('tr')).data();
+            alert('Viewing details for Protocol: ' + data['Protocol ID']);
+            // You can implement a modal or redirect to a detail page here
+        });
     });
     </script>
 {% endblock %}

@@ -1,0 +1,343 @@
+/* Color Variables */
+:root {
+    --primary: #2c3e50;
+    --secondary: #34495e;
+    --accent: #3498db;
+    --success: #2ecc71;
+    --warning: #f39c12;
+    --danger: #e74c3c;
+    --light: #ecf0f1;
+    --dark: #2c3e50;
+    --gray: #95a5a6;
+    --border: #ddd;
+    
+    /* Additional custom colors derived from the main palette */
+    --primary-light: #3a506e;
+    --primary-dark: #1e2b38;
+    --accent-light: #5faee3;
+    --accent-dark: #2980b9;
+    --light-hover: #dde4e6;
+    --table-stripe: #f6f9fa;
+    --table-hover: #e2e8ea;
+}
+
+/* Compact Data-Dense Table Style */
+.table-compact {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.875rem;
+}
+
+.table-compact thead th {
+    background-color: var(--primary);
+    color: var(--light);
+    font-weight: 600;
+    padding: 8px 12px;
+    border-bottom: 2px solid var(--primary-dark);
+    text-align: left;
+    white-space: nowrap;
+}
+
+.table-compact tbody td {
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.table-compact tbody tr:hover {
+    background-color: var(--table-hover);
+}
+
+/* DataTables customization */
+.dataTables_wrapper .dataTables_length, 
+.dataTables_wrapper .dataTables_filter, 
+.dataTables_wrapper .dataTables_info, 
+.dataTables_wrapper .dataTables_processing, 
+.dataTables_wrapper .dataTables_paginate {
+    font-size: 0.875rem;
+    color: var(--dark);
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    padding-top: 0.5em;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 0.25em 0.75em;
+}
+
+/* Well container */
+.well {
+    min-height: 20px;
+    padding: 19px;
+    margin-bottom: 20px;
+    background-color: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+/* White-space control for table cells */
+td.dt-nowrap { 
+    white-space: nowrap;
+}
+
+/* DataTable striping and hover effects */
+table.dataTable.stripe tbody tr.odd {
+    background-color: var(--table-stripe);
+}
+
+table.dataTable.hover tbody tr:hover {
+    background-color: var(--table-hover);
+}
+
+/* DataTable pagination customization */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    text-decoration: none !important;
+    cursor: pointer;
+    color: var(--dark) !important;
+    background: var(--light);
+    box-shadow: none;
+    border: 1px solid transparent;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    color: var(--light) !important;
+    background: var(--primary-light);
+    border: 1px solid transparent;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:active {
+    outline: none;
+    background: var(--primary);
+    border: 1px solid transparent;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current, 
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    color: var(--light) !important;
+    background: var(--accent);
+    border: 1px solid transparent;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled, 
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover, 
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:active {
+    cursor: default;
+    color: var(--gray) !important;
+    background: var(--light);
+    border: 1px solid transparent;
+}
+
+/* DataTable buttons customization */
+button.dt-button,
+div.dt-button,
+a.dt-button {
+    border: 1px solid transparent;
+    cursor: pointer;
+    color: var(--light);
+    background: var(--accent);
+    box-shadow: none;
+}
+
+button.dt-button:hover:not(.disabled),
+div.dt-button:hover:not(.disabled),
+a.dt-button:hover:not(.disabled) {
+    text-decoration: none;
+    border: 1px solid transparent;
+    background: var(--accent-dark);
+}
+
+/* DataTable button collection styling */
+div.dt-button-collection button.dt-button:not(.disabled),
+div.dt-button-collection button.dt-button:not(.disabled),
+div.dt-button-collection div.dt-button:not(.disabled),
+div.dt-button-collection div.dt-button:not(.disabled),
+div.dt-button-collection a.dt-button:not(.disabled),
+div.dt-button-collection a.dt-button:not(.disabled) {
+    background: var(--light);
+    color: var(--dark);
+    box-shadow: none;
+    border: 1px solid var(--border);
+}
+
+div.dt-button-collection button.dt-button:hover:not(.disabled),
+div.dt-button-collection button.dt-button:hover:not(.disabled),
+div.dt-button-collection div.dt-button:hover:not(.disabled),
+div.dt-button-collection div.dt-button:hover:not(.disabled),
+div.dt-button-collection a.dt-button:hover:not(.disabled),
+div.dt-button-collection a.dt-button:hover:not(.disabled) {
+    background: var(--primary-light);
+    color: var(--light);
+    box-shadow: none;
+    border: 1px solid var(--border);
+}
+
+div.dt-button-collection button.dt-button:active:not(.disabled),
+div.dt-button-collection button.dt-button.active:not(.disabled),
+div.dt-button-collection div.dt-button:active:not(.disabled),
+div.dt-button-collection div.dt-button.active:not(.disabled),
+div.dt-button-collection a.dt-button:active:not(.disabled),
+div.dt-button-collection a.dt-button.active:not(.disabled) {
+    background: var(--accent);
+    color: var(--light);
+    box-shadow: none;
+    border: 1px solid var(--border);
+}
+
+div.dt-button-collection button.dt-button:active:not(.disabled):hover:not(.disabled),
+div.dt-button-collection button.dt-button.active:not(.disabled):hover:not(.disabled),
+div.dt-button-collection div.dt-button:active:not(.disabled):hover:not(.disabled),
+div.dt-button-collection div.dt-button.active:not(.disabled):hover:not(.disabled),
+div.dt-button-collection a.dt-button:active:not(.disabled):hover:not(.disabled),
+div.dt-button-collection a.dt-button.active:not(.disabled):hover:not(.disabled) {
+    background: var(--accent-dark);
+    box-shadow: none;
+    border: 1px solid var(--border);
+}
+
+/* Tab navigation styling */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.tab-nav {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+}
+
+.tab-link {
+    padding: 10px 15px;
+    cursor: pointer;
+    margin-bottom: -1px;
+    border: 1px solid transparent;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    color: var(--accent);
+}
+
+.tab-link.active {
+    color: var(--dark);
+    background-color: #fff;
+    border-color: var(--border) var(--border) #fff;
+}
+
+.tab-link:hover:not(.active) {
+    border-color: var(--light) var(--light) var(--border);
+    background-color: var(--light);
+}
+
+/* Visualization container */
+.visualization {
+    background-color: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+    color: var(--gray);
+    font-style: italic;
+}
+
+/* Upload area styling */
+.upload-area {
+    border: 2px dashed var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+    background-color: var(--light);
+    cursor: pointer;
+}
+
+.upload-area:hover {
+    border-color: var(--gray);
+    background-color: var(--light-hover);
+}
+
+/* Button styling */
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary-dark);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-secondary {
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--dark);
+    border-color: var(--dark);
+}
+
+.btn-link {
+    color: var(--accent);
+}
+
+.btn-link:hover {
+    color: var(--accent-dark);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .tab-nav {
+        flex-direction: column;
+    }
+    
+    .tab-link {
+        border-radius: 0;
+    }
+    
+    .tab-link.active {
+        border-color: var(--border);
+    }
+    
+    .form-row {
+        flex-direction: column;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    .tab-nav, 
+    .form-row, 
+    .btn, 
+    .dataTables_length, 
+    .dataTables_filter, 
+    .dataTables_paginate {
+        display: none !important;
+    }
+    
+    .tab-content {
+        display: block !important;
+    }
+    
+    .well {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+    }
+    
+    table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+    
+    table td, 
+    table th {
+        background-color: #fff !important;
+        border: 1px solid var(--border) !important;
+    }
+}
