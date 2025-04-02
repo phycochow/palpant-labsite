@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
-    <title>{% block title %}Dashboard{% endblock %}</title>
+    <title>{% block Title %}Dashboard{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
 
@@ -12,31 +12,35 @@
     <div class="page-wrapper">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <div class="logo">CM<span>Portal</span></div>
+                {% block Logo %}
+                    <div class="logo">Dash<span>board</span></div>
+                {% endblock %}
             </div>
-            
-            <nav class="sidebar-menu">
-                <a href="#" class="menu-item">
-                    <span class="icon icon-database"></span>
-                    CMPortal
-                </a>
-                <a href="#" class="menu-item">
-                    <span class="icon icon-enrichment"></span>
-                    EpiCop
-                </a>
-                <a href="#" class="menu-item">
-                    <span class="icon icon-search"></span>
-                    Study 3
-                </a>
-                <a href="#" class="menu-item">
-                    <span class="icon icon-benchmark"></span>
-                    Study 4
-                </a>
-                <a href="https://palpantlab.duckdns.org/" class="menu-item active">
-                    <span class="icon icon-dashboard"></span>
-                    Exit Dashboard
-                </a>
-            </nav>
+
+            {% block Sidebar %}
+                <nav class="sidebar-menu">
+                    <a href="https://palpantlab.duckdns.org/cmportal" class="menu-item">
+                        <span class="icon icon-database"></span>
+                        CMPortal
+                    </a>
+                    <a href="#" class="menu-item">
+                        <span class="icon icon-enrichment"></span>
+                        EpiCop
+                    </a>
+                    <a href="#" class="menu-item">
+                        <span class="icon icon-search"></span>
+                        Study 3
+                    </a>
+                    <a href="#" class="menu-item">
+                        <span class="icon icon-benchmark"></span>
+                        Study 4
+                    </a>
+                    <a href="https://palpantlab.duckdns.org/">
+                        <span class="icon icon-dashboard"></span>
+                        Exit Dashboard
+                    </a>
+                </nav>
+            {% endblock %}
             
             <div class="sidebar-footer">
                 <p>Geneious Dashboard v1.0.0</p>
@@ -53,15 +57,16 @@
                 
                 <div class="user-menu">
                     <div class="avatar">R</div>
-                    <span>Researcher</span>
+                    <span>Key Researchers</span>
+                    <p>View my publication</p>
                 </div>
             </div>
             
             <div class="content-wrapper">
                 
-                {% block content %}
-                
-                    <p>This is the main dashboard content.</p>
+                {% block Content %}
+
+                    <p>This is the main dashboard content. Below can be metrics above this dashboard usage</p>
 
                     <div class="stats-grid">
                         <div class="stat-card">
@@ -90,7 +95,6 @@
                     </div>
 
                 {% endblock %}
-
 
             </div>
         </main>

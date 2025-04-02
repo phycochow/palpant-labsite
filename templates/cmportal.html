@@ -1,9 +1,39 @@
 {% extends "dashboard.html" %}
 
-{% block title %}CM Portal - Database Modules{% endblock %}
+{% block Title %}
+    CM Portal - Database Modules
+{% endblock %}
 
-{% block content %}
+{% block Logo %}
+    <div class="logo">CM<span>Portal</span></div>
+{% endblock %}
 
+{% block Sidebar %}
+    <nav class="sidebar-menu">
+        <a href="#" class="menu-item" class="menu-item active">
+            <span class="icon icon-database"></span>
+            CMPortal
+        </a>
+        <a href="#" class="menu-item">
+            <span class="icon icon-enrichment"></span>
+            EpiCop
+        </a>
+        <a href="#" class="menu-item">
+            <span class="icon icon-search"></span>
+            Study 3
+        </a>
+        <a href="#" class="menu-item">
+            <span class="icon icon-benchmark"></span>
+            Study 4
+        </a>
+        <a href="https://palpantlab.duckdns.org/">
+            <span class="icon icon-dashboard"></span>
+            Exit Dashboard
+        </a>
+    </nav>
+{% endblock %}
+
+{% block Content %}
     <div class="card-header">
         <h3 class="card-title">Database Modules</h3>
     </div>
