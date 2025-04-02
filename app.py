@@ -10,6 +10,9 @@ def home():
 def cmportal():
     return render_template('cmportal.html')
 
+@app.route('/dash')
+def cmportal():
+    return render_template('dashboard.html')
 
 if __name__ == '__main__':
     # Development server only – not used in production
