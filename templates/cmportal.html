@@ -220,102 +220,255 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.colVis.min.js"></script>
     
     <script>
-    $(document).ready(function() {
-        // Tab navigation functionality
-        $('.tab-link').click(function(){
-            var tab_id = $(this).attr('data-tab');
+        $(document).ready(function() {
+            // Store API data globally to avoid multiple fetches
+            var apiData = null;
             
-            // Hide all tabs and remove active class
+            // Tab navigation functionality
+            $('.tab-link').click(function(){
+                var tab_id = $(this).attr('data-tab');
+                
+                // Hide all tabs and remove active class
+                $('.tab-content').removeClass('active');
+                $('.tab-link').removeClass('active');
+                
+                // Show selected tab and add active class
+                $('#' + tab_id).addClass('active');
+                $(this).addClass('active');
+                
+                // Get the container ID for the current tab
+                var containerId = 'table-' + tab_id.replace('tab-', '') + '-container';
+                
+                // Initialize DataTable for the current tab if not already done
+                if (!$.fn.dataTable.isDataTable('#' + containerId + ' table')) {
+                    // If we already have the data, use it directly
+                    if (apiData) {
+                        createTable(containerId, apiData);
+                    } else {
+                        // Otherwise fetch it first
+                        fetchAndCreateTable(containerId);
+                    }
+                }
+            });
+            
+            // Make sure the active tab is shown initially
             $('.tab-content').removeClass('active');
-            $('.tab-link').removeClass('active');
+            $('#tab-viewer').addClass('active');
             
-            // Show selected tab and add active class
-            $('#' + tab_id).addClass('active');
-            $(this).addClass('active');
+            // Initialize the first table on page load
+            fetchAndCreateTable('table-viewer-container');
             
-            // Initialize DataTable for the newly displayed tab if not already initialized
-            var tableId = tab_id.replace('tab-', '');
-            if (!$.fn.dataTable.isDataTable('#table-' + tableId)) {
-                initializeDataTable(tableId);
+            // Function to fetch data from API and create table
+            function fetchAndCreateTable(containerId) {
+                var container = $('#' + containerId);
+                
+                // Show loading indicator
+                container.html('<div class="text-center"><p>Loading data...</p><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div></div>');
+                
+                // Fetch data from the API
+                $.getJSON('/api/viewer', function(data) {
+                    // Store data globally for reuse
+                    apiData = data;
+                    
+                    if (!data || data.length === 0) {
+                        container.html('<div class="alert alert-info">No data available.</div>');
+                        return;
+                    }
+                    
+                    // Create the table with the data
+                    createTable(containerId, data);
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    console.error('Error fetching data from API:', errorThrown);
+                    container.html('<div class="alert alert-danger">Error loading data: ' + errorThrown + '. Please try again later.</div>');
+                });
             }
-        });
-        
-        // Make sure the active tab is shown initially
-        $('.tab-content').removeClass('active');
-        $('#tab-viewer').addClass('active');
-        
-        // Function to initialize a DataTable with enhanced features and dynamic columns
-        function initializeDataTable(tableType) {
-            var apiEndpoint = '/api/' + tableType;
             
-            // Fetch data from the API
-            $.getJSON(apiEndpoint, function(data) {
+            // Function to create a DataTable in the specified container
+            function createTable(containerId, data) {
+                var container = $('#' + containerId);
+                var tableId = 'table-' + containerId.replace('table-', '').replace('-container', '');
+                
+                // Get column names dynamically from the first data item
+                var columnNames = Object.keys(data[0]);
+                
                 // Create HTML table structure
-                var tableHTML = '<table id="table-' + tableType + '" class="table-compact display" style="width:100%">';
+                var tableHTML = '<table id="' + tableId + '" class="table table-striped table-bordered table-compact display" style="width:100%">';
                 
                 // Create column definitions and headers dynamically
                 var columns = [];
-                if (data.length > 0) {
-                    tableHTML += '<thead><tr>';
-                    Object.keys(data[0]).forEach(function(key) {
-                        tableHTML += '<th>' + key + '</th>';
-                        columns.push({ data: key, title: key });
+                tableHTML += '<thead><tr>';
+                columnNames.forEach(function(key) {
+                    // Format the column display name (capitalize words, replace underscores with spaces)
+                    var displayName = key.replace(/_/g, ' ')
+                        .replace(/\w\S*/g, function(txt) {
+                            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+                        });
+                        
+                    tableHTML += '<th data-column-name="' + key + '">' + displayName + '</th>';
+                    columns.push({ 
+                        data: key, 
+                        title: displayName,
+                        name: key,
+                        defaultContent: 'NaN'
                     });
-                    tableHTML += '</tr></thead>';
-                }
-                
+                });
+                tableHTML += '</tr></thead>';
                 tableHTML += '<tbody></tbody></table>';
                 
                 // Add table to container
-                $('#table-' + tableType + '-container').html(tableHTML);
+                container.html(tableHTML);
                 
                 // Initialize DataTable
-                $('#table-' + tableType).DataTable({
+                var dataTable = $('#' + tableId).DataTable({
                     data: data,
                     columns: columns,
                     scrollX: true,
                     pageLength: 10,
                     lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
                     autoWidth: false,
-                    dom: 'Bfrtip',
+                    dom: 'Blfrtip',
                     buttons: [
                         {
                             extend: 'colvis',
-                            className: 'btn btn-primary',
+                            className: 'btn btn-primary btn-sm',
                             text: 'Select Features'
                         },
                         {
                             extend: 'csv',
-                            className: 'btn btn-secondary',
+                            className: 'btn btn-secondary btn-sm',
                             text: 'Export CSV'
                         }
                     ],
                     language: {
                         search: "_INPUT_",
                         searchPlaceholder: "Search...",
+                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                        infoEmpty: "Showing 0 to 0 of 0 entries",
                         paginate: {
                             first: "First",
                             last: "Last",
                             next: "→",
                             previous: "←"
-                        }
+                        },
+                        emptyTable: "No data available"
                     },
                     columnDefs: [
                         {
                             targets: '_all',
                             className: 'dt-nowrap',
                             render: function(data, type, row) {
-                                return (data === null || data === '') ? 'NaN' : data;
+                                if (type === 'display') {
+                                    return (data === null || data === undefined || data === '') ? 'NaN' : data;
+                                }
+                                return data;
                             }
                         }
                     ]
                 });
-            })
-            .fail(function(jqXHR, textStatus, errorThrown) {
-                console.error('Error fetching data from API:', errorThrown);
-                $('#table-' + tableType + '-container').html('<div class="alert alert-danger">Error loading data. Please try again later.</div>');
-            });
-        }
-    });
+                
+                // Store column information for filtering
+                var columnMap = {};
+                columnNames.forEach(function(name, index) {
+                    columnMap[name.toLowerCase()] = index;
+                });
+                
+                // Set up tab-specific filter handling
+                setupTabFilters(containerId, dataTable, columnMap);
+            }
+            
+            // Setup tab-specific filter handlers
+            function setupTabFilters(containerId, dataTable, columnMap) {
+                var tabType = containerId.replace('table-', '').replace('-container', '');
+                
+                if (tabType === 'viewer') {
+                    // Handle filter button click in the viewer tab
+                    $('#tab-viewer .btn-primary').click(function() {
+                        var mediaType = $('#media-type').val();
+                        var cellLine = $('#cell-line').val();
+                        var maturation = $('#maturation').val();
+                        
+                        // Clear previous filters
+                        dataTable.search('').columns().search('').draw();
+                        
+                        // Map select element IDs to possible corresponding data column names
+                        var filterMap = {
+                            'media-type': ['media_type', 'media', 'mediatype', 'media type'],
+                            'cell-line': ['cell_line', 'cellline', 'cell', 'cell type', 'cell line'],
+                            'maturation': ['maturation', 'maturation_method', 'maturation method']
+                        };
+                        
+                        // Apply filters where columns exist
+                        applyFilterIfColumnExists(dataTable, filterMap['media-type'], mediaType, columnMap);
+                        applyFilterIfColumnExists(dataTable, filterMap['cell-line'], cellLine, columnMap);
+                        applyFilterIfColumnExists(dataTable, filterMap['maturation'], maturation, columnMap);
+                        
+                        // Redraw table with filters applied
+                        dataTable.draw();
+                    });
+                } 
+                else if (tabType === 'enrichment') {
+                    // Handle filter button click in the enrichment tab
+                    $('#tab-enrichment .btn-primary').click(function() {
+                        var targetOutcome = $('#target-outcome').val();
+                        
+                        // Clear previous filters
+                        dataTable.search('').columns().search('').draw();
+                        
+                        // Map select element IDs to possible corresponding data column names
+                        var filterMap = {
+                            'target-outcome': ['outcome', 'target_outcome', 'target', 'endpoint']
+                        };
+                        
+                        // Apply filters where columns exist
+                        applyFilterIfColumnExists(dataTable, filterMap['target-outcome'], targetOutcome, columnMap);
+                        
+                        // Redraw table with filters applied
+                        dataTable.draw();
+                    });
+                }
+                else if (tabType === 'search') {
+                    // Handle filter button click in the search tab
+                    $('#tab-search .btn-primary').click(function() {
+                        var application = $('#application').val();
+                        var mediaVariables = $('#media-variables').val();
+                        
+                        // Clear previous filters
+                        dataTable.search('').columns().search('').draw();
+                        
+                        // Map select element IDs to possible corresponding data column names
+                        var filterMap = {
+                            'application': ['application', 'purpose', 'use_case', 'target_application'],
+                            'media-variables': ['media', 'media_type', 'media_variables']
+                        };
+                        
+                        // Apply filters where columns exist
+                        applyFilterIfColumnExists(dataTable, filterMap['application'], application, columnMap);
+                        applyFilterIfColumnExists(dataTable, filterMap['media-variables'], mediaVariables, columnMap);
+                        
+                        // Redraw table with filters applied
+                        dataTable.draw();
+                    });
+                }
+            }
+            
+            // Function to apply filter if the column exists in the data
+            function applyFilterIfColumnExists(dataTable, possibleColumnNames, filterValue, columnMap) {
+                if (!filterValue) return; // Skip empty filters
+                
+                // Check if any of the possible column names exist in our data
+                for (var i = 0; i < possibleColumnNames.length; i++) {
+                    var columnName = possibleColumnNames[i].toLowerCase();
+                    if (columnMap.hasOwnProperty(columnName)) {
+                        // Column exists, apply filter
+                        dataTable.column(columnMap[columnName]).search(filterValue).draw(false);
+                        return; // Exit after applying filter to the first matching column
+                    }
+                }
+                
+                // If we get here, no matching column was found
+                console.log('Warning: No column found matching any of', possibleColumnNames);
+            }
+        });
     </script>
 {% endblock %}
