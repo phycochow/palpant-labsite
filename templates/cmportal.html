@@ -282,4 +282,26 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Tab functionality
+        document.querySelectorAll('.tab-link').forEach(tabLink => {
+            tabLink.addEventListener('click', () => {
+                const tabId = tabLink.getAttribute('data-tab');
+                
+                // Hide all tabs and remove active class
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                document.querySelectorAll('.tab-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                // Show selected tab and add active class
+                document.getElementById(tabId).classList.add('active');
+                tabLink.classList.add('active');
+            });
+        });
+    </script>
 {% endblock %}
