@@ -22,16 +22,6 @@ def api_viewer():
     df = database.get_data()
     return jsonify(df.to_dict(orient='records'))
 
-@app.route('/api/enrichment')
-def api_enrichment():
-    df = database.get_data()
-    return jsonify(df.to_dict(orient='records'))
-
-@app.route('/api/search')
-def api_search():
-    df = database.get_data()
-    return jsonify(df.to_dict(orient='records'))
-
 if __name__ == '__main__':
     # Development server only – not used in production
     app.run(host='0.0.0.0', debug=True)
