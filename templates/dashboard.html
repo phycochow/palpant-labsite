@@ -4,6 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <title>{% block Title %}Dashboard{% endblock %}</title>
+    <!-- <link rel="stylesheet" href="../static/css/dashboard.css"> -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
 
@@ -55,21 +56,22 @@
                     <p class="page-description">A computationally enriched resource for hiPSC-CM protocol optimization</p>
                 </div>
                 
-<div class="user-menu">
-    <div class="avatar">R</div>
-    <!-- Wrap the text in its own container -->
-    <div class="text-container">
-        <span>Key Researchers</span>
-        <p>View my publication</p>
-    </div>
-</div>
+                <div class="user-menu">
+                    <div class="avatar">R</div>
+                    <div class="avatar">R</div>
+                    <!-- Wrap the text in its own container -->
+                    <div class="avatar-text">
+                        <span>Key Researchers</span>
+                        <p>View the publication</p>
+                    </div>
+                </div>
             </div>
             
             <div class="content-wrapper">
                 
                 {% block Content %}
 
-                    <p>This is the main dashboard content. Below can be metrics above this dashboard usage</p>
+                    <p>This is the main dashboard content. Below can be changed to metrics about this dashboard's usage</p>
 
                     <div class="stats-grid">
                         <div class="stat-card">

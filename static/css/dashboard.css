@@ -125,32 +125,30 @@ body {
 .user-menu {
     display: flex;
     align-items: center;
-    cursor: pointer;
 }
 
 /* Container for the two text elements */
-.user-menu .text-container {
+.user-menu .avatar-text {
+    margin-left: 2px;
     display: flex;
     flex-direction: column;
-    /* align-items: flex-start;  // optional if you want left alignment */
 }
 
-.user-menu .text-container span {
+.user-menu .avatar-text span {
     font-weight: bold; /* or normal, depending on preference */
-    margin-bottom: 0.25rem; /* small spacing before the publication link */
 }
 
-/* Style for "View my publication" */
-.user-menu .text-container p {
-    margin: 0;
+/* Style for "View the publication" */
+.user-menu .avatar-text p {
     font-size: 0.8rem;        /* smaller font size */
     font-style: italic;       /* italic text */
     text-decoration: underline; /* underlined */
+    cursor: pointer;
 }
 
 .avatar {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background-color: var(--accent);
     color: white;
@@ -159,6 +157,7 @@ body {
     justify-content: center;
     font-weight: 600;
     margin-right: 0.5rem;
+    cursor: pointer;
 }
 
 

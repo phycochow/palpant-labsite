@@ -163,6 +163,13 @@ nav ul li a:hover {
   background-color: var(--darkest-green);
 }
 
+.platform-icons i {
+  margin-left: 0.5rem;
+  vertical-align: middle;
+  font-size: 1.2em;
+/*  color: var(--white);*/
+}
+
 /* Section Header */
 .section-header {
   text-align: center;
