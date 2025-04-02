@@ -209,3 +209,4 @@ sudo chmod 755 /home/ubuntu/palpant-labsite
 website not working in a sudden
 
 cat /etc/nginx/sites-enabled/default
+the website is hosted with Gunicorn, Flask, nginx on lightsail
