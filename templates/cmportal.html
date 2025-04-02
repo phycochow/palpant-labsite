@@ -10,7 +10,7 @@
 
 {% block Sidebar %}
     <nav class="sidebar-menu">
-        <a href="#" class="menu-item active">
+        <a href="#" class="menu-item" class="menu-item active">
             <span class="icon icon-database"></span>
             CMPortal
         </a>
@@ -96,7 +96,7 @@
             </div>
             
             <!-- Database Enrichment -->
-            <div id="tab-enrichment" class="tab-content">
+            <div id="tab-enrichment" class="tab-content" style="display:none;">
                 <p>Retrieve outcome-specific features and identify protocol parameters associated with specific endpoints.</p>
                 <div class="form-row">
                     <div class="form-group">
@@ -115,7 +115,7 @@
                 <div class="visualization mb-3">
                     Feature Enrichment Visualization (Fig. 2d)
                 </div>
-                <table id="table-enrichment" class="table table-striped">
+                  <table id="table-viewer" class="table table-striped">
                     <thead>
                         <tr>
                             <th>Protocol ID</th>
@@ -130,7 +130,7 @@
             </div>
             
             <!-- Protocol Search -->
-            <div id="tab-search" class="tab-content">
+            <div id="tab-search" class="tab-content" style="display:none;">
                 <p>Retrieve protocols by application regardless of their intended purpose using outcome-specific features (Fig 2j).</p>
                 <div class="form-row">
                     <div class="form-group">
@@ -154,7 +154,7 @@
                         <button class="btn btn-primary">Find Protocols</button>
                     </div>
                 </div>
-                <table id="table-search" class="table table-striped">
+                <table id="table-viewer" class="table table-striped">
                     <thead>
                         <tr>
                             <th>Protocol ID</th>
@@ -169,7 +169,7 @@
             </div>
             
             <!-- Protocol Benchmarking -->
-            <div id="tab-benchmark" class="tab-content">
+            <div id="tab-benchmark" class="tab-content" style="display:none;">
                 <p>Compare your protocol against the compiled dataset using the associated ranges of outcome-enriched protocol features.</p>
                 <div class="upload-area mb-3">
                     <p>Drag and drop your protocol file here or click to browse</p>
@@ -197,6 +197,27 @@
         </div>
     </div>
 
+    <script>
+        // Tab functionality
+        document.querySelectorAll('.tab-link').forEach(tabLink => {
+            tabLink.addEventListener('click', () => {
+                const tabId = tabLink.getAttribute('data-tab');
+                
+                // Hide all tabs and remove active class
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                document.querySelectorAll('.tab-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                // Show selected tab and add active class
+                document.getElementById(tabId).classList.add('active');
+                tabLink.classList.add('active');
+            });
+        });
+    </script>
     <!-- jQuery, Popper.js, Bootstrap JS, and DataTables JS -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
@@ -207,30 +228,13 @@
         // Tab navigation functionality
         $('.tab-link').click(function(){
             var tab_id = $(this).attr('data-tab');
-            
-            // Hide all tabs and remove active class
-            $('.tab-content').removeClass('active');
             $('.tab-link').removeClass('active');
-            
-            // Show selected tab and add active class
-            $('#' + tab_id).addClass('active');
+            $('.tab-content').hide();
             $(this).addClass('active');
+            $('#' + tab_id).show();
         });
         
-        // Add CSS to hide inactive tabs
-        $('<style>')
-            .prop('type', 'text/css')
-            .html(`
-                .tab-content {
-                    display: none;
-                }
-                .tab-content.active {
-                    display: block;
-                }
-            `)
-            .appendTo('head');
-        
-        // Initialize DataTables with AJAX data source for each table
+        // Initialize DataTables with AJAX data source for each table.
         $('#table-viewer').DataTable({
             ajax: '/api/viewer',
             columns: [
@@ -250,10 +254,9 @@
         $('#table-enrichment').DataTable({
             ajax: '/api/enrichment',
             columns: [
-                { data: 'Protocol ID' },
-                { data: 'Media Type' },
-                { data: 'Cell Line' },
-                { data: 'Maturation' },
+                { data: 'Feature' },
+                { data: 'Association' },
+                { data: 'Significance' },
                 { 
                     data: null,
                     render: function(data, type, row) {
@@ -267,9 +270,8 @@
             ajax: '/api/search',
             columns: [
                 { data: 'Protocol ID' },
+                { data: 'Original Purpose' },
                 { data: 'Media Type' },
-                { data: 'Cell Line' },
-                { data: 'Maturation' },
                 { 
                     data: null,
                     render: function(data, type, row) {
