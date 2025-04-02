@@ -50,32 +50,37 @@
             <div id="tab-viewer" class="tab-content active">
                 <p>Explore and subset studies based on specific protocol designs and view common variable trends.</p>
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="media-type">Media Type</label>
-                        <select id="media-type" class="form-control">
-                            <option value="">All Media Types</option>
-                            <option value="rpmi">RPMI</option>
-                            <option value="dmem">DMEM</option>
-                            <option value="dmem-fa">DMEM + Fatty Acids</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="cell-line">Cell Line</label>
-                        <select id="cell-line" class="form-control">
-                            <option value="">All Cell Lines</option>
-                            <option value="bj1">BJ1</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="maturation">Maturation Method</label>
-                        <select id="maturation" class="form-control">
-                            <option value="">All Methods</option>
-                            <option value="wnt">Wnt Modulation</option>
-                            <option value="stromal">Stromal Cell Inclusion</option>
-                            <option value="matrix">Matrix Stiffness</option>
-                        </select>
-                    </div>
+                    {% set viewer_filters = [
+                        {'id': 'media-type', 'label': 'Media Type', 'options': [
+                            {'value': '', 'text': 'All Media Types'},
+                            {'value': 'rpmi', 'text': 'RPMI'},
+                            {'value': 'dmem', 'text': 'DMEM'},
+                            {'value': 'dmem-fa', 'text': 'DMEM + Fatty Acids'}
+                        ]},
+                        {'id': 'cell-line', 'label': 'Cell Line', 'options': [
+                            {'value': '', 'text': 'All Cell Lines'},
+                            {'value': 'bj1', 'text': 'BJ1'},
+                            {'value': 'other', 'text': 'Other'}
+                        ]},
+                        {'id': 'maturation', 'label': 'Maturation Method', 'options': [
+                            {'value': '', 'text': 'All Methods'},
+                            {'value': 'wnt', 'text': 'Wnt Modulation'},
+                            {'value': 'stromal', 'text': 'Stromal Cell Inclusion'},
+                            {'value': 'matrix', 'text': 'Matrix Stiffness'}
+                        ]}
+                    ] %}
+                    
+                    {% for filter in viewer_filters %}
+                        <div class="form-group">
+                            <label for="{{ filter.id }}">{{ filter.label }}</label>
+                            <select id="{{ filter.id }}" class="form-control">
+                                {% for option in filter.options %}
+                                    <option value="{{ option.value }}">{{ option.text }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% endfor %}
+                    
                     <div class="form-group align-self-end">
                         <button class="btn btn-primary">Apply Filters</button>
                     </div>
@@ -95,10 +100,16 @@
                     <div class="form-group">
                         <label for="target-outcome">Target Outcome</label>
                         <select id="target-outcome" class="form-control">
-                            <option value="contractile">Contractile Force</option>
-                            <option value="sarcomere">Sarcomere Length</option>
-                            <option value="calcium">Calcium Kinetics</option>
-                            <option value="conduction">Conduction Velocity</option>
+                            {% set outcome_options = [
+                                {'value': 'contractile', 'text': 'Contractile Force'},
+                                {'value': 'sarcomere', 'text': 'Sarcomere Length'},
+                                {'value': 'calcium', 'text': 'Calcium Kinetics'},
+                                {'value': 'conduction', 'text': 'Conduction Velocity'}
+                            ] %}
+                            
+                            {% for option in outcome_options %}
+                                <option value="{{ option.value }}">{{ option.text }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="form-group align-self-end">
@@ -117,23 +128,31 @@
             <div id="tab-search" class="tab-content">
                 <p>Retrieve protocols by application regardless of their intended purpose using outcome-specific features (Fig 2j).</p>
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="application">Target Application</label>
-                        <select id="application" class="form-control">
-                            <option value="ischaemic">Ischaemic Modelling</option>
-                            <option value="disease">Disease Modelling</option>
-                            <option value="drug">Drug Testing</option>
-                            <option value="maturation">Maturation Studies</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="media-variables">Media Variables</label>
-                        <select id="media-variables" class="form-control">
-                            <option value="">All Media Types</option>
-                            <option value="rpmi">RPMI with B27</option>
-                            <option value="dmem-fa">DMEM with Fatty Acids</option>
-                        </select>
-                    </div>
+                    {% set search_filters = [
+                        {'id': 'application', 'label': 'Target Application', 'options': [
+                            {'value': 'ischaemic', 'text': 'Ischaemic Modelling'},
+                            {'value': 'disease', 'text': 'Disease Modelling'},
+                            {'value': 'drug', 'text': 'Drug Testing'},
+                            {'value': 'maturation', 'text': 'Maturation Studies'}
+                        ]},
+                        {'id': 'media-variables', 'label': 'Media Variables', 'options': [
+                            {'value': '', 'text': 'All Media Types'},
+                            {'value': 'rpmi', 'text': 'RPMI with B27'},
+                            {'value': 'dmem-fa', 'text': 'DMEM with Fatty Acids'}
+                        ]}
+                    ] %}
+                    
+                    {% for filter in search_filters %}
+                        <div class="form-group">
+                            <label for="{{ filter.id }}">{{ filter.label }}</label>
+                            <select id="{{ filter.id }}" class="form-control">
+                                {% for option in filter.options %}
+                                    <option value="{{ option.value }}">{{ option.text }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% endfor %}
+                    
                     <div class="form-group align-self-end">
                         <button class="btn btn-primary">Find Protocols</button>
                     </div>
@@ -155,10 +174,9 @@
                     <div class="form-group">
                         <label for="protocol-purpose">Protocol Purpose</label>
                         <select id="protocol-purpose" class="form-control">
-                            <option value="ischaemic">Ischaemic Modelling</option>
-                            <option value="disease">Disease Modelling</option>
-                            <option value="drug">Drug Testing</option>
-                            <option value="maturation">Maturation Studies</option>
+                            {% for option in search_filters[0].options %}
+                                <option value="{{ option.value }}">{{ option.text }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="form-group align-self-end">
@@ -175,7 +193,7 @@
         </div>
     </div>
 
-    <!-- jQuery, Popper.js, Bootstrap JS, and DataTables JS with extensions -->
+    <!-- Required JavaScript -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -185,260 +203,191 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.colVis.min.js"></script>
     
     <script>
-        $(document).ready(function() {
-            // Store API data globally to avoid multiple fetches
-            var apiData = null;
+    $(document).ready(function() {
+        // Store API data and table instances
+        const state = {
+            apiData: null,
+            tables: {}
+        };
+        
+        // Configure tab navigation
+        $('.tab-link').click(function() {
+            const tabId = $(this).attr('data-tab');
+            $('.tab-content, .tab-link').removeClass('active');
+            $('#' + tabId).addClass('active');
+            $(this).addClass('active');
             
-            // Tab navigation functionality
-            $('.tab-link').click(function(){
-                var tab_id = $(this).attr('data-tab');
-                
-                // Hide all tabs and remove active class
-                $('.tab-content').removeClass('active');
-                $('.tab-link').removeClass('active');
-                
-                // Show selected tab and add active class
-                $('#' + tab_id).addClass('active');
-                $(this).addClass('active');
-                
-                // Only load table data for tabs other than Protocol Benchmarking
-                if (tab_id !== 'tab-benchmark') {
-                    // Get the container ID for the current tab
-                    var containerId = 'table-' + tab_id.replace('tab-', '') + '-container';
-                    
-                    // Initialize DataTable for the current tab if not already done
-                    if (!$.fn.dataTable.isDataTable('#' + containerId + ' table')) {
-                        // If we already have the data, use it directly
-                        if (apiData) {
-                            createTable(containerId, apiData);
-                        } else {
-                            // Otherwise fetch it first
-                            fetchAndCreateTable(containerId);
-                        }
-                    }
-                }
-            });
-            
-            // Make sure the active tab is shown initially
-            $('.tab-content').removeClass('active');
-            $('#tab-viewer').addClass('active');
-            
-            // Initialize the first table on page load
-            fetchAndCreateTable('table-viewer-container');
-            
-            // Function to fetch data from API and create table
-            function fetchAndCreateTable(containerId) {
-                var container = $('#' + containerId);
-                
-                // Show loading indicator
-                container.html('<div class="text-center"><p>Loading data...</p><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div></div>');
-                
-                // Fetch data from the API
-                $.getJSON('/api/viewer', function(data) {
-                    // Store data globally for reuse
-                    apiData = data;
-                    
-                    if (!data || data.length === 0) {
-                        container.html('<div class="alert alert-info">No data available.</div>');
-                        return;
-                    }
-                    
-                    // Create the table with the data
-                    createTable(containerId, data);
-                })
-                .fail(function(jqXHR, textStatus, errorThrown) {
-                    console.error('Error fetching data from API:', errorThrown);
-                    container.html('<div class="alert alert-danger">Error loading data: ' + errorThrown + '. Please try again later.</div>');
-                });
-            }
-            
-            // Function to create a DataTable in the specified container
-            function createTable(containerId, data) {
-                var container = $('#' + containerId);
-                var tableId = 'table-' + containerId.replace('table-', '').replace('-container', '');
-                
-                // Get column names dynamically from the first data item, excluding 'actions'
-                var columnNames = Object.keys(data[0]).filter(function(key) {
-                    return key.toLowerCase() !== 'actions';
-                });
-                
-                // Create HTML table structure
-                var tableHTML = '<table id="' + tableId + '" class="table table-striped table-bordered table-compact display" style="width:100%">';
-                
-                // Create column definitions and headers dynamically
-                var columns = [];
-                tableHTML += '<thead><tr>';
-                columnNames.forEach(function(key) {
-                    // Format the column display name (capitalize words, replace underscores with spaces)
-                    var displayName = key.replace(/_/g, ' ')
-                        .replace(/\w\S*/g, function(txt) {
-                            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-                        });
-                        
-                    tableHTML += '<th data-column-name="' + key + '">' + displayName + '</th>';
-                    columns.push({ 
-                        data: key, 
-                        title: displayName,
-                        name: key,
-                        defaultContent: 'NaN'
-                    });
-                });
-                tableHTML += '</tr></thead>';
-                tableHTML += '<tbody></tbody></table>';
-                
-                // Add table to container
-                container.html(tableHTML);
-                
-                // Initialize DataTable
-                var dataTable = $('#' + tableId).DataTable({
-                    data: data,
-                    columns: columns,
-                    scrollX: true,
-                    pageLength: 10,
-                    lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
-                    autoWidth: false,
-                    dom: 'Blfrtip',
-                    buttons: [
-                        {
-                            extend: 'colvis',
-                            className: 'btn btn-primary btn-sm',
-                            text: 'Select Features'
-                        },
-                        {
-                            extend: 'csv',
-                            className: 'btn btn-secondary btn-sm',
-                            text: 'Export CSV'
-                        }
-                    ],
-                    language: {
-                        search: "_INPUT_",
-                        searchPlaceholder: "Search...",
-                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                        infoEmpty: "Showing 0 to 0 of 0 entries",
-                        paginate: {
-                            first: "First",
-                            last: "Last",
-                            next: "→",
-                            previous: "←"
-                        },
-                        emptyTable: "No data available"
-                    },
-                    columnDefs: [
-                        {
-                            targets: '_all',
-                            className: 'dt-nowrap',
-                            render: function(data, type, row) {
-                                if (type === 'display') {
-                                    return (data === null || data === undefined || data === '') ? 'NaN' : data;
-                                }
-                                return data;
-                            }
-                        }
-                    ]
-                });
-                
-                // Store column information for filtering
-                var columnMap = {};
-                columnNames.forEach(function(name, index) {
-                    columnMap[name.toLowerCase()] = index;
-                });
-                
-                // Set up tab-specific filter handling
-                setupTabFilters(containerId, dataTable, columnMap);
-            }
-            
-            // Setup tab-specific filter handlers
-            function setupTabFilters(containerId, dataTable, columnMap) {
-                var tabType = containerId.replace('table-', '').replace('-container', '');
-                
-                if (tabType === 'viewer') {
-                    // Handle filter button click in the viewer tab
-                    $('#tab-viewer .btn-primary').click(function() {
-                        var mediaType = $('#media-type').val();
-                        var cellLine = $('#cell-line').val();
-                        var maturation = $('#maturation').val();
-                        
-                        // Clear previous filters
-                        dataTable.search('').columns().search('').draw();
-                        
-                        // Map select element IDs to possible corresponding data column names
-                        var filterMap = {
-                            'media-type': ['media_type', 'media', 'mediatype', 'media type'],
-                            'cell-line': ['cell_line', 'cellline', 'cell', 'cell type', 'cell line'],
-                            'maturation': ['maturation', 'maturation_method', 'maturation method']
-                        };
-                        
-                        // Apply filters where columns exist
-                        applyFilterIfColumnExists(dataTable, filterMap['media-type'], mediaType, columnMap);
-                        applyFilterIfColumnExists(dataTable, filterMap['cell-line'], cellLine, columnMap);
-                        applyFilterIfColumnExists(dataTable, filterMap['maturation'], maturation, columnMap);
-                        
-                        // Redraw table with filters applied
-                        dataTable.draw();
-                    });
-                } 
-                else if (tabType === 'enrichment') {
-                    // Handle filter button click in the enrichment tab
-                    $('#tab-enrichment .btn-primary').click(function() {
-                        var targetOutcome = $('#target-outcome').val();
-                        
-                        // Clear previous filters
-                        dataTable.search('').columns().search('').draw();
-                        
-                        // Map select element IDs to possible corresponding data column names
-                        var filterMap = {
-                            'target-outcome': ['outcome', 'target_outcome', 'target', 'endpoint']
-                        };
-                        
-                        // Apply filters where columns exist
-                        applyFilterIfColumnExists(dataTable, filterMap['target-outcome'], targetOutcome, columnMap);
-                        
-                        // Redraw table with filters applied
-                        dataTable.draw();
-                    });
-                }
-                else if (tabType === 'search') {
-                    // Handle filter button click in the search tab
-                    $('#tab-search .btn-primary').click(function() {
-                        var application = $('#application').val();
-                        var mediaVariables = $('#media-variables').val();
-                        
-                        // Clear previous filters
-                        dataTable.search('').columns().search('').draw();
-                        
-                        // Map select element IDs to possible corresponding data column names
-                        var filterMap = {
-                            'application': ['application', 'purpose', 'use_case', 'target_application'],
-                            'media-variables': ['media', 'media_type', 'media_variables']
-                        };
-                        
-                        // Apply filters where columns exist
-                        applyFilterIfColumnExists(dataTable, filterMap['application'], application, columnMap);
-                        applyFilterIfColumnExists(dataTable, filterMap['media-variables'], mediaVariables, columnMap);
-                        
-                        // Redraw table with filters applied
-                        dataTable.draw();
-                    });
-                }
-            }
-            
-            // Function to apply filter if the column exists in the data
-            function applyFilterIfColumnExists(dataTable, possibleColumnNames, filterValue, columnMap) {
-                if (!filterValue) return; // Skip empty filters
-                
-                // Check if any of the possible column names exist in our data
-                for (var i = 0; i < possibleColumnNames.length; i++) {
-                    var columnName = possibleColumnNames[i].toLowerCase();
-                    if (columnMap.hasOwnProperty(columnName)) {
-                        // Column exists, apply filter
-                        dataTable.column(columnMap[columnName]).search(filterValue).draw(false);
-                        return; // Exit after applying filter to the first matching column
-                    }
-                }
-                
-                // If we get here, no matching column was found
-                console.log('Warning: No column found matching any of', possibleColumnNames);
+            // Load data for the current tab if needed
+            if (tabId !== 'tab-benchmark' && !state.tables[tabId]) {
+                loadTabData(tabId);
             }
         });
+        
+        // Initialize first tab
+        loadTabData('tab-viewer');
+        
+        // Load tab data
+        function loadTabData(tabId) {
+            const containerId = 'table-' + tabId.replace('tab-', '') + '-container';
+            const container = $('#' + containerId);
+            
+            // Show loading indicator
+            container.html('<div class="text-center"><p>Loading data...</p><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div></div>');
+            
+            // Use cached data or fetch new data
+            if (state.apiData) {
+                createTable(containerId, state.apiData);
+            } else {
+                $.getJSON('/api/viewer')
+                    .done(function(data) {
+                        state.apiData = data;
+                        if (!data || data.length === 0) {
+                            container.html('<div class="alert alert-info">No data available.</div>');
+                            return;
+                        }
+                        createTable(containerId, data);
+                    })
+                    .fail(function(jqXHR, textStatus, errorThrown) {
+                        container.html('<div class="alert alert-danger">Error loading data: ' + errorThrown + '. Please try again later.</div>');
+                    });
+            }
+        }
+        
+        // Create DataTable
+        function createTable(containerId, data) {
+            const container = $('#' + containerId);
+            const tableId = 'table-' + containerId.replace('table-', '').replace('-container', '');
+            const tabId = 'tab-' + containerId.replace('table-', '').replace('-container', '');
+            
+            // Extract column names
+            const columnNames = Object.keys(data[0]).filter(key => key.toLowerCase() !== 'actions');
+            
+            // Create column definitions
+            const columns = columnNames.map(key => ({
+                data: key,
+                title: key.replace(/_/g, ' ').replace(/\w\S*/g, txt => 
+                    txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()),
+                defaultContent: 'NaN'
+            }));
+            
+            // Create HTML table
+            container.html(`<table id="${tableId}" class="table table-striped table-bordered table-compact display" style="width:100%"></table>`);
+            
+            // Initialize DataTable
+            const dataTable = $('#' + tableId).DataTable({
+                data: data,
+                columns: columns,
+                scrollX: true,
+                pageLength: 10,
+                lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+                dom: 'Blfrtip',
+                buttons: [
+                    {
+                        extend: 'colvis',
+                        className: 'btn btn-primary btn-sm',
+                        text: 'Select Features'
+                    },
+                    {
+                        extend: 'csv',
+                        className: 'btn btn-secondary btn-sm',
+                        text: 'Export CSV'
+                    }
+                ],
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Search...",
+                    emptyTable: "No data available"
+                },
+                columnDefs: [{
+                    targets: '_all',
+                    className: 'dt-nowrap',
+                    render: (data, type) => 
+                        (type === 'display' && (data === null || data === undefined || data === '')) ? 'NaN' : data
+                }]
+            });
+            
+            // Store table instance
+            state.tables[tabId] = {
+                table: dataTable,
+                columnMap: createColumnMap(columnNames)
+            };
+            
+            // Set up filters
+            setupFilters(tabId);
+        }
+        
+        // Create column map for filtering
+        function createColumnMap(columnNames) {
+            const map = {};
+            columnNames.forEach((name, index) => {
+                map[name.toLowerCase()] = index;
+            });
+            return map;
+        }
+        
+        // Set up tab filters
+        function setupFilters(tabId) {
+            const tableState = state.tables[tabId];
+            if (!tableState) return;
+            
+            const dataTable = tableState.table;
+            const columnMap = tableState.columnMap;
+            
+            // Define filter mappings for each tab
+            const filterMappings = {
+                'tab-viewer': {
+                    selectors: ['#media-type', '#cell-line', '#maturation'],
+                    columns: [
+                        ['media_type', 'media', 'mediatype', 'media type'],
+                        ['cell_line', 'cellline', 'cell', 'cell type', 'cell line'],
+                        ['maturation', 'maturation_method', 'maturation method']
+                    ]
+                },
+                'tab-enrichment': {
+                    selectors: ['#target-outcome'],
+                    columns: [
+                        ['outcome', 'target_outcome', 'target', 'endpoint']
+                    ]
+                },
+                'tab-search': {
+                    selectors: ['#application', '#media-variables'],
+                    columns: [
+                        ['application', 'purpose', 'use_case', 'target_application'],
+                        ['media', 'media_type', 'media_variables']
+                    ]
+                }
+            };
+            
+            // Set up filter handler
+            const mapping = filterMappings[tabId];
+            if (mapping) {
+                $(`#${tabId} .btn-primary`).click(function() {
+                    // Clear filters
+                    dataTable.search('').columns().search('').draw();
+                    
+                    // Apply new filters
+                    mapping.selectors.forEach((selector, i) => {
+                        const value = $(selector).val();
+                        if (value) {
+                            applyFilter(dataTable, mapping.columns[i], value, columnMap);
+                        }
+                    });
+                    
+                    dataTable.draw();
+                });
+            }
+        }
+        
+        // Apply filter if column exists
+        function applyFilter(dataTable, possibleColumns, value, columnMap) {
+            for (const colName of possibleColumns) {
+                const index = columnMap[colName.toLowerCase()];
+                if (index !== undefined) {
+                    dataTable.column(index).search(value);
+                    return;
+                }
+            }
+        }
+    });
     </script>
 {% endblock %}
