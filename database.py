@@ -2,11 +2,9 @@ import pandas as pd
 
 def get_data():
     return pd.DataFrame({
-        'Protocol ID': ['CMPR-001', 'CMPR-002', 'CMPR-003'],
-        'Media Type': ['RPMI with B27', 'DMEM + FA', 'DMEM'],
-        'Cell Line': ['BJ1', 'Other', 'BJ1'],
-        'Maturation': ['Wnt Modulation', 'Stromal Cell Inclusion', 'Matrix Stiffness']
+    f"Column {i}": [f"Value {i}.{j}" for j in range(1, 11)]
+    for i in range(1, 11)
     })
-
+    
 if __name__ == '__main__':
     pass

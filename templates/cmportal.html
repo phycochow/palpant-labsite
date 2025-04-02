@@ -263,17 +263,6 @@
                         columns.push({ data: key, title: key });
                     });
                     
-                    // Add Actions column if not present
-                    if (!Object.keys(data[0]).includes('Actions')) {
-                        tableHTML += '<th>Actions</th>';
-                        columns.push({ 
-                            data: null, 
-                            title: 'Actions',
-                            defaultContent: '<button class="btn btn-sm btn-link p-0">View</button>',
-                            orderable: false
-                        });
-                    }
-                    
                     tableHTML += '</tr></thead>';
                 }
                 
