@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Welcome to the Dashboard</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/cmportal">CM Portal</a></li>
+        </ul>
+    </nav>
+    <section id="main-content">
+         {% block content %}
+         <p>This is the main dashboard content.</p>
+         {% endblock %}
+    </section>
+    <footer>
+         <p>&copy; 2025 My Company</p>
+    </footer>
+</body>
+</html>
