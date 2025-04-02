@@ -26,7 +26,7 @@
             <span class="icon icon-benchmark"></span>
             Study 4
         </a>
-        <a href="https://palpantlab.duckdns.org/">
+        <a href="https://palpantlab.duckdns.org/" class="menu-item">
             <span class="icon icon-dashboard"></span>
             Exit Dashboard
         </a>
@@ -34,248 +34,251 @@
 {% endblock %}
 
 {% block Content %}
-    <div class="card-header">
-        <h3 class="card-title">Database Modules</h3>
-    </div>
-    <div class="card-body">
-        <div class="tab-nav">
-            <div class="tab-link active" data-tab="tab-viewer">Database Viewer</div>
-            <div class="tab-link" data-tab="tab-enrichment">Database Enrichment</div>
-            <div class="tab-link" data-tab="tab-search">Protocol Search</div>
-            <div class="tab-link" data-tab="tab-benchmark">Protocol Benchmarking</div>
-        </div>
-        
-        <div id="tab-viewer" class="tab-content active">
-            <p>Explore and subset studies based on specific protocol designs and view common variable trends.</p>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="media-type">Media Type</label>
-                    <select id="media-type">
-                        <option value="">All Media Types</option>
-                        <option value="rpmi">RPMI</option>
-                        <option value="dmem">DMEM</option>
-                        <option value="dmem-fa">DMEM + Fatty Acids</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="cell-line">Cell Line</label>
-                    <select id="cell-line">
-                        <option value="">All Cell Lines</option>
-                        <option value="bj1">BJ1</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="maturation">Maturation Method</label>
-                    <select id="maturation">
-                        <option value="">All Methods</option>
-                        <option value="wnt">Wnt Modulation</option>
-                        <option value="stromal">Stromal Cell Inclusion</option>
-                        <option value="matrix">Matrix Stiffness</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>&nbsp;</label>
-                    <button>Apply Filters</button>
-                </div>
+    <div class="card">
+
+<!--         <div class="card-header">
+            <h3 class="card-title">Database Modules</h3>
+        </div> -->
+        <div class="card-body">
+            <div class="tab-nav">
+                <div class="tab-link active" data-tab="tab-viewer">Database Viewer</div>
+                <div class="tab-link" data-tab="tab-enrichment">Database Enrichment</div>
+                <div class="tab-link" data-tab="tab-search">Protocol Search</div>
+                <div class="tab-link" data-tab="tab-benchmark">Protocol Benchmarking</div>
             </div>
             
-            <div class="visualization">
-                UMAP Projection of Protocol Parameters (Fig. 2c)
-            </div>
-            
-            <table>
-                <thead>
-                    <tr>
-                        <th>Protocol ID</th>
-                        <th>Media Type</th>
-                        <th>Cell Line</th>
-                        <th>Maturation</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>CMPR-001</td>
-                        <td>RPMI with B27</td>
-                        <td>BJ1</td>
-                        <td>Wnt Modulation</td>
-                        <td>
-                            <a href="#" class="action-btn">View</a>
-                            <a href="#" class="action-btn">Export</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>CMPR-002</td>
-                        <td>DMEM + FA</td>
-                        <td>Other</td>
-                        <td>Stromal Cell Inclusion</td>
-                        <td>
-                            <a href="#" class="action-btn">View</a>
-                            <a href="#" class="action-btn">Export</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>CMPR-003</td>
-                        <td>DMEM</td>
-                        <td>BJ1</td>
-                        <td>Matrix Stiffness</td>
-                        <td>
-                            <a href="#" class="action-btn">View</a>
-                            <a href="#" class="action-btn">Export</a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        
-        <div id="tab-enrichment" class="tab-content">
-            <p>Retrieve outcome-specific features and identify protocol parameters associated with specific endpoints.</p>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="target-outcome">Target Outcome</label>
-                    <select id="target-outcome">
-                        <option value="contractile">Contractile Force</option>
-                        <option value="sarcomere">Sarcomere Length</option>
-                        <option value="calcium">Calcium Kinetics</option>
-                        <option value="conduction">Conduction Velocity</option>
-                    </select>
+            <div id="tab-viewer" class="tab-content active">
+                <p>Explore and subset studies based on specific protocol designs and view common variable trends.</p>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="media-type">Media Type</label>
+                        <select id="media-type">
+                            <option value="">All Media Types</option>
+                            <option value="rpmi">RPMI</option>
+                            <option value="dmem">DMEM</option>
+                            <option value="dmem-fa">DMEM + Fatty Acids</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cell-line">Cell Line</label>
+                        <select id="cell-line">
+                            <option value="">All Cell Lines</option>
+                            <option value="bj1">BJ1</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="maturation">Maturation Method</label>
+                        <select id="maturation">
+                            <option value="">All Methods</option>
+                            <option value="wnt">Wnt Modulation</option>
+                            <option value="stromal">Stromal Cell Inclusion</option>
+                            <option value="matrix">Matrix Stiffness</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button>Apply Filters</button>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label>&nbsp;</label>
-                    <button>Analyze Enrichment</button>
-                </div>
-            </div>
-            
-            <div class="visualization">
-                Feature Enrichment Visualization (Fig. 2d)
-            </div>
-            
-            <table>
-                <thead>
-                    <tr>
-                        <th>Feature</th>
-                        <th>Association</th>
-                        <th>Significance</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>DMEM with Fatty Acids</td>
-                        <td>Higher contraction amplitude</td>
-                        <td>p &lt; 0.01</td>
-                        <td>
-                            <a href="#" class="action-btn">View Study</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>RPMI with B27</td>
-                        <td>Lower contraction amplitude</td>
-                        <td>p &lt; 0.05</td>
-                        <td>
-                            <a href="#" class="action-btn">View Study</a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        
-        <div id="tab-search" class="tab-content">
-            <p>Retrieve protocols by application regardless of their intended purpose using outcome-specific features (Fig 2j).</p>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="application">Target Application</label>
-                    <select id="application">
-                        <option value="ischaemic">Ischaemic Modelling</option>
-                        <option value="disease">Disease Modelling</option>
-                        <option value="drug">Drug Testing</option>
-                        <option value="maturation">Maturation Studies</option>
-                    </select>
+                <div class="visualization">
+                    UMAP Projection of Protocol Parameters (Fig. 2c)
                 </div>
                 
-                <div class="form-group">
-                    <label for="media-variables">Media Variables</label>
-                    <select id="media-variables">
-                        <option value="">All Media Types</option>
-                        <option value="rpmi">RPMI with B27</option>
-                        <option value="dmem-fa">DMEM with Fatty Acids</option>
-                    </select>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Protocol ID</th>
+                            <th>Media Type</th>
+                            <th>Cell Line</th>
+                            <th>Maturation</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>CMPR-001</td>
+                            <td>RPMI with B27</td>
+                            <td>BJ1</td>
+                            <td>Wnt Modulation</td>
+                            <td>
+                                <a href="#" class="action-btn">View</a>
+                                <a href="#" class="action-btn">Export</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>CMPR-002</td>
+                            <td>DMEM + FA</td>
+                            <td>Other</td>
+                            <td>Stromal Cell Inclusion</td>
+                            <td>
+                                <a href="#" class="action-btn">View</a>
+                                <a href="#" class="action-btn">Export</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>CMPR-003</td>
+                            <td>DMEM</td>
+                            <td>BJ1</td>
+                            <td>Matrix Stiffness</td>
+                            <td>
+                                <a href="#" class="action-btn">View</a>
+                                <a href="#" class="action-btn">Export</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="tab-enrichment" class="tab-content">
+                <p>Retrieve outcome-specific features and identify protocol parameters associated with specific endpoints.</p>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="target-outcome">Target Outcome</label>
+                        <select id="target-outcome">
+                            <option value="contractile">Contractile Force</option>
+                            <option value="sarcomere">Sarcomere Length</option>
+                            <option value="calcium">Calcium Kinetics</option>
+                            <option value="conduction">Conduction Velocity</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button>Analyze Enrichment</button>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label>&nbsp;</label>
-                    <button>Find Protocols</button>
-                </div>
-            </div>
-            
-            <table>
-                <thead>
-                    <tr>
-                        <th>Protocol ID</th>
-                        <th>Original Purpose</th>
-                        <th>Media Type</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>CMPR-004</td>
-                        <td>Disease Modelling</td>
-                        <td>DMEM with Fatty Acids</td>
-                        <td>
-                            <a href="#" class="action-btn">View Details</a>
-                            <a href="#" class="action-btn">Export</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>CMPR-005</td>
-                        <td>Maturation Studies</td>
-                        <td>RPMI with B27</td>
-                        <td>
-                            <a href="#" class="action-btn">View Details</a>
-                            <a href="#" class="action-btn">Export</a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        
-        <div id="tab-benchmark" class="tab-content">
-            <p>Compare your protocol against the compiled dataset using the associated ranges of outcome-enriched protocol features.</p>
-            
-            <div class="upload-area">
-                <p>Drag and drop your protocol file here or click to browse</p>
-                <input type="file" style="display: none;">
-                <button>Browse Files</button>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="protocol-purpose">Protocol Purpose</label>
-                    <select id="protocol-purpose">
-                        <option value="ischaemic">Ischaemic Modelling</option>
-                        <option value="disease">Disease Modelling</option>
-                        <option value="drug">Drug Testing</option>
-                        <option value="maturation">Maturation Studies</option>
-                    </select>
+                <div class="visualization">
+                    Feature Enrichment Visualization (Fig. 2d)
                 </div>
                 
-                <div class="form-group">
-                    <label>&nbsp;</label>
-                    <button>Benchmark Protocol</button>
-                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Association</th>
+                            <th>Significance</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>DMEM with Fatty Acids</td>
+                            <td>Higher contraction amplitude</td>
+                            <td>p &lt; 0.01</td>
+                            <td>
+                                <a href="#" class="action-btn">View Study</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>RPMI with B27</td>
+                            <td>Lower contraction amplitude</td>
+                            <td>p &lt; 0.05</td>
+                            <td>
+                                <a href="#" class="action-btn">View Study</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
             
-            <div class="visualization">
-                Protocol Benchmarking Visualization
+            <div id="tab-search" class="tab-content">
+                <p>Retrieve protocols by application regardless of their intended purpose using outcome-specific features (Fig 2j).</p>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="application">Target Application</label>
+                        <select id="application">
+                            <option value="ischaemic">Ischaemic Modelling</option>
+                            <option value="disease">Disease Modelling</option>
+                            <option value="drug">Drug Testing</option>
+                            <option value="maturation">Maturation Studies</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="media-variables">Media Variables</label>
+                        <select id="media-variables">
+                            <option value="">All Media Types</option>
+                            <option value="rpmi">RPMI with B27</option>
+                            <option value="dmem-fa">DMEM with Fatty Acids</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button>Find Protocols</button>
+                    </div>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Protocol ID</th>
+                            <th>Original Purpose</th>
+                            <th>Media Type</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>CMPR-004</td>
+                            <td>Disease Modelling</td>
+                            <td>DMEM with Fatty Acids</td>
+                            <td>
+                                <a href="#" class="action-btn">View Details</a>
+                                <a href="#" class="action-btn">Export</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>CMPR-005</td>
+                            <td>Maturation Studies</td>
+                            <td>RPMI with B27</td>
+                            <td>
+                                <a href="#" class="action-btn">View Details</a>
+                                <a href="#" class="action-btn">Export</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="tab-benchmark" class="tab-content">
+                <p>Compare your protocol against the compiled dataset using the associated ranges of outcome-enriched protocol features.</p>
+                
+                <div class="upload-area">
+                    <p>Drag and drop your protocol file here or click to browse</p>
+                    <input type="file" style="display: none;">
+                    <button>Browse Files</button>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="protocol-purpose">Protocol Purpose</label>
+                        <select id="protocol-purpose">
+                            <option value="ischaemic">Ischaemic Modelling</option>
+                            <option value="disease">Disease Modelling</option>
+                            <option value="drug">Drug Testing</option>
+                            <option value="maturation">Maturation Studies</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button>Benchmark Protocol</button>
+                    </div>
+                </div>
+                
+                <div class="visualization">
+                    Protocol Benchmarking Visualization
+                </div>
             </div>
         </div>
     </div>
