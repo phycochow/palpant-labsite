@@ -6,9 +6,9 @@ app = Flask(__name__)
 def home():
     return render_template('main.html')
 
-# @app.route('/cmportal')
-# def cmportal():
-#     return render_template('cmportal.html')
+@app.route('/cmportal')
+def cmportal():
+    return render_template('cmportal.html')
 
 
 if __name__ == '__main__':
