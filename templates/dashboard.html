@@ -46,7 +46,10 @@
         
         <main class="main-content">
             <div class="top-bar">
-                <h1 class="page-title">Dashboard</h1>
+                <div class="dashboard-header">
+                    <h2>CMPortal Overview</h2>
+                    <p class="page-description">A computationally enriched resource for hiPSC-CM protocol optimization</p>
+                </div>
                 
                 <div class="user-menu">
                     <div class="avatar">R</div>
@@ -55,42 +58,39 @@
             </div>
             
             <div class="content-wrapper">
-                <div class="dashboard-header">
-                    <h2>CMPortal Overview</h2>
-                    <p class="page-description">A computationally enriched resource for hiPSC-CM protocol optimization</p>
-                </div>
                 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-title">Total Studies</div>
-                        <div class="stat-value">322</div>
-                        <div class="stat-description">Studies analyzed in the database</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-title">Protocol Variables</div>
-                        <div class="stat-value">442</div>
-                        <div class="stat-description">Distinct variables analyzed</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-title">Target Outcomes</div>
-                        <div class="stat-value">117</div>
-                        <div class="stat-description">Characteristics and outcomes</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-title">Maturity Indicators</div>
-                        <div class="stat-value">16</div>
-                        <div class="stat-description">Analyzed maturity metrics</div>
-                    </div>
-                </div>
+                {% block content %}
                 
-                <section id="database-modules">
-                     {% block content %}
-                     <p>This is the main dashboard content.</p>
-                     {% endblock %}
-                </section>
+                    <p>This is the main dashboard content.</p>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-title">Total Studies</div>
+                            <div class="stat-value">322</div>
+                            <div class="stat-description">Studies analyzed in the database</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-title">Protocol Variables</div>
+                            <div class="stat-value">442</div>
+                            <div class="stat-description">Distinct variables analyzed</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-title">Target Outcomes</div>
+                            <div class="stat-value">117</div>
+                            <div class="stat-description">Characteristics and outcomes</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-title">Maturity Indicators</div>
+                            <div class="stat-value">16</div>
+                            <div class="stat-description">Analyzed maturity metrics</div>
+                        </div>
+                    </div>
+
+                {% endblock %}
+
 
             </div>
         </main>

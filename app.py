@@ -22,3 +22,11 @@ if __name__ == '__main__':
 # cd ~/palpant-labsite
 # source venv/bin/activate
 # gunicorn --bind 127.0.0.1:8000 app:app
+
+# Changes to this file require these steps in bash after:
+# pkill gunicorn
+# sudo systemctl daemon-reexec
+# sudo systemctl daemon-reload
+# sudo systemctl start flaskapp
+# sudo systemctl enable flaskapp
+# sudo systemctl status flaskapp
