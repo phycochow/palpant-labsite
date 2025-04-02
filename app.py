@@ -11,7 +11,7 @@ def cmportal():
     return render_template('cmportal.html')
 
 @app.route('/dash')
-def cmportal():
+def dash():
     return render_template('dashboard.html')
 
 if __name__ == '__main__':
