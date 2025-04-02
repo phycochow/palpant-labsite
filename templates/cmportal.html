@@ -88,6 +88,39 @@
                             <th>Media Type</th>
                             <th>Cell Line</th>
                             <th>Maturation</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+            <!-- Database Enrichment -->
+            <div id="tab-enrichment" class="tab-content">
+                <p>Retrieve outcome-specific features and identify protocol parameters associated with specific endpoints.</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="target-outcome">Target Outcome</label>
+                        <select id="target-outcome" class="form-control">
+                            <option value="contractile">Contractile Force</option>
+                            <option value="sarcomere">Sarcomere Length</option>
+                            <option value="calcium">Calcium Kinetics</option>
+                            <option value="conduction">Conduction Velocity</option>
+                        </select>
+                    </div>
+                    <div class="form-group align-self-end">
+                        <button class="btn btn-primary">Analyze Enrichment</button>
+                    </div>
+                </div>
+                <div class="visualization mb-3">
+                    Feature Enrichment Visualization (Fig. 2d)
+                </div>
+                <table id="table-enrichment" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Protocol ID</th>
+                            <th>Media Type</th>
+                            <th>Cell Line</th>
+                            <th>Maturation</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -95,20 +128,70 @@
                 </table>
             </div>
             
-            <!-- Other tabs with minimal content -->
-            <div id="tab-enrichment" class="tab-content" style="display:none;">
-                <p>Retrieve outcome-specific features and identify protocol parameters associated with specific endpoints.</p>
-                <!-- Content hidden for brevity -->
+            <!-- Protocol Search -->
+            <div id="tab-search" class="tab-content">
+                <p>Retrieve protocols by application regardless of their intended purpose using outcome-specific features (Fig 2j).</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="application">Target Application</label>
+                        <select id="application" class="form-control">
+                            <option value="ischaemic">Ischaemic Modelling</option>
+                            <option value="disease">Disease Modelling</option>
+                            <option value="drug">Drug Testing</option>
+                            <option value="maturation">Maturation Studies</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="media-variables">Media Variables</label>
+                        <select id="media-variables" class="form-control">
+                            <option value="">All Media Types</option>
+                            <option value="rpmi">RPMI with B27</option>
+                            <option value="dmem-fa">DMEM with Fatty Acids</option>
+                        </select>
+                    </div>
+                    <div class="form-group align-self-end">
+                        <button class="btn btn-primary">Find Protocols</button>
+                    </div>
+                </div>
+                <table id="table-search" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Protocol ID</th>
+                            <th>Media Type</th>
+                            <th>Cell Line</th>
+                            <th>Maturation</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
             
-            <div id="tab-search" class="tab-content" style="display:none;">
-                <p>Retrieve protocols by application regardless of their intended purpose using outcome-specific features.</p>
-                <!-- Content hidden for brevity -->
-            </div>
-            
-            <div id="tab-benchmark" class="tab-content" style="display:none;">
+            <!-- Protocol Benchmarking -->
+            <div id="tab-benchmark" class="tab-content">
                 <p>Compare your protocol against the compiled dataset using the associated ranges of outcome-enriched protocol features.</p>
-                <!-- Content hidden for brevity -->
+                <div class="upload-area mb-3">
+                    <p>Drag and drop your protocol file here or click to browse</p>
+                    <input type="file" style="display: none;">
+                    <button class="btn btn-secondary">Browse Files</button>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="protocol-purpose">Protocol Purpose</label>
+                        <select id="protocol-purpose" class="form-control">
+                            <option value="ischaemic">Ischaemic Modelling</option>
+                            <option value="disease">Disease Modelling</option>
+                            <option value="drug">Drug Testing</option>
+                            <option value="maturation">Maturation Studies</option>
+                        </select>
+                    </div>
+                    <div class="form-group align-self-end">
+                        <button class="btn btn-primary">Benchmark Protocol</button>
+                    </div>
+                </div>
+                <div class="visualization">
+                    Protocol Benchmarking Visualization
+                </div>
             </div>
         </div>
     </div>
@@ -120,43 +203,66 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
     <script>
     $(document).ready(function() {
+        // Add CSS for tab display
+        $('<style>')
+            .prop('type', 'text/css')
+            .html(`
+                .tab-content {
+                    display: none;
+                }
+                .tab-content.active {
+                    display: block;
+                }
+            `)
+            .appendTo('head');
+            
         // Tab navigation functionality
         $('.tab-link').click(function(){
             var tab_id = $(this).attr('data-tab');
+            
+            // Hide all tabs and remove active class
+            $('.tab-content').removeClass('active');
             $('.tab-link').removeClass('active');
-            $('.tab-content').hide();
+            
+            // Show selected tab and add active class
+            $('#' + tab_id).addClass('active');
             $(this).addClass('active');
-            $('#' + tab_id).show();
+            
+            // Reinitialize DataTable for the newly displayed tab if not already initialized
+            // This helps ensure tables in tabs that weren't visible on page load get properly initialized
+            var tableId = 'table-' + tab_id.replace('tab-', '');
+            if ($.fn.dataTable.isDataTable('#' + tableId)) {
+                // Table already initialized, no need to do anything
+            } else if ($('#' + tableId).length > 0) {
+                // Initialize table if it exists in this tab
+                initializeDataTable(tableId);
+            }
         });
         
-        // Ensure active tab is shown initially
-        $('.tab-content').hide();
-        $('.tab-content.active').show();
+        // Make sure the active tab is shown initially
+        $('.tab-content').removeClass('active');
+        $('#tab-viewer').addClass('active');
         
-        // Debug: Check if API is returning data
-        $.getJSON('/api/viewer', function(data) {
-            console.log('API data:', data);
-        }).fail(function(jqXHR, textStatus, errorThrown) {
-            console.error('API error:', textStatus, errorThrown);
-        });
+        // Function to initialize a DataTable with consistent configuration
+        function initializeDataTable(tableId) {
+            var apiEndpoint = '/api/' + tableId.replace('table-', '');
+            
+            $('#' + tableId).DataTable({
+                ajax: {
+                    url: apiEndpoint,
+                    dataSrc: '' // This tells DataTables the data is an array
+                },
+                columns: [
+                    { data: 'Protocol ID' },
+                    { data: 'Media Type' },
+                    { data: 'Cell Line' },
+                    { data: 'Maturation' }
+                ]
+            });
+        }
         
-        // Initialize DataTable with proper data format
-        $('#table-viewer').DataTable({
-            ajax: {
-                url: '/api/viewer',
-                dataSrc: '' // This tells DataTables the data is an array
-            },
-            columns: [
-                { data: 'Protocol ID' },
-                { data: 'Media Type' },
-                { data: 'Cell Line' },
-                { data: 'Maturation' },
-                { 
-                    data: null,
-                    defaultContent: '<a href="#" class="action-btn">View</a> <a href="#" class="action-btn">Export</a>'
-                }
-            ]
-        });
+        // Initialize DataTables for all tables in the active tab
+        initializeDataTable('table-viewer');
     });
     </script>
 {% endblock %}
