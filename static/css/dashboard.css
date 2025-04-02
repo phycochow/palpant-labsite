@@ -128,6 +128,26 @@ body {
     cursor: pointer;
 }
 
+/* Container for the two text elements */
+.user-menu .text-container {
+    display: flex;
+    flex-direction: column;
+    /* align-items: flex-start;  // optional if you want left alignment */
+}
+
+.user-menu .text-container span {
+    font-weight: bold; /* or normal, depending on preference */
+    margin-bottom: 0.25rem; /* small spacing before the publication link */
+}
+
+/* Style for "View my publication" */
+.user-menu .text-container p {
+    margin: 0;
+    font-size: 0.8rem;        /* smaller font size */
+    font-style: italic;       /* italic text */
+    text-decoration: underline; /* underlined */
+}
+
 .avatar {
     width: 32px;
     height: 32px;
@@ -140,6 +160,7 @@ body {
     font-weight: 600;
     margin-right: 0.5rem;
 }
+
 
 .content-wrapper {
     padding: 1.5rem;
