@@ -197,3 +197,14 @@ Changed html code
 git pull
 sudo systemctl daemon-reload
 sudo systemctl restart flaskapp
+
+---
+difficulty loading css - 403 error
+
+sudo chmod -R 755 /home/ubuntu/palpant-labsite/static
+sudo chmod 755 /home/ubuntu
+sudo chmod 755 /home/ubuntu/palpant-labsite
+
+---
+
+
