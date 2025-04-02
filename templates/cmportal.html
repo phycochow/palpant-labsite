@@ -229,7 +229,6 @@
             $(this).addClass('active');
             
             // Reinitialize DataTable for the newly displayed tab if not already initialized
-            // This helps ensure tables in tabs that weren't visible on page load get properly initialized
             var tableId = 'table-' + tab_id.replace('tab-', '');
             if ($.fn.dataTable.isDataTable('#' + tableId)) {
                 // Table already initialized, no need to do anything
@@ -243,21 +242,25 @@
         $('.tab-content').removeClass('active');
         $('#tab-viewer').addClass('active');
         
-        // Function to initialize a DataTable with consistent configuration
+        // Function to initialize a DataTable with dynamic columns from the API response
         function initializeDataTable(tableId) {
             var apiEndpoint = '/api/' + tableId.replace('table-', '');
             
-            $('#' + tableId).DataTable({
-                ajax: {
-                    url: apiEndpoint,
-                    dataSrc: '' // This tells DataTables the data is an array
-                },
-                columns: [
-                    { data: 'Protocol ID' },
-                    { data: 'Media Type' },
-                    { data: 'Cell Line' },
-                    { data: 'Maturation' }
-                ]
+            // Fetch data from the API
+            $.getJSON(apiEndpoint, function(data) {
+                // Create column definitions dynamically using keys from the first record
+                var dynamicColumns = [];
+                if (data.length > 0) {
+                    dynamicColumns = Object.keys(data[0]).map(function(key) {
+                        return { data: key, title: key };
+                    });
+                }
+                
+                // Initialize DataTable with the fetched data and dynamic columns
+                $('#' + tableId).DataTable({
+                    data: data,
+                    columns: dynamicColumns
+                });
             });
         }
         
