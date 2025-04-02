@@ -236,17 +236,20 @@
                 $('#' + tab_id).addClass('active');
                 $(this).addClass('active');
                 
-                // Get the container ID for the current tab
-                var containerId = 'table-' + tab_id.replace('tab-', '') + '-container';
-                
-                // Initialize DataTable for the current tab if not already done
-                if (!$.fn.dataTable.isDataTable('#' + containerId + ' table')) {
-                    // If we already have the data, use it directly
-                    if (apiData) {
-                        createTable(containerId, apiData);
-                    } else {
-                        // Otherwise fetch it first
-                        fetchAndCreateTable(containerId);
+                // Only load table data for tabs other than Protocol Benchmarking
+                if (tab_id !== 'tab-benchmark') {
+                    // Get the container ID for the current tab
+                    var containerId = 'table-' + tab_id.replace('tab-', '') + '-container';
+                    
+                    // Initialize DataTable for the current tab if not already done
+                    if (!$.fn.dataTable.isDataTable('#' + containerId + ' table')) {
+                        // If we already have the data, use it directly
+                        if (apiData) {
+                            createTable(containerId, apiData);
+                        } else {
+                            // Otherwise fetch it first
+                            fetchAndCreateTable(containerId);
+                        }
                     }
                 }
             });
@@ -289,8 +292,10 @@
                 var container = $('#' + containerId);
                 var tableId = 'table-' + containerId.replace('table-', '').replace('-container', '');
                 
-                // Get column names dynamically from the first data item
-                var columnNames = Object.keys(data[0]);
+                // Get column names dynamically from the first data item, excluding 'actions'
+                var columnNames = Object.keys(data[0]).filter(function(key) {
+                    return key.toLowerCase() !== 'actions';
+                });
                 
                 // Create HTML table structure
                 var tableHTML = '<table id="' + tableId + '" class="table table-striped table-bordered table-compact display" style="width:100%">';
