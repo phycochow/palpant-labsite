@@ -1,4 +1,5 @@
 from flask import Flask, render_template
+import database
 
 app = Flask(__name__)
 
@@ -13,6 +14,23 @@ def cmportal():
 @app.route('/dash')
 def dash():
     return render_template('dashboard.html')
+
+
+# API endpoints for AJAX calls
+@app.route('/api/viewer')
+def api_viewer():
+    df = database.get_data()
+    return jsonify(df.to_dict(orient='records'))
+
+@app.route('/api/enrichment')
+def api_enrichment():
+    df = database.get_data()
+    return jsonify(df.to_dict(orient='records'))
+
+@app.route('/api/search')
+def api_search():
+    df = database.get_data()
+    return jsonify(df.to_dict(orient='records'))
 
 if __name__ == '__main__':
     # Development server only – not used in production
