@@ -32,7 +32,7 @@ body {
 }
 
 .sidebar {
-    width: 250px;
+    width: 200px;
     background-color: var(--primary);
     color: white;
     flex-shrink: 0;

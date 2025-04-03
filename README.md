@@ -210,3 +210,6 @@ website not working in a sudden
 
 ls /etc/nginx/sites-enabled/
 the website is hosted with Gunicorn, Flask, nginx on lightsail
+
+
+review this code, it is working great. however, the columns are scrambled. i want to retain the original order of

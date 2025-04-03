@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CM Portal - Database Viewer</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.2/css/buttons.dataTables.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cmportal.css') }}">
+</head>
+<body>
+<!--     <div class="container-fluid mt-3">
+        <div class="row">
+            <div class="col-12"> -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <div id="loading-indicator" class="text-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                <p>Loading protocol data...</p>
+                            </div>
+                            <div id="error-message" class="alert alert-danger d-none"></div>
+                        </div>
+                        
+                        <div id="table-container" class="d-none">
+                            <table id="data-table" class="table table-striped table-bordered table-compact" style="width:100%"></table>
+                        </div>
+                    </div>
+                </div>
+       <!--      </div>
+        </div>
+    </div> -->
+    
+    <!-- Required JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.html5.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.colVis.min.js"></script>
+    
+    <script>
+$(document).ready(function() {
+    // Variable to store the category row
+    let categoryRow = null;
+    
+    // Load data from API
+    $.ajax({
+        url: '/api/viewer',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.data && response.data.length > 0) {
+                // Extract the category row (first row)
+                categoryRow = response.data[0];
+                
+                // Create data without the category row
+                const dataWithoutCategory = [...response.data];
+                dataWithoutCategory.splice(0, 1);
+                
+                initializeTable(dataWithoutCategory, response.columns);
+                $('#loading-indicator').addClass('d-none');
+                $('#table-container').removeClass('d-none');
+            } else {
+                showError('No data available');
+            }
+        },
+        error: function(xhr, status, error) {
+            showError('Error loading data: ' + error);
+        }
+    });
+    
+    function initializeTable(data, columnNames) {
+        // Group columns by category
+        const columnsByCategory = {};
+        
+        columnNames.forEach(key => {
+            const category = categoryRow[key] || 'Other';
+            if (!columnsByCategory[category]) {
+                columnsByCategory[category] = [];
+            }
+            
+            let columnWidth = '10%';
+            let className = 'dt-head-center';
+            
+            if (key.toLowerCase().includes('reference') || key.toLowerCase().includes('title')) {
+                columnWidth = '15%';
+                className += ' dt-body-left';
+            } else if (key.toLowerCase().includes('doi') || key.toLowerCase().includes('url')) {
+                columnWidth = '12%';
+                className += ' dt-body-left';
+            } else if (key.toLowerCase().includes('year') || key.toLowerCase().includes('number')) {
+                columnWidth = '7%';
+                className += ' dt-body-center';
+            } else if (key.toLowerCase().includes('sex') || key.toLowerCase().includes('line')) {
+                columnWidth = '8%';
+                className += ' dt-body-center';
+            }
+            
+                            columnsByCategory[category].push({
+                data: key,
+                title: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                width: columnWidth,
+                className: className,
+                // Add special render function for URL columns as well
+                render: (function() {
+                    if (key.toLowerCase().includes('doi')) {
+                        return function(data, type, row) {
+                            if (type === 'display' && data && data !== 'NaN' && data.trim() !== '') {
+                                // Format DOI as clickable link if it's a valid DOI
+                                let url = data;
+                                if (!url.startsWith('http')) {
+                                    url = 'https://doi.org/' + data.replace(/^doi:?\s*/i, '');
+                                }
+                                return '<a href="' + url + '" target="_blank">' + data + '</a>';
+                            }
+                            return data;
+                        };
+                    } else if (key.toLowerCase().includes('url')) {
+                        return function(data, type, row) {
+                            if (type === 'display' && data && data !== 'NaN' && data.trim() !== '') {
+                                return '<a href="' + data + '" target="_blank">' + data + '</a>';
+                            }
+                            return data;
+                        };
+                    }
+                    return null;
+                })()
+            });
+        });
+        
+        // Prepare DataTable buttons array
+        const buttons = [
+            {
+                extend: 'csv',
+                className: 'btn btn-sm btn-secondary',
+                text: 'Export CSV'
+            }
+        ];
+        
+        // Add a button for each category
+        Object.keys(columnsByCategory).forEach(category => {
+            if (category !== 'Other' && columnsByCategory[category].length > 0) {
+                buttons.push({
+                    extend: 'colvis',
+                    className: `btn btn-sm btn-primary category-toggle-${category.toLowerCase().replace(/\s+/g, '-')}`,
+                    text: `Toggle ${category}`,
+                    columns: columnsByCategory[category].map((col, idx) => {
+                        // Find the index of this column in the main columns array
+                        return columnNames.indexOf(col.data);
+                    })
+                });
+            }
+        });
+        
+        // Add a button for 'Other' category if it exists
+        if (columnsByCategory['Other'] && columnsByCategory['Other'].length > 0) {
+            buttons.push({
+                extend: 'colvis',
+                className: 'btn btn-sm btn-outline-secondary category-toggle-other',
+                text: 'Toggle Other',
+                columns: columnsByCategory['Other'].map((col) => columnNames.indexOf(col.data))
+            });
+        }
+        
+        // Flatten the grouped columns back to a single array for DataTables
+        const columns = [];
+        Object.values(columnsByCategory).forEach(categoryColumns => {
+            columns.push(...categoryColumns);
+        });
+        
+        // Initialize DataTable
+        const table = $('#data-table').DataTable({
+            data: data,
+            columns: columns,
+            scrollX: true,
+            scrollY: '60vh',
+            scrollCollapse: true,
+            pageLength: 10,
+            lengthChange: false, // Remove the entries dropdown
+            autoWidth: false,
+            dom: 'Bfrtip', // Remove 'l' to hide length changing input
+            buttons: buttons,
+            language: {
+                search: "<div class='search-label'>Search</div>_INPUT_", // Add Search label
+                searchPlaceholder: "Filter records..."
+            },
+            initComplete: function() {
+                // Apply custom styling to column visibility dropdowns
+                customizeColumnVisibilityDropdowns();
+                
+                // After table is initialized
+                setTimeout(function() {
+                    // Add the duplicate header row
+                    addDuplicateHeaderRow(table);
+                    
+                    // Set up the draw event to always place category row at the top
+                    table.on('draw', function() {
+                        // Clear any existing category row
+                        $('.category-row').remove();
+                        
+                        // Add the category row after every draw
+                        addCategoryRow(table, categoryRow, columnNames);
+                    });
+                    
+                    // Update category row when columns visibility changes
+                    table.on('column-visibility.dt', function(e, settings, column, state) {
+                        // Clear existing category row
+                        $('.category-row').remove();
+                        
+                        // Add updated category row
+                        addCategoryRow(table, categoryRow, columnNames);
+                    });
+                    
+                    // Initial sort and draw
+                    table.order([0, 'asc']).draw();
+                    
+                    // Trigger resize to ensure proper layout
+                    $(window).trigger('resize');
+                    
+                    // Setup special handling for the category toggle buttons
+                    setupCategoryToggleButtons();
+                }, 100);
+            }
+        });
+        
+        // Return the table instance for reference
+        return table;
+    }
+    
+    function setupCategoryToggleButtons() {
+        // Intercept button clicks for all category toggle buttons
+        $('.category-toggle-protocol-variable, .category-toggle-analysis-method, .category-toggle-cell-profile, .category-toggle-study-characteristic, .category-toggle-measured-endpoint, .category-toggle-other').on('click', function() {
+            // Use setTimeout to let DataTables create the collection first
+            setTimeout(function() {
+                centerToggleMenu();
+            }, 10);
+        });
+    }
+    
+    function centerToggleMenu() {
+        const collection = $('.dt-button-collection');
+        if (collection.length > 0) {
+            // Find all the backdrop elements
+            const backdrop = $('.dt-button-background');
+            
+            // Ensure the collection is properly positioned
+            collection.css({
+                'position': 'fixed',
+                'top': '50%',
+                'left': '50%',
+                'transform': 'translate(-50%, -50%)',
+                'max-height': '80vh',
+                'overflow-y': 'auto',
+                'z-index': '1001' // Higher than backdrop
+            });
+            
+            // Force a repaint to ensure styles are applied
+            collection[0].offsetHeight;
+        }
+    }
+    
+    function customizeColumnVisibilityDropdowns() {
+        // Add custom CSS to the head with inline styles
+        $('head').append(`
+            <style>
+                /* Column toggle specific styles */
+                div.dt-button-collection {
+                    width: 1000px !important;
+                    max-width: 95vw !important;
+                    position: fixed !important;
+                    top: 50% !important;
+                    left: 50% !important;
+                    transform: translate(-50%, -50%) !important;
+                    max-height: 80vh !important;
+                    overflow-y: auto !important;
+                    margin-top: 0 !important;
+                    margin-left: 0 !important;
+                    z-index: 1001 !important; /* Above backdrop */
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
+                    border-radius: 6px !important;
+                }
+                
+                div.dt-button-collection button.dt-button {
+                    display: inline-block !important;
+                    width: 30% !important;
+                    box-sizing: border-box !important;
+                    white-space: nowrap !important;
+                    overflow: hidden !important;
+                    text-overflow: ellipsis !important;
+                    margin: 0 !important;
+                    padding: 0.7em 1.2em !important;
+                    font-size: 1.05em !important;
+                }
+                
+                /* Make sure column headers are properly visible */
+                .dataTables_scrollHead {
+                    overflow: visible !important;
+                }
+                
+                /* Style the backdrop */
+                div.dt-button-background {
+                    position: fixed !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    z-index: 1000 !important; /* Below the menu but above other content */
+                    background: rgba(0, 0, 0, 0.6) !important; /* Darker backdrop */
+                }
+                
+                /* Style for search label and box */
+                .search-label {
+                    font-weight: bold;
+                    margin-bottom: 5px;
+                    color: var(--dark);
+                    width: 100%;
+                    text-align: center;
+                    max-width: 250px;
+                }
+                
+                /* Adjust search box layout */
+                .dataTables_filter {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-end;
+                }
+                
+                .dataTables_filter input {
+                    margin-left: 0 !important;
+                    width: 100%;
+                    max-width: 250px;
+                    padding: 4px 8px;
+                    border: 1px solid var(--border);
+                    border-radius: 4px;
+                }
+            </style>
+        `);
+        
+        // Add global document handlers for the collection
+        $(document).on('click', '.dt-button', function() {
+            setTimeout(centerToggleMenu, 10);
+        });
+        
+        // Add mutation observer to watch for new elements
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+                    for (let i = 0; i < mutation.addedNodes.length; i++) {
+                        const node = mutation.addedNodes[i];
+                        if (node.classList && node.classList.contains('dt-button-collection')) {
+                            centerToggleMenu();
+                        }
+                    }
+                }
+            });
+        });
+        
+        // Start observing the document body for added nodes
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+    
+    function addDuplicateHeaderRow(table) {
+        // Get the current header row
+        const headerRow = $('#data-table thead tr');
+        
+        // Clone the header row
+        const clonedRow = headerRow.clone(true);
+        
+        // Insert the cloned row before the original header row
+        headerRow.before(clonedRow);
+        
+        // Style both header rows with the blue background
+        $('#data-table thead tr').css({
+            'background-color': 'var(--primary)',
+            'color': 'var(--light)'
+        });
+        
+        // Remove sorting indicators from the first (cloned) row
+        $('#data-table thead tr:first-child th').removeClass('sorting sorting_asc sorting_desc');
+        
+        // Remove click events from the first row to make it non-functional for sorting
+        $('#data-table thead tr:first-child th').off('click').css('cursor', 'default');
+    }
+    
+    function addCategoryRow(table, categoryRow, columnNames) {
+        if (!categoryRow) return;
+        
+        // Create a new row for categories
+        const categoryRowHtml = $('<tr class="category-row"></tr>');
+        
+        // Get visible columns
+        const visibleColumns = table.columns().visible().toArray();
+        
+        // Add cells for each column with the appropriate category
+        columnNames.forEach(function(columnKey, index) {
+            const categoryValue = categoryRow[columnKey] || '';
+            
+            // Create a cell with the category value
+            const cell = $('<td></td>').text(categoryValue);
+            
+            // Add a class based on the category value
+            if (categoryValue === 'Protocol Variable') {
+                cell.addClass('category-variable');
+            } else if (categoryValue === 'Analysis Method') {
+                cell.addClass('category-analysis');
+            } else if (categoryValue === 'Cell Profile') {
+                cell.addClass('category-cell');
+            } else if (categoryValue === 'Study Characteristic') {
+                cell.addClass('category-study');
+            } else if (categoryValue === 'Measured Endpoint') {
+                cell.addClass('category-endpoint');
+            }
+            
+            // Only show the cell if its column is visible
+            if (!visibleColumns[index]) {
+                cell.css('display', 'none');
+            }
+            
+            categoryRowHtml.append(cell);
+        });
+        
+        // Insert the category row at the top of the tbody
+        $('#data-table tbody').prepend(categoryRowHtml);
+    }
+    
+    function showError(message) {
+        $('#loading-indicator').addClass('d-none');
+        $('#error-message').removeClass('d-none').text(message);
+    }
+});
+    </script>
+</body>
+</html>

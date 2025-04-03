@@ -46,7 +46,7 @@
                 <div class="tab-link" data-tab="tab-benchmark">Protocol Benchmarking</div>
             </div>
             
-            <!-- Database Viewer -->
+            <!-- UMAP Viewer -->
             <div id="tab-viewer" class="tab-content active">
                 <p>Explore and subset studies based on specific protocol designs and view common variable trends.</p>
                 <div class="form-row">
@@ -88,8 +88,15 @@
                 <div class="visualization mb-3">
                     UMAP Projection of Protocol Parameters (Fig. 2c)
                 </div>
-                <div class="well">
-                    <div id="table-viewer-container"></div>
+
+                <!-- Database viewer - NEW IMPLEMENTATION -->
+                <div class="card">
+                    <div class="card-body">
+                        
+                        <div id="table-container" class="d-none">
+                            <table id="data-table" class="table table-striped table-bordered table-compact" style="width:100%"></table>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -201,192 +208,423 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.2/js/dataTables.buttons.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.html5.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.colVis.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/fixedheader/3.1.7/js/dataTables.fixedHeader.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/responsive/2.2.5/js/dataTables.responsive.min.js"></script>
     
     <script>
     $(document).ready(function() {
-        // Store API data and table instances
-        const state = {
-            apiData: null,
-            tables: {}
-        };
-        
         // Configure tab navigation
         $('.tab-link').click(function() {
             const tabId = $(this).attr('data-tab');
             $('.tab-content, .tab-link').removeClass('active');
             $('#' + tabId).addClass('active');
             $(this).addClass('active');
-            
-            // Load data for the current tab if needed
-            if (tabId !== 'tab-benchmark' && !state.tables[tabId]) {
-                loadTabData(tabId);
+        });
+        
+        // Variable to store the category row
+        let categoryRow = null;
+        
+        // Load data from API
+        $.ajax({
+            url: '/api/viewer',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.data && response.data.length > 0) {
+                    // Extract the category row (first row)
+                    categoryRow = response.data[0];
+                    
+                    // Create data without the category row
+                    const dataWithoutCategory = [...response.data];
+                    dataWithoutCategory.splice(0, 1);
+                    
+                    initializeTable(dataWithoutCategory, response.columns);
+                    $('#loading-indicator').addClass('d-none');
+                    $('#table-container').removeClass('d-none');
+                } else {
+                    showError('No data available');
+                }
+            },
+            error: function(xhr, status, error) {
+                showError('Error loading data: ' + error);
             }
         });
         
-        // Initialize first tab
-        loadTabData('tab-viewer');
-        
-        // Load tab data
-        function loadTabData(tabId) {
-            const containerId = 'table-' + tabId.replace('tab-', '') + '-container';
-            const container = $('#' + containerId);
+        function initializeTable(data, columnNames) {
+            // Group columns by category
+            const columnsByCategory = {};
             
-            // Show loading indicator
-            container.html('<div class="text-center"><p>Loading data...</p><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div></div>');
-            
-            // Use cached data or fetch new data
-            if (state.apiData) {
-                createTable(containerId, state.apiData);
-            } else {
-                $.getJSON('/api/viewer')
-                    .done(function(data) {
-                        state.apiData = data;
-                        if (!data || data.length === 0) {
-                            container.html('<div class="alert alert-info">No data available.</div>');
-                            return;
+            columnNames.forEach(key => {
+                const category = categoryRow[key] || 'Other';
+                if (!columnsByCategory[category]) {
+                    columnsByCategory[category] = [];
+                }
+                
+                let columnWidth = '10%';
+                let className = 'dt-head-center';
+                
+                if (key.toLowerCase().includes('reference') || key.toLowerCase().includes('title')) {
+                    columnWidth = '15%';
+                    className += ' dt-body-left';
+                } else if (key.toLowerCase().includes('doi') || key.toLowerCase().includes('url')) {
+                    columnWidth = '12%';
+                    className += ' dt-body-left';
+                } else if (key.toLowerCase().includes('year') || key.toLowerCase().includes('number')) {
+                    columnWidth = '7%';
+                    className += ' dt-body-center';
+                } else if (key.toLowerCase().includes('sex') || key.toLowerCase().includes('line')) {
+                    columnWidth = '8%';
+                    className += ' dt-body-center';
+                }
+                
+                columnsByCategory[category].push({
+                    data: key,
+                    title: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                    width: columnWidth,
+                    className: className,
+                    // Add special render function for URL columns as well
+                    render: (function() {
+                        if (key.toLowerCase().includes('doi')) {
+                            return function(data, type, row) {
+                                if (type === 'display' && data && data !== 'NaN' && data.trim() !== '') {
+                                    // Format DOI as clickable link if it's a valid DOI
+                                    let url = data;
+                                    if (!url.startsWith('http')) {
+                                        url = 'https://doi.org/' + data.replace(/^doi:?\s*/i, '');
+                                    }
+                                    return '<a href="' + url + '" target="_blank">' + data + '</a>';
+                                }
+                                return data;
+                            };
+                        } else if (key.toLowerCase().includes('url')) {
+                            return function(data, type, row) {
+                                if (type === 'display' && data && data !== 'NaN' && data.trim() !== '') {
+                                    return '<a href="' + data + '" target="_blank">' + data + '</a>';
+                                }
+                                return data;
+                            };
                         }
-                        createTable(containerId, data);
-                    })
-                    .fail(function(jqXHR, textStatus, errorThrown) {
-                        container.html('<div class="alert alert-danger">Error loading data: ' + errorThrown + '. Please try again later.</div>');
+                        return null;
+                    })()
+                });
+            });
+            
+            // Prepare DataTable buttons array
+            const buttons = [
+                {
+                    extend: 'csv',
+
+                }
+            ];
+            
+            // Add a button for each category
+            Object.keys(columnsByCategory).forEach(category => {
+                if (category !== 'Other' && columnsByCategory[category].length > 0) {
+                    buttons.push({
+                        extend: 'colvis',
+                        className: `btn btn-sm btn-primary category-toggle-${category.toLowerCase().replace(/\s+/g, '-')}`,
+                        text: `Toggle ${category}`,
+                        columns: columnsByCategory[category].map((col, idx) => {
+                            // Find the index of this column in the main columns array
+                            return columnNames.indexOf(col.data);
+                        })
                     });
+                }
+            });
+            
+            // Add a button for 'Other' category if it exists
+            if (columnsByCategory['Other'] && columnsByCategory['Other'].length > 0) {
+                buttons.push({
+                    extend: 'colvis',
+                    className: 'btn btn-sm btn-outline-secondary category-toggle-other',
+                    text: 'Toggle Other',
+                    columns: columnsByCategory['Other'].map((col) => columnNames.indexOf(col.data))
+                });
             }
-        }
-        
-        // Create DataTable
-        function createTable(containerId, data) {
-            const container = $('#' + containerId);
-            const tableId = 'table-' + containerId.replace('table-', '').replace('-container', '');
-            const tabId = 'tab-' + containerId.replace('table-', '').replace('-container', '');
             
-            // Extract column names
-            const columnNames = Object.keys(data[0]).filter(key => key.toLowerCase() !== 'actions');
+            // Flatten the grouped columns back to a single array for DataTables
+            const columns = [];
+            Object.values(columnsByCategory).forEach(categoryColumns => {
+                columns.push(...categoryColumns);
+            });
             
-            // Create column definitions
-            const columns = columnNames.map(key => ({
-                data: key,
-                title: key.replace(/_/g, ' ').replace(/\w\S*/g, txt => 
-                    txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()),
-                defaultContent: 'NaN'
-            }));
-            
-            // Create HTML table
-            container.html(`<table id="${tableId}" class="table table-striped table-bordered table-compact display" style="width:100%"></table>`);
+            // First, add CSS for the buttons
+            $('head').append(`
+                <style>
+                    /* Reduce button sizes */
+                    .dt-buttons .btn {
+                        font-size: 0.8rem !important;
+                        padding: 0.3rem 0.6rem !important;
+                        width: auto !important;
+                        max-width: 150px !important;
+                        margin-right: 5px !important;
+                    }
+                </style>
+            `);
             
             // Initialize DataTable
-            const dataTable = $('#' + tableId).DataTable({
+            const table = $('#data-table').DataTable({
                 data: data,
                 columns: columns,
                 scrollX: true,
+                scrollY: '60vh',
+                scrollCollapse: true,
                 pageLength: 10,
-                lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
-                dom: 'Blfrtip',
-                buttons: [
-                    {
-                        extend: 'colvis',
-                        className: 'btn btn-primary btn-sm',
-                        text: 'Select Features'
-                    },
-                    {
-                        extend: 'csv',
-                        className: 'btn btn-secondary btn-sm',
-                        text: 'Export CSV'
-                    }
+                lengthChange: false, // Remove the entries dropdown
+                autoWidth: false,
+                responsive: true,
+                fixedHeader: true,
+                columnDefs: [
+                    { "width": "150px", targets: "_all" }
                 ],
+                dom: 'Bfrtip', // Remove 'l' to hide length changing input
+                buttons: buttons,
                 language: {
-                    search: "_INPUT_",
-                    searchPlaceholder: "Search...",
-                    emptyTable: "No data available"
+                    search: "<div class='search-label'>Search</div>_INPUT_", // Add Search label
+                    searchPlaceholder: "Filter records..."
                 },
-                columnDefs: [{
-                    targets: '_all',
-                    className: 'dt-nowrap',
-                    render: (data, type) => 
-                        (type === 'display' && (data === null || data === undefined || data === '')) ? 'NaN' : data
-                }]
-            });
-            
-            // Store table instance
-            state.tables[tabId] = {
-                table: dataTable,
-                columnMap: createColumnMap(columnNames)
-            };
-            
-            // Set up filters
-            setupFilters(tabId);
-        }
-        
-        // Create column map for filtering
-        function createColumnMap(columnNames) {
-            const map = {};
-            columnNames.forEach((name, index) => {
-                map[name.toLowerCase()] = index;
-            });
-            return map;
-        }
-        
-        // Set up tab filters
-        function setupFilters(tabId) {
-            const tableState = state.tables[tabId];
-            if (!tableState) return;
-            
-            const dataTable = tableState.table;
-            const columnMap = tableState.columnMap;
-            
-            // Define filter mappings for each tab
-            const filterMappings = {
-                'tab-viewer': {
-                    selectors: ['#media-type', '#cell-line', '#maturation'],
-                    columns: [
-                        ['media_type', 'media', 'mediatype', 'media type'],
-                        ['cell_line', 'cellline', 'cell', 'cell type', 'cell line'],
-                        ['maturation', 'maturation_method', 'maturation method']
-                    ]
-                },
-                'tab-enrichment': {
-                    selectors: ['#target-outcome'],
-                    columns: [
-                        ['outcome', 'target_outcome', 'target', 'endpoint']
-                    ]
-                },
-                'tab-search': {
-                    selectors: ['#application', '#media-variables'],
-                    columns: [
-                        ['application', 'purpose', 'use_case', 'target_application'],
-                        ['media', 'media_type', 'media_variables']
-                    ]
+                initComplete: function() {
+                    // Apply custom styling to column visibility dropdowns
+                    customizeColumnVisibilityDropdowns();
+                    
+                    // After table is initialized
+                    setTimeout(function() {
+                        // Add the duplicate header row
+                        addDuplicateHeaderRow(table);
+                        
+                        // Set up the draw event to always place category row at the top
+                        table.on('draw', function() {
+                            // Clear any existing category row
+                            $('.category-row').remove();
+                            
+                            // Add the category row after every draw
+                            addCategoryRow(table, categoryRow, columnNames);
+                        });
+                        
+                        // Update category row when columns visibility changes
+                        table.on('column-visibility.dt', function(e, settings, column, state) {
+                            // Clear existing category row
+                            $('.category-row').remove();
+                            
+                            // Add updated category row
+                            addCategoryRow(table, categoryRow, columnNames);
+                        });
+                        
+                        // Initial sort and draw
+                        table.order([0, 'asc']).draw();
+                        
+                        // Trigger resize to ensure proper layout
+                        $(window).trigger('resize');
+                        
+                        // Setup special handling for the category toggle buttons
+                        setupCategoryToggleButtons();
+                    }, 100);
                 }
-            };
+            });
             
-            // Set up filter handler
-            const mapping = filterMappings[tabId];
-            if (mapping) {
-                $(`#${tabId} .btn-primary`).click(function() {
-                    // Clear filters
-                    dataTable.search('').columns().search('').draw();
-                    
-                    // Apply new filters
-                    mapping.selectors.forEach((selector, i) => {
-                        const value = $(selector).val();
-                        if (value) {
-                            applyFilter(dataTable, mapping.columns[i], value, columnMap);
-                        }
-                    });
-                    
-                    dataTable.draw();
+            // Return the table instance for reference
+            return table;
+        }
+        
+        function setupCategoryToggleButtons() {
+            // Intercept button clicks for all category toggle buttons
+            $('.category-toggle-protocol-variable, .category-toggle-analysis-method, .category-toggle-cell-profile, .category-toggle-study-characteristic, .category-toggle-measured-endpoint, .category-toggle-other').on('click', function() {
+                // Use setTimeout to let DataTables create the collection first
+                setTimeout(function() {
+                    centerToggleMenu();
+                }, 10);
+            });
+        }
+        
+        function centerToggleMenu() {
+            const collection = $('.dt-button-collection');
+            if (collection.length > 0) {
+                // Find all the backdrop elements
+                const backdrop = $('.dt-button-background');
+                
+                // Ensure the collection is properly positioned
+                collection.css({
+                    'position': 'fixed',
+                    'top': '50%',
+                    'left': '50%',
+                    'transform': 'translate(-50%, -50%)',
+                    'max-height': '80vh',
+                    'overflow-y': 'auto',
+                    'z-index': '1001' // Higher than backdrop
                 });
+                
+                // Force a repaint to ensure styles are applied
+                collection[0].offsetHeight;
             }
         }
         
-        // Apply filter if column exists
-        function applyFilter(dataTable, possibleColumns, value, columnMap) {
-            for (const colName of possibleColumns) {
-                const index = columnMap[colName.toLowerCase()];
-                if (index !== undefined) {
-                    dataTable.column(index).search(value);
-                    return;
+        function customizeColumnVisibilityDropdowns() {
+            // Add custom CSS to the head with inline styles
+            $('head').append(`
+                <style>
+                    /* Column toggle specific styles */
+                    div.dt-button-collection {
+                        width: 600px !important;
+                        max-width: 95vw !important;
+                        position: fixed !important;
+                        top: 50% !important;
+                        left: 50% !important;
+                        transform: translate(-50%, -50%) !important;
+                        max-height: 80vh !important;
+                        overflow-y: auto !important;
+                        margin-top: 0 !important;
+                        margin-left: 0 !important;
+                        z-index: 1001 !important; /* Above backdrop */
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
+                        border-radius: 6px !important;
+                    }
+                    
+                    div.dt-button-collection button.dt-button {
+                        display: inline-block !important;
+                        width: 30% !important;
+                        box-sizing: border-box !important;
+                        white-space: nowrap !important;
+                        overflow: hidden !important;
+                        text-overflow: ellipsis !important;
+                        margin: 0 !important;
+                        padding: 0.5em 0.8em !important;
+                        font-size: 0.85em !important;
+                    }
+                    
+                    /* Make sure column headers are properly visible */
+                    .dataTables_scrollHead {
+                        overflow: visible !important;
+                    }
+                    
+                    /* Style the backdrop */
+                    div.dt-button-background {
+                        position: fixed !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: 100% !important;
+                        height: 100% !important;
+                        z-index: 1000 !important; /* Below the menu but above other content */
+                        background: rgba(0, 0, 0, 0.6) !important; /* Darker backdrop */
+                    }
+                    
+                    /* Style for search label and box */
+                    .search-label {
+                        font-weight: bold;
+                        margin-bottom: 5px;
+                        color: var(--dark);
+                        width: 100%;
+                        text-align: center;
+                        max-width: 250px;
+                    }
+                    
+                    /* Adjust search box layout */
+                    .dataTables_filter {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-end;
+                    }
+                    
+                    .dataTables_filter input {
+                        margin-left: 0 !important;
+                        width: 100%;
+                        max-width: 250px;
+                        padding: 4px 8px;
+                        border: 1px solid var(--border);
+                        border-radius: 4px;
+                    }
+                </style>
+            `);
+            
+            // Add global document handlers for the collection
+            $(document).on('click', '.dt-button', function() {
+                setTimeout(centerToggleMenu, 10);
+            });
+            
+            // Add mutation observer to watch for new elements
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+                        for (let i = 0; i < mutation.addedNodes.length; i++) {
+                            const node = mutation.addedNodes[i];
+                            if (node.classList && node.classList.contains('dt-button-collection')) {
+                                centerToggleMenu();
+                            }
+                        }
+                    }
+                });
+            });
+            
+            // Start observing the document body for added nodes
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
+        
+        function addDuplicateHeaderRow(table) {
+            // Get the current header row
+            const headerRow = $('#data-table thead tr');
+            
+            // Clone the header row
+            const clonedRow = headerRow.clone(true);
+            
+            // Insert the cloned row before the original header row
+            headerRow.before(clonedRow);
+            
+            // Style both header rows with the blue background
+            $('#data-table thead tr').css({
+                'background-color': 'var(--primary)',
+                'color': 'var(--light)'
+            });
+            
+            // Remove sorting indicators from the first (cloned) row
+            $('#data-table thead tr:first-child th').removeClass('sorting sorting_asc sorting_desc');
+            
+            // Remove click events from the first row to make it non-functional for sorting
+            $('#data-table thead tr:first-child th').off('click').css('cursor', 'default');
+        }
+        
+        function addCategoryRow(table, categoryRow, columnNames) {
+            if (!categoryRow) return;
+            
+            // Create a new row for categories
+            const categoryRowHtml = $('<tr class="category-row"></tr>');
+            
+            // Get visible columns
+            const visibleColumns = table.columns().visible().toArray();
+            
+            // Add cells for each column with the appropriate category
+            columnNames.forEach(function(columnKey, index) {
+                const categoryValue = categoryRow[columnKey] || '';
+                
+                // Create a cell with the category value
+                const cell = $('<td></td>').text(categoryValue);
+                
+                // Add a class based on the category value
+                if (categoryValue === 'Protocol Variable') {
+                    cell.addClass('category-variable');
+                } else if (categoryValue === 'Analysis Method') {
+                    cell.addClass('category-analysis');
+                } else if (categoryValue === 'Cell Profile') {
+                    cell.addClass('category-cell');
+                } else if (categoryValue === 'Study Characteristic') {
+                    cell.addClass('category-study');
+                } else if (categoryValue === 'Measured Endpoint') {
+                    cell.addClass('category-endpoint');
                 }
-            }
+                
+                // Only show the cell if its column is visible
+                if (!visibleColumns[index]) {
+                    cell.css('display', 'none');
+                }
+                
+                categoryRowHtml.append(cell);
+            });
+            
+            // Insert the category row at the top of the tbody
+            $('#data-table tbody').prepend(categoryRowHtml);
+        }
+        
+        function showError(message) {
+            $('#loading-indicator').addClass('d-none');
+            $('#error-message').removeClass('d-none').text(message);
         }
     });
     </script>
