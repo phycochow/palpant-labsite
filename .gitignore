@@ -1,8 +1,24 @@
-# Byte-compiled / cache
+# Python cache
 __pycache__/
 *.py[cod]
 *.pyo
+*.pyd
+*.so
 
 # Virtual environments
 venv/
 env/
+.venv/
+
+# Environment variables and credentials
+.env
+*.env
+
+# Logs
+*.log
+
+# OS & Editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
