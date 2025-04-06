@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cmportal.css') }}">
+
 {% extends "dashboard.html" %}
 
 {% block Title %}
@@ -206,8 +208,6 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.2/js/dataTables.buttons.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.html5.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.colVis.min.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/fixedheader/3.1.7/js/dataTables.fixedHeader.min.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/responsive/2.2.5/js/dataTables.responsive.min.js"></script>
     
     <script>
     $(document).ready(function() {
@@ -285,7 +285,6 @@
                         if (key.toLowerCase().includes('doi')) {
                             return function(data, type, row) {
                                 if (type === 'display' && data && data !== 'NaN' && data.trim() !== '') {
-                                    // Format DOI as clickable link if it's a valid DOI
                                     let url = data;
                                     if (!url.startsWith('http')) {
                                         url = 'https://doi.org/' + data.replace(/^doi:?\s*/i, '');
@@ -311,7 +310,8 @@
             const buttons = [
                 {
                     extend: 'csv',
-
+                    className: 'btn btn-sm btn-secondary',
+                    text: 'Export CSV'
                 }
             ];
             
@@ -323,7 +323,6 @@
                         className: `btn btn-sm btn-primary category-toggle-${category.toLowerCase().replace(/\s+/g, '-')}`,
                         text: `Toggle ${category}`,
                         columns: columnsByCategory[category].map((col, idx) => {
-                            // Find the index of this column in the main columns array
                             return columnNames.indexOf(col.data);
                         })
                     });
@@ -346,20 +345,6 @@
                 columns.push(...categoryColumns);
             });
             
-            // First, add CSS for the buttons
-            $('head').append(`
-                <style>
-                    /* Reduce button sizes */
-                    .dt-buttons .btn {
-                        font-size: 0.8rem !important;
-                        padding: 0.3rem 0.6rem !important;
-                        width: auto !important;
-                        max-width: 150px !important;
-                        margin-right: 5px !important;
-                    }
-                </style>
-            `);
-            
             // Initialize DataTable
             const table = $('#data-table').DataTable({
                 data: data,
@@ -368,17 +353,12 @@
                 scrollY: '60vh',
                 scrollCollapse: true,
                 pageLength: 10,
-                lengthChange: false, // Remove the entries dropdown
+                lengthChange: false,
                 autoWidth: false,
-                responsive: true,
-                fixedHeader: true,
-                columnDefs: [
-                    { "width": "150px", targets: "_all" }
-                ],
-                dom: 'Bfrtip', // Remove 'l' to hide length changing input
+                dom: 'Bfrtip',
                 buttons: buttons,
                 language: {
-                    search: "<div class='search-label'>Search</div>_INPUT_", // Add Search label
+                    search: "<div class='search-label'>Search</div>_INPUT_",
                     searchPlaceholder: "Filter records..."
                 },
                 initComplete: function() {
@@ -387,47 +367,31 @@
                     
                     // After table is initialized
                     setTimeout(function() {
-                        // Add the duplicate header row
-                        addDuplicateHeaderRow(table);
-                        
                         // Set up the draw event to always place category row at the top
                         table.on('draw', function() {
-                            // Clear any existing category row
                             $('.category-row').remove();
-                            
-                            // Add the category row after every draw
                             addCategoryRow(table, categoryRow, columnNames);
                         });
                         
                         // Update category row when columns visibility changes
                         table.on('column-visibility.dt', function(e, settings, column, state) {
-                            // Clear existing category row
                             $('.category-row').remove();
-                            
-                            // Add updated category row
                             addCategoryRow(table, categoryRow, columnNames);
                         });
                         
                         // Initial sort and draw
                         table.order([0, 'asc']).draw();
-                        
-                        // Trigger resize to ensure proper layout
                         $(window).trigger('resize');
-                        
-                        // Setup special handling for the category toggle buttons
                         setupCategoryToggleButtons();
                     }, 100);
                 }
             });
             
-            // Return the table instance for reference
             return table;
         }
         
         function setupCategoryToggleButtons() {
-            // Intercept button clicks for all category toggle buttons
             $('.category-toggle-protocol-variable, .category-toggle-analysis-method, .category-toggle-cell-profile, .category-toggle-study-characteristic, .category-toggle-measured-endpoint, .category-toggle-other').on('click', function() {
-                // Use setTimeout to let DataTables create the collection first
                 setTimeout(function() {
                     centerToggleMenu();
                 }, 10);
@@ -437,10 +401,7 @@
         function centerToggleMenu() {
             const collection = $('.dt-button-collection');
             if (collection.length > 0) {
-                // Find all the backdrop elements
                 const backdrop = $('.dt-button-background');
-                
-                // Ensure the collection is properly positioned
                 collection.css({
                     'position': 'fixed',
                     'top': '50%',
@@ -448,21 +409,17 @@
                     'transform': 'translate(-50%, -50%)',
                     'max-height': '80vh',
                     'overflow-y': 'auto',
-                    'z-index': '1001' // Higher than backdrop
+                    'z-index': '1001'
                 });
-                
-                // Force a repaint to ensure styles are applied
                 collection[0].offsetHeight;
             }
         }
         
         function customizeColumnVisibilityDropdowns() {
-            // Add custom CSS to the head with inline styles
             $('head').append(`
                 <style>
-                    /* Column toggle specific styles */
                     div.dt-button-collection {
-                        width: 600px !important;
+                        width: 1000px !important;
                         max-width: 95vw !important;
                         position: fixed !important;
                         top: 50% !important;
@@ -472,7 +429,7 @@
                         overflow-y: auto !important;
                         margin-top: 0 !important;
                         margin-left: 0 !important;
-                        z-index: 1001 !important; /* Above backdrop */
+                        z-index: 1001 !important;
                         box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
                         border-radius: 6px !important;
                     }
@@ -485,27 +442,24 @@
                         overflow: hidden !important;
                         text-overflow: ellipsis !important;
                         margin: 0 !important;
-                        padding: 0.5em 0.8em !important;
-                        font-size: 0.85em !important;
+                        padding: 0.7em 1.2em !important;
+                        font-size: 1.05em !important;
                     }
                     
-                    /* Make sure column headers are properly visible */
                     .dataTables_scrollHead {
                         overflow: visible !important;
                     }
                     
-                    /* Style the backdrop */
                     div.dt-button-background {
                         position: fixed !important;
                         top: 0 !important;
                         left: 0 !important;
                         width: 100% !important;
                         height: 100% !important;
-                        z-index: 1000 !important; /* Below the menu but above other content */
-                        background: rgba(0, 0, 0, 0.6) !important; /* Darker backdrop */
+                        z-index: 1000 !important;
+                        background: rgba(0, 0, 0, 0.6) !important;
                     }
                     
-                    /* Style for search label and box */
                     .search-label {
                         font-weight: bold;
                         margin-bottom: 5px;
@@ -515,7 +469,6 @@
                         max-width: 250px;
                     }
                     
-                    /* Adjust search box layout */
                     .dataTables_filter {
                         display: flex;
                         flex-direction: column;
@@ -533,12 +486,10 @@
                 </style>
             `);
             
-            // Add global document handlers for the collection
             $(document).on('click', '.dt-button', function() {
                 setTimeout(centerToggleMenu, 10);
             });
             
-            // Add mutation observer to watch for new elements
             const observer = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
                     if (mutation.addedNodes && mutation.addedNodes.length > 0) {
@@ -552,50 +503,16 @@
                 });
             });
             
-            // Start observing the document body for added nodes
             observer.observe(document.body, { childList: true, subtree: true });
-        }
-        
-        function addDuplicateHeaderRow(table) {
-            // Get the current header row
-            const headerRow = $('#data-table thead tr');
-            
-            // Clone the header row
-            const clonedRow = headerRow.clone(true);
-            
-            // Insert the cloned row before the original header row
-            headerRow.before(clonedRow);
-            
-            // Style both header rows with the blue background
-            $('#data-table thead tr').css({
-                'background-color': 'var(--primary)',
-                'color': 'var(--light)'
-            });
-            
-            // Remove sorting indicators from the first (cloned) row
-            $('#data-table thead tr:first-child th').removeClass('sorting sorting_asc sorting_desc');
-            
-            // Remove click events from the first row to make it non-functional for sorting
-            $('#data-table thead tr:first-child th').off('click').css('cursor', 'default');
         }
         
         function addCategoryRow(table, categoryRow, columnNames) {
             if (!categoryRow) return;
-            
-            // Create a new row for categories
             const categoryRowHtml = $('<tr class="category-row"></tr>');
-            
-            // Get visible columns
             const visibleColumns = table.columns().visible().toArray();
-            
-            // Add cells for each column with the appropriate category
             columnNames.forEach(function(columnKey, index) {
                 const categoryValue = categoryRow[columnKey] || '';
-                
-                // Create a cell with the category value
                 const cell = $('<td></td>').text(categoryValue);
-                
-                // Add a class based on the category value
                 if (categoryValue === 'Protocol Variable') {
                     cell.addClass('category-variable');
                 } else if (categoryValue === 'Analysis Method') {
@@ -607,16 +524,11 @@
                 } else if (categoryValue === 'Measured Endpoint') {
                     cell.addClass('category-endpoint');
                 }
-                
-                // Only show the cell if its column is visible
                 if (!visibleColumns[index]) {
                     cell.css('display', 'none');
                 }
-                
                 categoryRowHtml.append(cell);
             });
-            
-            // Insert the category row at the top of the tbody
             $('#data-table tbody').prepend(categoryRowHtml);
         }
         
@@ -625,5 +537,6 @@
             $('#error-message').removeClass('d-none').text(message);
         }
     });
-    </script>
+</script>
+
 {% endblock %}
