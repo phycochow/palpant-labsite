@@ -252,11 +252,20 @@ $(document).ready(function() {
         // Group columns by category
         const columnsByCategory = {};
         
+        // First identify all unique categories from the category row
+        const uniqueCategories = [...new Set(Object.values(categoryRow))].filter(Boolean);
+        
+        // Initialize each category with an empty array
+        uniqueCategories.forEach(category => {
+            columnsByCategory[category] = [];
+        });
+        
+        // For any category that might be missing or null
+        columnsByCategory['Other'] = [];
+        
+        // Now assign columns to the appropriate category
         columnNames.forEach(key => {
             const category = categoryRow[key] || 'Other';
-            if (!columnsByCategory[category]) {
-                columnsByCategory[category] = [];
-            }
             
             let columnWidth = '10%';
             let className = 'dt-head-center';
@@ -271,7 +280,7 @@ $(document).ready(function() {
                 columnWidth = '7%';
                 className += ' dt-body-center';
             } else if (key.toLowerCase().includes('sex') || key.toLowerCase().includes('line')) {
-                columnWidth = '8%';
+                columnWidth = '7%';
                 className += ' dt-body-center';
             }
             
@@ -305,14 +314,6 @@ $(document).ready(function() {
             });
         });
         
-        function fixTableLayout() {
-            $(window).trigger('resize');
-            const tableWidth = $('#data-table').width();
-            $('.dataTables_scrollHeadInner, .dataTables_scrollHeadInner table').width(tableWidth);
-            const table = $('#data-table').DataTable();
-            table.columns.adjust().draw();
-        }
-
         // Prepare DataTable buttons array
         const buttons = [
             {
@@ -322,40 +323,39 @@ $(document).ready(function() {
             }
         ];
         
-        // Add a button for each category
+        // Flatten the grouped columns back to a single array for DataTables
+        const flattenedColumns = [];
+        // Track the mapping between original column names and their indices in the flattened array
+        const columnToFlattenedIndex = {};
+        
+        // Flatten columns and track indices
+        Object.values(columnsByCategory).forEach(categoryColumns => {
+            categoryColumns.forEach(column => {
+                // Store the mapping of original column name to its index in the flattened array
+                columnToFlattenedIndex[column.data] = flattenedColumns.length;
+                flattenedColumns.push(column);
+            });
+        });
+        
+        // Now add a button for each category using the correct flattened indices
         Object.keys(columnsByCategory).forEach(category => {
             if (category !== 'Other' && columnsByCategory[category].length > 0) {
                 buttons.push({
                     extend: 'colvis',
                     className: `btn btn-sm btn-primary category-toggle-${category.toLowerCase().replace(/\s+/g, '-')}`,
                     text: `Toggle ${category}`,
-                    columns: columnsByCategory[category].map((col, idx) => {
-                        return columnNames.indexOf(col.data);
+                    columns: columnsByCategory[category].map(col => {
+                        // Use the tracked flattened index instead of the original index
+                        return columnToFlattenedIndex[col.data];
                     })
                 });
             }
         });
         
-        // Add a button for 'Other' category if it exists
-        if (columnsByCategory['Other'] && columnsByCategory['Other'].length > 0) {
-            buttons.push({
-                extend: 'colvis',
-                className: 'btn btn-sm btn-outline-secondary category-toggle-other',
-                text: 'Toggle Other',
-                columns: columnsByCategory['Other'].map((col) => columnNames.indexOf(col.data))
-            });
-        }
-        
-        // Flatten the grouped columns back to a single array for DataTables
-        const columns = [];
-        Object.values(columnsByCategory).forEach(categoryColumns => {
-            columns.push(...categoryColumns);
-        });
-        
-        // Initialize DataTable
+        // Initialize DataTable with the flattened columns
         const table = $('#data-table').DataTable({
             data: data,
-            columns: columns,
+            columns: flattenedColumns,
             scrollX: true,
             scrollY: '60vh',
             scrollCollapse: true,
@@ -373,12 +373,14 @@ $(document).ready(function() {
                 setTimeout(function() {
                     table.on('draw', function() {
                         $('.category-row').remove();
-                        addCategoryRow(table, categoryRow, columnNames);
+                        addCategoryRow(table, categoryRow, columnNames, columnToFlattenedIndex);
+                        synchronizeColumnWidths();
                     });
                     
                     table.on('column-visibility.dt', function(e, settings, column, state) {
                         $('.category-row').remove();
-                        addCategoryRow(table, categoryRow, columnNames);
+                        addCategoryRow(table, categoryRow, columnNames, columnToFlattenedIndex);
+                        synchronizeColumnWidths();
                     });
                     
                     table.order([0, 'asc']).draw();
@@ -389,6 +391,61 @@ $(document).ready(function() {
         });
         
         return table;
+    }
+
+    // Update the addCategoryRow function to use the correct indices
+    function addCategoryRow(table, categoryRow, columnNames, columnToFlattenedIndex) {
+        if (!categoryRow) return;
+        
+        const categoryRowHtml = $('<tr class="category-row"></tr>');
+        const visibleColumns = table.columns().visible().toArray();
+        
+        // For each column in the flattened order
+        Object.keys(columnToFlattenedIndex).forEach(function(columnKey) {
+            const flattenedIndex = columnToFlattenedIndex[columnKey];
+            const categoryValue = categoryRow[columnKey] || '';
+            const cell = $('<td></td>').text(categoryValue);
+            
+            if (categoryValue === 'Protocol Variable') {
+                cell.addClass('category-variable');
+            } else if (categoryValue === 'Analysis Method') {
+                cell.addClass('category-analysis');
+            } else if (categoryValue === 'Cell Profile') {
+                cell.addClass('category-cell');
+            } else if (categoryValue === 'Study Characteristic') {
+                cell.addClass('category-study');
+            } else if (categoryValue === 'Measured Endpoint') {
+                cell.addClass('category-endpoint');
+            }
+            
+            if (!visibleColumns[flattenedIndex]) {
+                cell.css('display', 'none');
+            }
+            
+            categoryRowHtml.append(cell);
+        });
+        
+        $('#data-table tbody').prepend(categoryRowHtml);
+    }
+    
+    function synchronizeColumnWidths() {
+        // Synchronize header and body column widths based on the maximum of each
+        const headerCells = $('#data-table_wrapper .dataTables_scrollHead thead th');
+        const bodyRows = $('#data-table_wrapper .dataTables_scrollBody tbody tr');
+        
+        headerCells.each(function(index) {
+            let maxWidth = $(this).outerWidth();
+            bodyRows.each(function() {
+                const cell = $(this).find('td').eq(index);
+                if (cell.length > 0) {
+                    maxWidth = Math.max(maxWidth, cell.outerWidth());
+                }
+            });
+            $(this).css('width', maxWidth);
+            bodyRows.each(function() {
+                $(this).find('td').eq(index).css('width', maxWidth);
+            });
+        });
     }
     
     function setupCategoryToggleButtons() {
@@ -484,6 +541,14 @@ $(document).ready(function() {
                     border: 1px solid var(--border);
                     border-radius: 4px;
                 }
+                
+                /* Added grid line styles for the table header and body */
+                #data-table {
+                    border-collapse: collapse;
+                }
+                #data-table th, #data-table td {
+                    border: 1px solid #dee2e6;
+                }
             </style>
         `);
         
@@ -507,43 +572,13 @@ $(document).ready(function() {
         observer.observe(document.body, { childList: true, subtree: true });
     }
     
-    function addCategoryRow(table, categoryRow, columnNames) {
-        if (!categoryRow) return;
-        
-        const categoryRowHtml = $('<tr class="category-row"></tr>');
-        const visibleColumns = table.columns().visible().toArray();
-        
-        columnNames.forEach(function(columnKey, index) {
-            const categoryValue = categoryRow[columnKey] || '';
-            const cell = $('<td></td>').text(categoryValue);
-            
-            if (categoryValue === 'Protocol Variable') {
-                cell.addClass('category-variable');
-            } else if (categoryValue === 'Analysis Method') {
-                cell.addClass('category-analysis');
-            } else if (categoryValue === 'Cell Profile') {
-                cell.addClass('category-cell');
-            } else if (categoryValue === 'Study Characteristic') {
-                cell.addClass('category-study');
-            } else if (categoryValue === 'Measured Endpoint') {
-                cell.addClass('category-endpoint');
-            }
-            
-            if (!visibleColumns[index]) {
-                cell.css('display', 'none');
-            }
-            
-            categoryRowHtml.append(cell);
-        });
-        
-        $('#data-table tbody').prepend(categoryRowHtml);
-    }
     
     function showError(message) {
         $('#loading-indicator').addClass('d-none');
         $('#error-message').removeClass('d-none').text(message);
     }
 });
+
 
     </script>
 {% endblock %}
