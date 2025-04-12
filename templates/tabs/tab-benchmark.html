@@ -1,0 +1,26 @@
+<p>Compare your protocol against the compiled dataset using the associated ranges of outcome-enriched protocol features.</p>
+<div class="upload-area mb-3">
+    <p>Drag and drop your protocol file here or click to browse</p>
+    <input type="file" style="display: none;">
+    <button class="btn btn-secondary">Browse Files</button>
+</div>
+<div class="form-row">
+    <div class="form-group">
+        <label for="protocol-purpose">Protocol Purpose</label>
+        <select id="protocol-purpose" class="form-control">
+            <option value="ischaemic">Ischaemic Modelling</option>
+            <option value="disease">Disease Modelling</option>
+            <option value="drug">Drug Testing</option>
+            <option value="maturation">Maturation Studies</option>
+        </select>
+    </div>
+    <div class="form-group align-self-end">
+        <button class="btn btn-primary">Benchmark Protocol</button>
+    </div>
+</div>
+<div class="visualization">
+    Protocol Benchmarking Visualization
+</div>
+<div class="well">
+    <div id="table-benchmark-container"></div>
+</div>

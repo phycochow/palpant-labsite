@@ -1,0 +1,37 @@
+<p>Retrieve enrichments and protocols by application regardless of their intended purpose using outcome-specific features</p>
+&nbsp;
+
+<div class="form-row">
+    {% set search_filters = [
+        {'id': 'application', 'label': 'Target Application', 'options': [
+            {'value': 'ischaemic', 'text': 'Ischaemic Modelling'},
+            {'value': 'disease', 'text': 'Disease Modelling'},
+            {'value': 'drug', 'text': 'Drug Testing'},
+            {'value': 'maturation', 'text': 'Maturation Studies'}
+        ]},
+    ] %}
+    
+    {% for filter in search_filters %}
+        <div class="form-group">
+            <label for="{{ filter.id }}">{{ filter.label }}</label>
+            <select id="{{ filter.id }}" class="form-control">
+                {% for option in filter.options %}
+                    <option value="{{ option.value }}">{{ option.text }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    {% endfor %}
+    
+    <div class="form-group align-self-end">
+        <button class="btn btn-primary">Find Protocols</button>
+    </div>
+</div>
+
+<div class="well">
+    <p>Row 1 - Table(s) of Enrichment</p>
+</div>
+
+<div class="well">
+    <p>Row 2 - Table of Protocol Retrieved using Enrichments of the Target Parameters (Independent from Intended Purpose)</p>
+    <div id="table-search-container"></div>
+</div>

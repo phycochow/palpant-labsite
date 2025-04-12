@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Protocol Search</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tab-search.css') }}">
+</head>
+<body>
+
+  <p>
+    Retrieve protocols by target parameters regardless of their intended purpose using outcome-specific features (Fig 2j).
+  </p>
+  &nbsp;
+
+  <!-- A container for two side-by-side search UI panels. The CSS should arrange these containers at 50% width each. -->
+  <div class="search-row">
+    <div class="search-ui-container" id="search-ui-container-left">
+      <form id="features-form-left">
+        <div class="search-ui-form-group">
+          <label for="search-ui-key-dropdown-left" class="search-ui-label">Select Primary Parameter:</label>
+          <select id="search-ui-key-dropdown-left" name="category" class="search-ui-select">
+            <option value="">-- Select a Category --</option>
+            {% for category in FeatureCategories %}
+              <option value="{{ category }}">{{ category }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="search-ui-form-group">
+          <label class="search-ui-label">Select Features:</label>
+          <div id="search-ui-checkbox-container-left" class="search-ui-checkbox-container search-ui-hidden">
+            <p id="search-ui-loading-message-left">Please select a category first...</p>
+          </div>
+          <div class="search-ui-selection-summary" id="search-ui-selection-summary-left"></div>
+        </div>
+        <!-- Removed individual submit button -->
+      </form>
+    </div>
+
+    <div class="search-ui-container" id="search-ui-container-right">
+      <form id="features-form-right">
+        <div class="search-ui-form-group">
+          <label for="search-ui-key-dropdown-right" class="search-ui-label">Select Second Parameter:</label>
+          <select id="search-ui-key-dropdown-right" name="category" class="search-ui-select">
+            <option value="">-- Select a Category --</option>
+            {% for category in FeatureCategories %}
+              <option value="{{ category }}">{{ category }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="search-ui-form-group">
+          <label class="search-ui-label">Select Features:</label>
+          <div id="search-ui-checkbox-container-right" class="search-ui-checkbox-container search-ui-hidden">
+            <p id="search-ui-loading-message-right">Please select a category first...</p>
+          </div>
+          <div class="search-ui-selection-summary" id="search-ui-selection-summary-right"></div>
+        </div>
+        <!-- Removed individual submit button -->
+      </form>
+    </div>
+  </div>
+
+  <!-- Global submit button for dual-form aggregation -->
+  <div class="global-submit-container">
+    <button id="search-ui-submit-button" class="search-ui-button" disabled>Find Protocols</button>
+  </div>
+
+  <!-- Placeholder sections for search outputs -->
+  <div class="well">
+    <p>Row 1 of Pie Charts</p>
+    <div id="table-search-container-row1"></div>
+  </div>
+
+  <div class="well">
+    <p>Row 2 of UMAPs</p>
+    <div id="table-search-container-row2"></div>
+  </div>
+
+  <div class="well">
+    <div id="table-search-container-row3"></div>
+    <p>Row 3 of UMAPs</p>
+  </div>
+
+  <div class="search-ui-result search-ui-hidden" id="search-ui-result-display">
+    <h3>Submission Result:</h3>
+    <pre id="search-ui-submission-result" class="search-ui-pre"></pre>
+  </div>
+
+  <div class="well">
+    <div id="table-search-container-row4"></div>
+    <p>Row 4 of Database, showing top protocols based on the search above. The search by a flexible protocol design will be in tab 3</p>
+  </div>
+
+  <!-- Include the associated JavaScript for interactivity -->
+  <script src="{{ url_for('static', filename='js/tab-search.js') }}"></script>
+</body>
+</html>

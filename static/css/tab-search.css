@@ -1,0 +1,171 @@
+/* Flex container for side-by-side panels */
+.search-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* Each form container */
+.search-ui-container {
+    font-family: Arial, sans-serif;
+    width: 48%;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+/* Header */
+.search-ui-container h1 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: var(--primary);
+}
+
+/* Form elements */
+.search-ui-container .search-ui-form-group {
+    margin-bottom: 15px;
+}
+
+.search-ui-container label.search-ui-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: var(--dark);
+}
+
+.search-ui-container select.search-ui-select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    font-size: 1rem;
+}
+
+/* Checkbox container */
+.search-ui-container .search-ui-checkbox-container {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 5px;
+    background-color: #fff;
+}
+
+.search-ui-container .search-ui-checkbox-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 5px;
+}
+
+/* Set alternating background colors */
+.search-ui-container .search-ui-checkbox-item:nth-child(odd) {
+    background-color: white;
+}
+
+.search-ui-container .search-ui-checkbox-item:nth-child(even) {
+    background-color: #f0f0f0;
+}
+
+.search-ui-container .search-ui-checkbox-item label {
+    order: 1;
+    font-weight: normal;
+    margin: 0;
+    flex-grow: 1;
+}
+
+.search-ui-container .search-ui-checkbox-item input[type="checkbox"] {
+    order: 2;
+    margin-left: 5px;
+}
+
+
+/* Result display */
+.search-ui-container .search-ui-result {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.search-ui-container pre.search-ui-pre {
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 4px;
+    overflow-x: auto;
+    border: 1px solid #eee;
+}
+
+/* Button styling within container */
+.search-ui-container button.search-ui-button {
+    background-color: var(--accent);
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 15px;
+}
+
+.search-ui-container button.search-ui-button:hover {
+    background-color: var(--accent-dark);
+}
+
+.search-ui-container button.search-ui-button:disabled {
+    background-color: var(--gray);
+    cursor: not-allowed;
+}
+
+/* Global submit button styling */
+#search-ui-submit-button {
+    background-color: var(--accent-dark);
+    text-transform: none;
+    font-size: 1.1rem;
+    padding: 12px 20px;
+    border-radius: 4px;
+    display: block;
+    margin: 20px auto;
+}
+
+#search-ui-submit-button:hover {
+    background-color: var(--accent-dark);
+}
+
+/* Utility classes */
+.search-ui-hidden {
+    display: none;
+}
+
+.search-ui-selection-summary {
+    margin-top: 15px;
+    font-weight: bold;
+    color: var(--accent);
+}
+
+/* Visualization section */
+.search-ui-visualization-container {
+    margin-top: 30px;
+}
+
+.search-ui-viz-row {
+    margin-bottom: 20px;
+}
+
+.search-ui-viz-row h3 {
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+    color: var(--primary);
+}
+
+.search-ui-chart-placeholder {
+    background-color: var(--light);
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    padding: 40px;
+    text-align: center;
+    color: var(--gray);
+}

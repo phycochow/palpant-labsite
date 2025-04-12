@@ -1,5 +1,4 @@
 from flask import Flask, render_template, jsonify, request
-import database
 import os, csv
 from collections import defaultdict
 import pandas as pd
@@ -110,7 +109,7 @@ def home():
 
 @app.route('/cmportal')
 def cmportal():
-    return render_template('cmportal.html')
+    return render_template('cmportal.html', FeatureCategories=FeatureCategories_dict.keys())
 
 @app.route('/dash')
 def dash():

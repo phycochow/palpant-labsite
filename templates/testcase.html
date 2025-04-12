@@ -4,146 +4,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Category and Features Selection</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/cmportal.css') }}">
     <style>
         body {
-            font-family: "Open Sans", "Helvetica Neue", Arial, sans-serif;
-            max-width: 800px;
+            font-family: Arial, sans-serif;
+            max-width: 600px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f7fa;
         }
-        
-        h1 {
-            color: var(--primary);
-            margin-bottom: 20px;
-        }
-        
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
-        
         label {
             display: block;
             margin-bottom: 5px;
-            font-weight: 600;
-            color: var(--dark);
+            font-weight: bold;
         }
-        
         select {
             width: 100%;
-            padding: 0.7rem 1rem;
-            border: 1px solid var(--border);
+            padding: 8px;
             border-radius: 4px;
-            font-size: 1rem;
-            transition: border-color 0.15s ease-in-out;
+            border: 1px solid #ccc;
         }
-        
-        select:focus {
-            border-color: var(--accent);
-            outline: none;
-        }
-        
         .checkbox-container {
-            max-height: 300px;
+            max-height: 200px;
             overflow-y: auto;
-            border: 1px solid var(--border);
+            border: 1px solid #ccc;
             border-radius: 4px;
-            padding: 15px;
-            margin-top: 10px;
-            background-color: var(--white);
+            padding: 10px;
+            margin-top: 5px;
         }
-        
         .checkbox-item {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
-        
         .checkbox-item label {
             font-weight: normal;
             display: inline;
-            margin-left: 8px;
+            margin-left: 5px;
         }
-        
         .result {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: var(--light);
-            border-radius: 6px;
-            border: 1px solid var(--border);
-        }
-        
-        button {
-            background-color: var(--accent);
-            color: var(--white);
-            border: none;
-            padding: 0.7rem 1.5rem;
-            border-radius: 4px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.15s ease-in-out;
             margin-top: 20px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
         }
-        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+        }
         button:hover {
-            background-color: var(--accent-dark);
+            background-color: #45a049;
         }
-        
-        button:disabled {
-            background-color: var(--gray);
-            cursor: not-allowed;
-        }
-        
         .hidden {
             display: none;
         }
-        
         .selection-summary {
             margin-top: 15px;
             font-weight: bold;
-            color: var(--accent);
-        }
-        
-        pre {
-            background-color: var(--white);
-            padding: 10px;
-            border-radius: 4px;
-            overflow-x: auto;
         }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="card-body">
-            <h1>Category and Features Selection</h1>
-            
-            <form id="features-form">
-                <div class="form-group">
-                    <label for="key-dropdown">Select Category:</label>
-                    <select id="key-dropdown" name="category">
-                        <option value="">-- Select a Category --</option>
-                        {% for category in FeatureCategories %}
-                        <option value="{{ category }}">{{ category }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Select Features:</label>
-                    <div id="checkbox-container" class="checkbox-container hidden">
-                        <p id="loading-message">Please select a category first...</p>
-                    </div>
-                    <div class="selection-summary" id="selection-summary"></div>
-                </div>
-                
-                <button type="submit" id="submit-button" disabled>Submit Selection</button>
-            </form>
-            
-            <div class="result hidden" id="result-display">
-                <h3>Submission Result:</h3>
-                <pre id="submission-result"></pre>
-            </div>
+    <h1>Category and Features Selection</h1>
+    
+    <form id="features-form">
+        <div class="form-group">
+            <label for="key-dropdown">Select Category:</label>
+            <select id="key-dropdown" name="category">
+                <option value="">-- Select a Category --</option>
+                {% for category in FeatureCategories %}
+                <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
+            </select>
         </div>
+        
+        <div class="form-group">
+            <label>Select Features:</label>
+            <div id="checkbox-container" class="checkbox-container hidden">
+                <p id="loading-message">Please select a category first...</p>
+            </div>
+            <div class="selection-summary" id="selection-summary"></div>
+        </div>
+        
+        <button type="submit" id="submit-button" disabled>Submit Selection</button>
+    </form>
+    
+    <div class="result hidden" id="result-display">
+        <h3>Submission Result:</h3>
+        <pre id="submission-result"></pre>
     </div>
 
     <script>
