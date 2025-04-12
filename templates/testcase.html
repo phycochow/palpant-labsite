@@ -4,99 +4,146 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Category and Features Selection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cmportal.css') }}">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
+            font-family: "Open Sans", "Helvetica Neue", Arial, sans-serif;
+            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #f5f7fa;
         }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
+        
         label {
             display: block;
             margin-bottom: 5px;
-            font-weight: bold;
+            font-weight: 600;
+            color: var(--dark);
         }
+        
         select {
             width: 100%;
-            padding: 8px;
+            padding: 0.7rem 1rem;
+            border: 1px solid var(--border);
             border-radius: 4px;
-            border: 1px solid #ccc;
+            font-size: 1rem;
+            transition: border-color 0.15s ease-in-out;
         }
+        
+        select:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+        
         .checkbox-container {
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
-            border: 1px solid #ccc;
+            border: 1px solid var(--border);
             border-radius: 4px;
-            padding: 10px;
-            margin-top: 5px;
+            padding: 15px;
+            margin-top: 10px;
+            background-color: var(--white);
         }
+        
         .checkbox-item {
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
+        
         .checkbox-item label {
             font-weight: normal;
             display: inline;
-            margin-left: 5px;
+            margin-left: 8px;
         }
+        
         .result {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f5f5f5;
-            border-radius: 4px;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--light);
+            border-radius: 6px;
+            border: 1px solid var(--border);
         }
+        
         button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 15px;
+            background-color: var(--accent);
+            color: var(--white);
             border: none;
+            padding: 0.7rem 1.5rem;
             border-radius: 4px;
+            font-size: 0.95rem;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 16px;
-            margin-top: 15px;
+            transition: background-color 0.15s ease-in-out;
+            margin-top: 20px;
         }
+        
         button:hover {
-            background-color: #45a049;
+            background-color: var(--accent-dark);
         }
+        
+        button:disabled {
+            background-color: var(--gray);
+            cursor: not-allowed;
+        }
+        
         .hidden {
             display: none;
         }
+        
         .selection-summary {
             margin-top: 15px;
             font-weight: bold;
+            color: var(--accent);
+        }
+        
+        pre {
+            background-color: var(--white);
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
         }
     </style>
 </head>
 <body>
-    <h1>Category and Features Selection</h1>
-    
-    <form id="features-form">
-        <div class="form-group">
-            <label for="key-dropdown">Select Category:</label>
-            <select id="key-dropdown" name="category">
-                <option value="">-- Select a Category --</option>
-                {% for category in FeatureCategories %}
-                <option value="{{ category }}">{{ category }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label>Select Features:</label>
-            <div id="checkbox-container" class="checkbox-container hidden">
-                <p id="loading-message">Please select a category first...</p>
+    <div class="card">
+        <div class="card-body">
+            <h1>Category and Features Selection</h1>
+            
+            <form id="features-form">
+                <div class="form-group">
+                    <label for="key-dropdown">Select Category:</label>
+                    <select id="key-dropdown" name="category">
+                        <option value="">-- Select a Category --</option>
+                        {% for category in FeatureCategories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Features:</label>
+                    <div id="checkbox-container" class="checkbox-container hidden">
+                        <p id="loading-message">Please select a category first...</p>
+                    </div>
+                    <div class="selection-summary" id="selection-summary"></div>
+                </div>
+                
+                <button type="submit" id="submit-button" disabled>Submit Selection</button>
+            </form>
+            
+            <div class="result hidden" id="result-display">
+                <h3>Submission Result:</h3>
+                <pre id="submission-result"></pre>
             </div>
-            <div class="selection-summary" id="selection-summary"></div>
         </div>
-        
-        <button type="submit" id="submit-button" disabled>Submit Selection</button>
-    </form>
-    
-    <div class="result hidden" id="result-display">
-        <h3>Submission Result:</h3>
-        <pre id="submission-result"></pre>
     </div>
 
     <script>
@@ -111,11 +158,9 @@
             
             let selectedFeatures = [];
             
-            // When the key dropdown changes, update the checkboxes
             keyDropdown.addEventListener('change', function() {
                 const selectedKey = this.value;
                 
-                // Reset the checkboxes
                 checkboxContainer.innerHTML = '';
                 checkboxContainer.classList.add('hidden');
                 selectedFeatures = [];
@@ -126,42 +171,40 @@
                     checkboxContainer.classList.remove('hidden');
                     checkboxContainer.innerHTML = '<p>Loading features...</p>';
                     
-                    // Create a FormData object to send the selected key
                     const formData = new FormData();
                     formData.append('selected_key', selectedKey);
                     
-                    // Make an AJAX request to get the values for the selected key
                     fetch('/api/get_ProtocolFeatures', {
                         method: 'POST',
                         body: formData
                     })
                     .then(response => response.json())
                     .then(data => {
-                        // Clear the loading message
                         checkboxContainer.innerHTML = '';
                         
-                        if (data.values.length === 0) {
+                        const validValues = data.values.filter(value => value && value.trim() !== '');
+                        
+                        if (validValues.length === 0) {
                             const noItems = document.createElement('p');
                             noItems.textContent = 'No features available for this category.';
                             checkboxContainer.appendChild(noItems);
                             return;
                         }
                         
-                        // Add checkbox options based on the returned values
-                        data.values.forEach((value, index) => {
+                        validValues.forEach((value, index) => {
                             const checkboxItem = document.createElement('div');
                             checkboxItem.className = 'checkbox-item';
-                            
+
                             const checkbox = document.createElement('input');
                             checkbox.type = 'checkbox';
                             checkbox.id = `feature-${index}`;
                             checkbox.value = value;
                             checkbox.name = 'selected_features';
-                            
+
                             const label = document.createElement('label');
                             label.htmlFor = `feature-${index}`;
                             label.textContent = value;
-                            
+
                             checkbox.addEventListener('change', function() {
                                 if (this.checked) {
                                     selectedFeatures.push(this.value);
@@ -171,12 +214,11 @@
                                         selectedFeatures.splice(index, 1);
                                     }
                                 }
-                                
+
                                 updateSelectionSummary();
-                                // Enable submit button if at least one feature is selected
                                 submitButton.disabled = selectedFeatures.length === 0;
                             });
-                            
+
                             checkboxItem.appendChild(checkbox);
                             checkboxItem.appendChild(label);
                             checkboxContainer.appendChild(checkboxItem);
@@ -189,7 +231,6 @@
                 }
             });
             
-            // Update the selection summary
             function updateSelectionSummary() {
                 if (selectedFeatures.length === 0) {
                     selectionSummary.textContent = '';
@@ -198,7 +239,6 @@
                 }
             }
             
-            // Handle form submission
             featuresForm.addEventListener('submit', function(event) {
                 event.preventDefault();
                 
@@ -208,7 +248,6 @@
                     formData.append('features[]', feature);
                 });
                 
-                // Send the form data to the server
                 fetch('/api/submit_features', {
                     method: 'POST',
                     body: formData
