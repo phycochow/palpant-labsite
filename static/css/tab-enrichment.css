@@ -1,198 +1,175 @@
-/* Flex container for side-by-side panels */
-.search-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-    margin-bottom: 20px;
+/* tab-enrichment.css */
+
+/* Reset some default styles */
+* {
+  box-sizing: border-box;
 }
 
-/* Each form container */
-.search-ui-container {
-    font-family: Arial, sans-serif;
-    width: 48%;
-    padding: 20px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-}
-
-/* Header */
-.search-ui-container h1 {
-    font-size: 1.8rem;
-    margin-bottom: 20px;
-    color: var(--primary);
+/* Full-width container styling */
+.enrichment-form-container {
+  width: 100%;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  margin-bottom: 20px;
 }
 
 /* Form elements */
-.search-ui-container .search-ui-form-group {
-    margin-bottom: 15px;
+.enrichment-form-group {
+  margin-bottom: 15px;
+  width: 100%;
 }
 
-.search-ui-container label.search-ui-label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: var(--dark);
+.enrichment-label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
 }
 
-.search-ui-container select.search-ui-select {
-    width: 100%;
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid var(--border);
-    font-size: 1rem;
+.enrichment-select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
 }
 
 /* Checkbox container */
-.search-ui-container .search-ui-checkbox-container {
-    max-height: 200px;
-    overflow-y: auto;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 10px;
-    margin-top: 5px;
-    background-color: #fff;
+.enrichment-checkbox-container {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  margin-top: 5px;
+  background-color: #fff;
+  width: 100%;
 }
 
-.search-ui-container .search-ui-checkbox-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
-    padding: 5px;
+.enrichment-checkbox-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 5px;
 }
 
 /* Set alternating background colors */
-.search-ui-container .search-ui-checkbox-item:nth-child(odd) {
-    background-color: white;
+.enrichment-checkbox-item:nth-child(odd) {
+  background-color: white;
 }
 
-.search-ui-container .search-ui-checkbox-item:nth-child(even) {
-    background-color: #f0f0f0;
+.enrichment-checkbox-item:nth-child(even) {
+  background-color: #f0f0f0;
 }
 
-.search-ui-container .search-ui-checkbox-item label {
-    order: 1;
-    font-weight: normal;
-    margin: 0;
-    flex-grow: 1;
+.enrichment-checkbox-item label {
+  order: 1;
+  font-weight: normal;
+  margin: 0;
+  flex-grow: 1;
 }
 
-.search-ui-container .search-ui-checkbox-item input[type="checkbox"] {
-    order: 2;
-    margin-left: 5px;
+.enrichment-checkbox-item input[type="radio"] {
+  order: 2;
+  margin-left: 5px;
 }
 
-
-/* Result display */
-.search-ui-container .search-ui-result {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #f5f5f5;
-    border-radius: 4px;
-    border: 1px solid #ddd;
+/* Selection summary */
+.enrichment-selection-summary {
+  margin-top: 15px;
+  min-height: 24px;
+  color: #3498db;
+  font-weight: bold;
 }
 
-.search-ui-container pre.search-ui-pre {
-    background-color: #fff;
-    padding: 10px;
-    border-radius: 4px;
-    overflow-x: auto;
-    border: 1px solid #eee;
+/* Submit button container */
+.enrichment-submit-container {
+  margin: 20px 0;
+  text-align: center;
+  width: 100%;
 }
 
-/* Button styling within container */
-.search-ui-container button.search-ui-button {
-    background-color: var(--accent);
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: 15px;
+/* Button styling */
+.enrichment-button {
+  background-color: #3498db;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
 }
 
-.search-ui-container button.search-ui-button:hover {
-    background-color: var(--accent-dark);
+.enrichment-button:hover {
+  background-color: #2980b9;
 }
 
-.search-ui-container button.search-ui-button:disabled {
-    background-color: var(--gray);
-    cursor: not-allowed;
+.enrichment-button:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
 }
 
-/* Global submit button styling */
-#search-ui-submit-button {
-    background-color: var(--accent-dark);
-    text-transform: none;
-    font-size: 1.1rem;
-    padding: 12px 20px;
-    border-radius: 4px;
-    display: block;
-    margin: 20px auto;
+/* Results container */
+.enrichment-table-container {
+  width: 100%;
 }
 
-#search-ui-submit-button:hover {
-    background-color: var(--accent-dark);
+/* Results section */
+.enrichment-results {
+  margin-top: 30px;
+  width: 100%;
+}
+
+/* Table styling */
+.enrichment-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.enrichment-table th, 
+.enrichment-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.enrichment-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.enrichment-table tr:hover {
+  background-color: #f5f5f5;
 }
 
 /* Utility classes */
-.search-ui-hidden {
-    display: none;
+.enrichment-hidden {
+  display: none;
 }
 
-.search-ui-selection-summary {
-    margin-top: 15px;
-    font-weight: bold;
-    color: var(--accent);
+/* Well container styling */
+.well {
+  min-height: 20px;
+  padding: 19px;
+  margin-bottom: 20px;
+  background-color: #f5f5f5;
+  border: 1px solid #e3e3e3;
+  border-radius: 4px;
+  width: 100%;
 }
 
-/* Visualization section */
-.search-ui-visualization-container {
-    margin-top: 30px;
-}
-
-.search-ui-viz-row {
-    margin-bottom: 20px;
-}
-
-.search-ui-viz-row h3 {
-    margin-bottom: 10px;
-    font-size: 1.2rem;
-    color: var(--primary);
-}
-
-.search-ui-chart-placeholder {
-    background-color: var(--light);
-    border: 1px dashed var(--border);
-    border-radius: 4px;
-    padding: 40px;
-    text-align: center;
-    color: var(--gray);
-}
-
-
-/* Reset button styling */
-.search-ui-reset-button {
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    color: #333;
-    cursor: pointer;
-    font-size: 12px;
-    margin-left: 10px;
-    padding: 2px 8px;
-    transition: all 0.2s ease;
-}
-
-.search-ui-reset-button:hover {
-    background-color: #e0e0e0;
-    border-color: #999;
-}
-
-/* Make sure the selection summary container can accommodate the button */
-.search-ui-selection-summary {
-    display: flex;
-    align-items: center;
-    margin-top: 15px;
-    min-height: 24px;
+/* Make everything responsive */
+@media (max-width: 768px) {
+  .enrichment-form-container,
+  .enrichment-form-group,
+  .enrichment-select,
+  .enrichment-checkbox-container,
+  .enrichment-submit-container,
+  .well {
+    width: 100%;
+  }
 }

@@ -6,49 +6,42 @@
   <title>Enrichment Browser</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/tab-enrichment.css') }}">
 </head>
-<body>
-  <p>Retrieve enrichments and protocols by application regardless of their intended purpose using outcome-specific features.</p>
-  &nbsp;
+<!-- tab-enrichment.html -->
+<p>Retrieve enrichments and protocols by application regardless of their intended purpose using outcome-specific features.</p>
+&nbsp;
 
-  <!-- Full-width parameter selection form -->
-  <div class="enrichment-form-container">
-    <form id="parameter-form">
-      <div class="enrichment-form-group">
-        <label for="parameter-dropdown" class="enrichment-label">Select Target Parameter:</label>
-        <select id="parameter-dropdown" name="category" class="enrichment-select">
-          <option value="">-- Select a Category --</option>
-          {% for category in TargetParameters %}
-            <option value="{{ category }}">{{ category }}</option>
-          {% endfor %}
-        </select>
+<!-- Full-width form container with flex layout removed -->
+<div class="enrichment-form-container">
+  <form id="parameter-form">
+    <div class="enrichment-form-group">
+      <label for="parameter-dropdown" class="enrichment-label">Select Target Parameter:</label>
+      <select id="parameter-dropdown" name="category" class="enrichment-select">
+        <option value="">-- Select a Category --</option>
+        {% for category in TargetParameters %}
+          <option value="{{ category }}">{{ category }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="enrichment-form-group">
+      <label class="enrichment-label">Select Features:</label>
+      <div id="parameter-container" class="enrichment-checkbox-container enrichment-hidden">
+        <p>Please select a category first...</p>
       </div>
+      <div class="enrichment-selection-summary" id="parameter-summary"></div>
+    </div>
+  </form>
+</div>
 
-      <div class="enrichment-form-group">
-        <label class="enrichment-label">Select Features:</label>
-        <div id="parameter-container" class="enrichment-checkbox-container enrichment-hidden">
-          <p>Please select a category first...</p>
-        </div>
-        <div class="enrichment-selection-summary" id="parameter-summary"></div>
-      </div>
-    </form>
-  </div>
+<!-- Submit button -->
+<div class="enrichment-submit-container">
+  <button id="enrichment-submit-button" class="enrichment-button" disabled>Find Protocols</button>
+</div>
 
-  <!-- Submit button -->
-  <div class="enrichment-submit-container">
-    <button id="enrichment-submit-button" class="enrichment-button" disabled>Find Protocols</button>
-  </div>
-
-  <div class="well">
-    <p>Row 1 - Table(s) of Enrichment</p>
-    <div id="enrichment-table-container"></div>
-  </div>
-
-  <div class="well">
-    <p>Row 2 - Table of Protocol Retrieved using Enrichments of the Target Parameters (Independent from Intended Purpose)</p>
-    <div id="table-search-container"></div>
-  </div>
-
+<div class="well">
+  <p>Row 1 - Table(s) of Enrichment</p>
+  <div id="enrichment-table-container"></div>
+</div>
   <script src="{{ url_for('static', filename='js/tab-enrichment.js') }}"></script>
 </body>
 </html>
-
