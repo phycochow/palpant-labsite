@@ -18,17 +18,21 @@ app.logger.setLevel(logging.INFO)
 app.logger.info('Flask application startup')
 
 # ----- Preset databases -----
-# Original feature categories (for right panel)
-csv_filepath = os.path.join(app.static_folder, 'datasets/0_FeatureCategories_01Mar25.csv')
-# New target parameter findings (for left panel)
+# Original feature categories (for reference only)
+feature_categories_filepath = os.path.join(app.static_folder, 'datasets/0_FeatureCategories_01Mar25.csv')
+# New label categories (for right panel)
+label_categories_filepath = os.path.join(app.static_folder, 'datasets/0_LabelCategories_17Apr25.csv')
+# Target parameter findings (for left panel)
 target_param_filepath = os.path.join(app.static_folder, 'datasets/0_TargetParameterFindings_12Apr25.csv')
 
+# Initialize dictionaries for each dataset
 FeatureCategories_dict = defaultdict(list)
+LabelCategories_dict = defaultdict(list)
 TargetParameters_dict = defaultdict(list)
 
 try:
-    # Load original feature categories
-    with open(csv_filepath, mode='r', newline='', encoding='utf-8') as f:
+    # Load original feature categories (for reference)
+    with open(feature_categories_filepath, mode='r', newline='', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
             for key, value in row.items():
@@ -36,7 +40,16 @@ try:
     FeatureCategories_dict = dict(FeatureCategories_dict)
     app.logger.info('Successfully loaded feature categories')
     
-    # Load target parameter findings
+    # Load new label categories (for right panel and full-width form)
+    with open(label_categories_filepath, mode='r', newline='', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            for key, value in row.items():
+                LabelCategories_dict[key].append(value)
+    LabelCategories_dict = dict(LabelCategories_dict)
+    app.logger.info('Successfully loaded label categories')
+    
+    # Load target parameter findings (for left panel)
     with open(target_param_filepath, mode='r', newline='', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -45,7 +58,7 @@ try:
     TargetParameters_dict = dict(TargetParameters_dict)
     app.logger.info('Successfully loaded target parameter findings')
 except Exception as e:
-    app.logger.error(f'Error loading feature categories or target parameters: {str(e)}')
+    app.logger.error(f'Error loading data files: {str(e)}')
 
 try:
     cleaned_df = pd.read_csv(os.path.join(app.static_folder, 'datasets/0_CleanedDatabase_25Feb25.csv'))
@@ -70,7 +83,7 @@ def api_viewer():
         app.logger.error(f'Error in api_viewer: {str(e)}')
         return jsonify({'error': str(e)}), 500
 
-# Code for dropdown menu - right panel (original)
+# Original endpoint (now for reference only)
 @app.route('/api/get_ProtocolFeatures', methods=['POST'])
 def get_ProtocolFeatures():
     try:
@@ -86,7 +99,23 @@ def get_ProtocolFeatures():
         app.logger.error(f'Error in get_ProtocolFeatures: {str(e)}')
         return jsonify({'error': str(e)}), 500
 
-# Code for dropdown menu - left panel (new target parameters)
+# New endpoint for label categories (right panel and full-width form)
+@app.route('/api/get_LabelCategories', methods=['POST'])
+def get_LabelCategories():
+    try:
+        # Get the selected key from the AJAX request
+        selected_key = request.form['selected_key']
+        
+        # Get the corresponding values for the selected key
+        values = LabelCategories_dict.get(selected_key, [])
+        
+        # Return the values as JSON
+        return jsonify(values=values)
+    except Exception as e:
+        app.logger.error(f'Error in get_LabelCategories: {str(e)}')
+        return jsonify({'error': str(e)}), 500
+
+# Endpoint for target parameters (left panel)
 @app.route('/api/get_TargetParameters', methods=['POST'])
 def get_TargetParameters():
     try:
@@ -132,6 +161,33 @@ def submit_features():
         app.logger.error(f'Error in submit_features: {str(e)}')
         return jsonify({'status': 'error', 'data': {'message': str(e)}}), 500
 
+# New endpoint for the full-width form's filter submission
+@app.route('/api/filter_features', methods=['POST'])
+def filter_features():
+    try:
+        # Get all selected features (multiple values with the same name)
+        features = request.form.getlist('filter_features[]')
+        
+        # You can process the submitted data here
+        # For example, filter database, generate visualizations, etc.
+        
+        # Response format
+        result = {
+            'status': 'success',
+            'data': {
+                'filtered_features': features,
+                'count': len(features)
+            }
+        }
+        
+        # Log the submission for debugging
+        app.logger.info(f"Filter features received: {features}")
+        
+        return jsonify(result)
+    except Exception as e:
+        app.logger.error(f'Error in filter_features: {str(e)}')
+        return jsonify({'status': 'error', 'data': {'message': str(e)}}), 500
+
 # ----- Actual webpage rendering -----
 @app.route('/')
 def home():
@@ -141,6 +197,7 @@ def home():
 def cmportal():
     return render_template('cmportal.html', 
                           FeatureCategories=FeatureCategories_dict.keys(),
+                          LabelCategories=LabelCategories_dict.keys(),
                           TargetParameters=TargetParameters_dict.keys())
 
 @app.route('/dash')
@@ -151,6 +208,7 @@ def dash():
 def test():
     return render_template('testcase.html', 
                           FeatureCategories=FeatureCategories_dict.keys(),
+                          LabelCategories=LabelCategories_dict.keys(),
                           TargetParameters=TargetParameters_dict.keys())
 
 if __name__ == '__main__':

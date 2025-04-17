@@ -15,26 +15,38 @@
     border-radius: 4px;
 }
 
+/* Full-width form container */
+.search-ui-full-container {
+    font-family: Arial, sans-serif;
+    width: 100%;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+}
+
 /* Header */
-.search-ui-container h1 {
+.search-ui-container h1,
+.search-ui-full-container h1 {
     font-size: 1.8rem;
     margin-bottom: 20px;
     color: var(--primary);
 }
 
 /* Form elements */
-.search-ui-container .search-ui-form-group {
+.search-ui-form-group {
     margin-bottom: 15px;
 }
 
-.search-ui-container label.search-ui-label {
+.search-ui-label {
     display: block;
     margin-bottom: 5px;
     font-weight: bold;
     color: var(--dark);
 }
 
-.search-ui-container select.search-ui-select {
+.search-ui-select {
     width: 100%;
     padding: 8px;
     border-radius: 4px;
@@ -43,7 +55,7 @@
 }
 
 /* Checkbox container */
-.search-ui-container .search-ui-checkbox-container {
+.search-ui-checkbox-container {
     max-height: 200px;
     overflow-y: auto;
     border: 1px solid var(--border);
@@ -53,7 +65,7 @@
     background-color: #fff;
 }
 
-.search-ui-container .search-ui-checkbox-item {
+.search-ui-checkbox-item {
     display: flex;
     align-items: center;
     margin-bottom: 8px;
@@ -61,29 +73,29 @@
 }
 
 /* Set alternating background colors */
-.search-ui-container .search-ui-checkbox-item:nth-child(odd) {
+.search-ui-checkbox-item:nth-child(odd) {
     background-color: white;
 }
 
-.search-ui-container .search-ui-checkbox-item:nth-child(even) {
+.search-ui-checkbox-item:nth-child(even) {
     background-color: #f0f0f0;
 }
 
-.search-ui-container .search-ui-checkbox-item label {
+.search-ui-checkbox-item label {
     order: 1;
     font-weight: normal;
     margin: 0;
     flex-grow: 1;
 }
 
-.search-ui-container .search-ui-checkbox-item input[type="checkbox"] {
+.search-ui-checkbox-item input[type="checkbox"] {
     order: 2;
     margin-left: 5px;
 }
 
 
 /* Result display */
-.search-ui-container .search-ui-result {
+.search-ui-result {
     margin-top: 20px;
     padding: 10px;
     background-color: #f5f5f5;
@@ -91,7 +103,7 @@
     border: 1px solid #ddd;
 }
 
-.search-ui-container pre.search-ui-pre {
+.search-ui-pre {
     background-color: #fff;
     padding: 10px;
     border-radius: 4px;
@@ -100,7 +112,7 @@
 }
 
 /* Button styling within container */
-.search-ui-container button.search-ui-button {
+.search-ui-button {
     background-color: var(--accent);
     color: white;
     padding: 10px 15px;
@@ -111,28 +123,64 @@
     margin-top: 15px;
 }
 
-.search-ui-container button.search-ui-button:hover {
+.search-ui-button:hover {
     background-color: var(--accent-dark);
 }
 
-.search-ui-container button.search-ui-button:disabled {
+.search-ui-button:disabled {
     background-color: var(--gray);
     cursor: not-allowed;
 }
 
 /* Global submit button styling */
+.global-submit-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
 #search-ui-submit-button {
     background-color: var(--accent-dark);
     text-transform: none;
     font-size: 1.1rem;
     padding: 12px 20px;
     border-radius: 4px;
-    display: block;
-    margin: 20px auto;
 }
 
 #search-ui-submit-button:hover {
     background-color: var(--accent-dark);
+}
+
+/* Filter submit button styling */
+.filter-submit-container {
+    margin-top: 15px;
+}
+
+#filter-submit-button {
+    background-color: #4caf50; /* Green color to differentiate */
+    font-size: 1rem;
+    padding: 8px 16px;
+}
+
+#filter-submit-button:hover {
+    background-color: #388e3c; /* Darker green */
+}
+
+/* Reset button styling */
+.search-ui-reset-button {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    color: #333;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 10px;
+    padding: 2px 8px;
+    transition: all 0.2s ease;
+}
+
+.search-ui-reset-button:hover {
+    background-color: #e0e0e0;
+    border-color: #999;
 }
 
 /* Utility classes */
@@ -170,29 +218,26 @@
     color: var(--gray);
 }
 
-
-/* Reset button styling */
-.search-ui-reset-button {
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    color: #333;
-    cursor: pointer;
-    font-size: 12px;
-    margin-left: 10px;
-    padding: 2px 8px;
-    transition: all 0.2s ease;
-}
-
-.search-ui-reset-button:hover {
-    background-color: #e0e0e0;
-    border-color: #999;
-}
-
 /* Make sure the selection summary container can accommodate the button */
 .search-ui-selection-summary {
     display: flex;
     align-items: center;
     margin-top: 15px;
     min-height: 24px;
+}
+
+/* Responsive styles for small screens */
+@media (max-width: 768px) {
+    .search-row {
+        flex-direction: column;
+    }
+    
+    .search-ui-container {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    
+    .search-ui-full-container {
+        padding: 15px;
+    }
 }

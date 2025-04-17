@@ -2,14 +2,16 @@ window.CMPortal = window.CMPortal || {};
 CMPortal.benchmark = {};
 
 /**
- * tab-search.js - Dual-Form Variable Search with Aggregated Submission and Error Handling
- * - Left panel uses TargetParameterFindings data
- * - Right panel uses FeatureCategories data
+ * tab-search.js - Enhanced version with:
+ * - Left panel: Target Parameters from 0_TargetParameterFindings_12Apr25.csv
+ * - Right panel: Label Categories from 0_LabelCategories_17Apr25.csv
+ * - Full-width filter form: Also using Label Categories
  */
 (function() {
     let isInitialized = false;
     let selectedFeaturesLeft = [];
     let selectedFeaturesRight = [];
+    let selectedFeaturesFilter = [];
 
     function initializeForm(side) {
         const keyDropdown = document.getElementById(`search-ui-key-dropdown-${side}`);
@@ -26,7 +28,7 @@ CMPortal.benchmark = {};
         }
 
         keyDropdown.addEventListener('change', function() {
-            // Clear previous UI elements for this side, but keep selections for right panel
+            // Clear previous UI elements for this side
             checkboxContainer.innerHTML = '';
             checkboxContainer.classList.add('search-ui-hidden');
             
@@ -47,9 +49,12 @@ CMPortal.benchmark = {};
                 formData.append('selected_key', selectedKey);
 
                 // Use different endpoint based on which side we're loading for
-                const endpoint = side === 'left' 
-                    ? '/api/get_TargetParameters'  // New endpoint for target parameters
-                    : '/api/get_ProtocolFeatures'; // Original endpoint for protocol features
+                let endpoint;
+                if (side === 'left') {
+                    endpoint = '/api/get_TargetParameters';  // Left panel: target parameters
+                } else if (side === 'right') {
+                    endpoint = '/api/get_LabelCategories';   // Right panel: label categories
+                }
 
                 fetch(endpoint, {
                     method: 'POST',
@@ -118,6 +123,96 @@ CMPortal.benchmark = {};
         });
     }
 
+    function initializeFilterForm() {
+        const keyDropdown = document.getElementById('search-ui-key-dropdown-filter');
+        const checkboxContainer = document.getElementById('search-ui-checkbox-container-filter');
+        const selectionSummary = document.getElementById('search-ui-selection-summary-filter');
+        const submitButton = document.getElementById('filter-submit-button');
+
+        if (!keyDropdown || !checkboxContainer || !selectionSummary || !submitButton) {
+            console.error('One or more elements not found for filter form.');
+            return;
+        }
+
+        keyDropdown.addEventListener('change', function() {
+            // Clear previous UI elements but keep selections
+            checkboxContainer.innerHTML = '';
+            checkboxContainer.classList.add('search-ui-hidden');
+            
+            updateFilterSelectionSummary();
+            updateFilterSubmitButton();
+
+            const selectedKey = this.value;
+            if (selectedKey) {
+                checkboxContainer.classList.remove('search-ui-hidden');
+                checkboxContainer.innerHTML = `<p id="search-ui-loading-message-filter">Loading features...</p>`;
+                const formData = new FormData();
+                formData.append('selected_key', selectedKey);
+
+                fetch('/api/get_LabelCategories', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    checkboxContainer.innerHTML = '';
+                    const validValues = data.values.filter(value => value && value.trim() !== '');
+                    if (validValues.length === 0) {
+                        const noItems = document.createElement('p');
+                        noItems.textContent = 'No features available for this category.';
+                        checkboxContainer.appendChild(noItems);
+                        return;
+                    }
+                    
+                    validValues.forEach((value, index) => {
+                        const checkboxItem = document.createElement('div');
+                        checkboxItem.className = 'search-ui-checkbox-item';
+
+                        const input = document.createElement('input');
+                        input.type = 'checkbox';
+                        input.id = `search-ui-feature-filter-${index}`;
+                        input.value = value;
+                        input.name = 'filter_features';
+                        
+                        // Check the box if this value is already selected
+                        if (selectedFeaturesFilter.includes(value)) {
+                            input.checked = true;
+                        }
+
+                        const label = document.createElement('label');
+                        label.htmlFor = `search-ui-feature-filter-${index}`;
+                        label.textContent = value;
+
+                        input.addEventListener('change', function() {
+                            if (this.checked) {
+                                selectedFeaturesFilter.push(this.value);
+                            } else {
+                                const idx = selectedFeaturesFilter.indexOf(this.value);
+                                if (idx > -1) selectedFeaturesFilter.splice(idx, 1);
+                            }
+                            updateFilterSelectionSummary();
+                            updateFilterSubmitButton();
+                        });
+
+                        checkboxItem.appendChild(input);
+                        checkboxItem.appendChild(label);
+                        checkboxContainer.appendChild(checkboxItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    checkboxContainer.innerHTML = '<p>Error loading features. Please try again.</p>';
+                });
+            }
+        });
+
+        // Add Reset button for filter form
+        submitButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            submitFilterSelection();
+        });
+    }
+
     function updateSelectionSummary(side) {
         const selectionSummary = document.getElementById(`search-ui-selection-summary-${side}`);
         let selectedFeatures = side === 'left' ? selectedFeaturesLeft : selectedFeaturesRight;
@@ -147,9 +242,6 @@ CMPortal.benchmark = {};
                 resetButton.type = 'button';
                 resetButton.className = 'search-ui-reset-button';
                 resetButton.textContent = 'Reset';
-                resetButton.style.marginLeft = '10px';
-                resetButton.style.padding = '2px 8px';
-                resetButton.style.fontSize = '12px';
                 resetButton.addEventListener('click', function(e) {
                     e.preventDefault();
                     resetRightPanelSelections();
@@ -159,6 +251,57 @@ CMPortal.benchmark = {};
             
             selectionSummary.appendChild(summaryDiv);
         }
+    }
+    
+    function updateFilterSelectionSummary() {
+        const selectionSummary = document.getElementById('search-ui-selection-summary-filter');
+        if (!selectionSummary) return;
+        
+        // Clear any existing content
+        selectionSummary.innerHTML = '';
+        
+        // Create a div to hold the text and possibly the button
+        const summaryDiv = document.createElement('div');
+        summaryDiv.style.display = 'flex';
+        summaryDiv.style.alignItems = 'center';
+        
+        // Create text span for feature count
+        const textSpan = document.createElement('span');
+        textSpan.textContent = selectedFeaturesFilter.length ? `Selected ${selectedFeaturesFilter.length} feature(s)` : '';
+        summaryDiv.appendChild(textSpan);
+        
+        // Add reset button if there are selected features
+        if (selectedFeaturesFilter.length > 0) {
+            const resetButton = document.createElement('button');
+            resetButton.type = 'button';
+            resetButton.className = 'search-ui-reset-button';
+            resetButton.textContent = 'Reset';
+            resetButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                resetFilterSelections();
+            });
+            summaryDiv.appendChild(resetButton);
+        }
+        
+        selectionSummary.appendChild(summaryDiv);
+    }
+    
+    function updateGlobalSubmitButton() {
+        // Enable the global submit button if either form has at least one selected feature.
+        const submitButton = document.getElementById('search-ui-submit-button');
+        if (!submitButton) {
+            console.error('Global submit button with id "search-ui-submit-button" not found.');
+            return;
+        }
+        submitButton.disabled = !(selectedFeaturesLeft.length > 0 || selectedFeaturesRight.length > 0);
+    }
+    
+    function updateFilterSubmitButton() {
+        const submitButton = document.getElementById('filter-submit-button');
+        if (!submitButton) return;
+        
+        // Enable button only if there are selected features
+        submitButton.disabled = selectedFeaturesFilter.length === 0;
     }
     
     function resetRightPanelSelections() {
@@ -178,15 +321,23 @@ CMPortal.benchmark = {};
         updateSelectionSummary('right');
         updateGlobalSubmitButton();
     }
-
-    function updateGlobalSubmitButton() {
-        // Enable the global submit button if either form has at least one selected feature.
-        const submitButton = document.getElementById('search-ui-submit-button');
-        if (!submitButton) {
-            console.error('Global submit button with id "search-ui-submit-button" not found.');
-            return;
+    
+    function resetFilterSelections() {
+        // Clear all filter selections
+        selectedFeaturesFilter = [];
+        
+        // Uncheck all checkboxes in the filter form
+        const checkboxContainer = document.getElementById('search-ui-checkbox-container-filter');
+        if (checkboxContainer) {
+            const checkboxes = checkboxContainer.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
         }
-        submitButton.disabled = !(selectedFeaturesLeft.length > 0 || selectedFeaturesRight.length > 0);
+        
+        // Update the selection summary and button
+        updateFilterSelectionSummary();
+        updateFilterSubmitButton();
     }
 
     function submitAllSelections() {
@@ -246,17 +397,49 @@ CMPortal.benchmark = {};
             submitButton.textContent = 'Find Protocols';
         });
     }
+    
+    function submitFilterSelection() {
+        const submitButton = document.getElementById('filter-submit-button');
+        if (!submitButton) return;
+        
+        const formData = new FormData();
+        
+        // Add all selected filter features
+        selectedFeaturesFilter.forEach(feature => {
+            formData.append('filter_features[]', feature);
+        });
+        
+        submitButton.disabled = true;
+        submitButton.textContent = 'Processing...';
+        
+        fetch('/api/filter_features', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Process filter results
+            updateFilterResults(data);
+            submitButton.disabled = false;
+            submitButton.textContent = 'Filter Features';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            submitButton.disabled = false;
+            submitButton.textContent = 'Filter Features';
+        });
+    }
 
     function updateVisualizations(data) {
-        const chartContainer = document.getElementById('chart-container');
+        const chartContainer = document.getElementById('table-search-container-row1');
         if (chartContainer) {
             chartContainer.innerHTML = '<p>Feature distribution for selected protocols</p>';
         }
-        const umapContainer = document.getElementById('umap-container');
+        const umapContainer = document.getElementById('table-search-container-row2');
         if (umapContainer) {
             umapContainer.innerHTML = '<p>UMAP visualization for selected protocols</p>';
         }
-        const umapContainer2 = document.getElementById('umap-container-2');
+        const umapContainer2 = document.getElementById('table-search-container-row3');
         if (umapContainer2) {
             umapContainer2.innerHTML = '<p>Alternative UMAP visualization for selected protocols</p>';
         }
@@ -264,11 +447,23 @@ CMPortal.benchmark = {};
             populateSearchResults(data.data);
         }
     }
+    
+    function updateFilterResults(data) {
+        // This function updates the display with filtered results
+        const tableContainer = document.getElementById('table-search-container-row4');
+        if (!tableContainer) return;
+        
+        if (data && data.data) {
+            const featureCount = data.data.filtered_features ? data.data.filtered_features.length : 0;
+            tableContainer.innerHTML = `<p>Filtered database showing protocols matching ${featureCount} selected feature(s)</p>`;
+            
+            // In a real implementation, you would display database results here
+        }
+    }
 
     function populateSearchResults(data) {
-        const tableContainer = document.getElementById('table-search-container');
+        const tableContainer = document.getElementById('table-search-container-row4');
         if (!tableContainer) return;
-        tableContainer.innerHTML = '';
         
         // Use the new simplified format
         const parameter = data.parameter || 'None';
@@ -284,21 +479,26 @@ CMPortal.benchmark = {};
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize both left and right forms.
-        initializeForm('left');
-        initializeForm('right');
+        if (!isInitialized) {
+            // Initialize both left and right forms
+            initializeForm('left');
+            initializeForm('right');
+            
+            // Initialize the filter form
+            initializeFilterForm();
 
-        // Attach the global submit event for the single submission button.
-        const submitButton = document.getElementById('search-ui-submit-button');
-        if (submitButton) {
-            submitButton.addEventListener('click', function(event) {
-                event.preventDefault();
-                submitAllSelections();
-            });
-        } else {
-            console.error('Global submit button with id "search-ui-submit-button" not found on DOMContentLoaded.');
+            // Attach the global submit event for the single submission button
+            const submitButton = document.getElementById('search-ui-submit-button');
+            if (submitButton) {
+                submitButton.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    submitAllSelections();
+                });
+            } else {
+                console.error('Global submit button with id "search-ui-submit-button" not found on DOMContentLoaded.');
+            }
+
+            isInitialized = true;
         }
-
-        isInitialized = true;
     });
 })();
