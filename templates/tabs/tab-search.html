@@ -18,17 +18,17 @@
     <div class="search-ui-container" id="search-ui-container-left">
       <form id="features-form-left">
         <div class="search-ui-form-group">
-          <label for="search-ui-key-dropdown-left" class="search-ui-label">Select Primary Parameter:</label>
+          <label for="search-ui-key-dropdown-left" class="search-ui-label">Select Category:</label>
           <select id="search-ui-key-dropdown-left" name="category" class="search-ui-select">
             <option value="">-- Select a Category --</option>
-            {% for category in FeatureCategories %}
+            {% for category in TargetParameters %}
               <option value="{{ category }}">{{ category }}</option>
             {% endfor %}
           </select>
         </div>
 
         <div class="search-ui-form-group">
-          <label class="search-ui-label">Select Features:</label>
+          <label class="search-ui-label">Select Target Parameter:</label>
           <div id="search-ui-checkbox-container-left" class="search-ui-checkbox-container search-ui-hidden">
             <p id="search-ui-loading-message-left">Please select a category first...</p>
           </div>
@@ -41,7 +41,7 @@
     <div class="search-ui-container" id="search-ui-container-right">
       <form id="features-form-right">
         <div class="search-ui-form-group">
-          <label for="search-ui-key-dropdown-right" class="search-ui-label">Select Second Parameter:</label>
+          <label for="search-ui-key-dropdown-right" class="search-ui-label">Select Category:</label>
           <select id="search-ui-key-dropdown-right" name="category" class="search-ui-select">
             <option value="">-- Select a Category --</option>
             {% for category in FeatureCategories %}
@@ -51,7 +51,7 @@
         </div>
 
         <div class="search-ui-form-group">
-          <label class="search-ui-label">Select Features:</label>
+          <label class="search-ui-label">Select Protocol Feature(s):</label>
           <div id="search-ui-checkbox-container-right" class="search-ui-checkbox-container search-ui-hidden">
             <p id="search-ui-loading-message-right">Please select a category first...</p>
           </div>

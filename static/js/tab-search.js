@@ -3,6 +3,8 @@ CMPortal.benchmark = {};
 
 /**
  * tab-search.js - Dual-Form Variable Search with Aggregated Submission and Error Handling
+ * - Left panel uses TargetParameterFindings data
+ * - Right panel uses FeatureCategories data
  */
 (function() {
     let isInitialized = false;
@@ -24,14 +26,16 @@ CMPortal.benchmark = {};
         }
 
         keyDropdown.addEventListener('change', function() {
-            // Clear previous selections and UI elements for this side.
+            // Clear previous UI elements for this side, but keep selections for right panel
             checkboxContainer.innerHTML = '';
             checkboxContainer.classList.add('search-ui-hidden');
+            
+            // Only clear selections for left panel (target parameter)
             if (side === 'left') {
                 selectedFeaturesLeft = [];
-            } else {
-                selectedFeaturesRight = [];
             }
+            // Right panel selections persist across category changes
+            
             updateSelectionSummary(side);
             updateGlobalSubmitButton();
 
@@ -42,7 +46,12 @@ CMPortal.benchmark = {};
                 const formData = new FormData();
                 formData.append('selected_key', selectedKey);
 
-                fetch('/api/get_ProtocolFeatures', {
+                // Use different endpoint based on which side we're loading for
+                const endpoint = side === 'left' 
+                    ? '/api/get_TargetParameters'  // New endpoint for target parameters
+                    : '/api/get_ProtocolFeatures'; // Original endpoint for protocol features
+
+                fetch(endpoint, {
                     method: 'POST',
                     body: formData
                 })
@@ -56,31 +65,37 @@ CMPortal.benchmark = {};
                         checkboxContainer.appendChild(noItems);
                         return;
                     }
+                    
+                    // Determine if we should use radio buttons (left side) or checkboxes (right side)
+                    const inputType = side === 'left' ? 'radio' : 'checkbox';
+                    
                     validValues.forEach((value, index) => {
                         const checkboxItem = document.createElement('div');
                         checkboxItem.className = 'search-ui-checkbox-item';
 
-                        const checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox';
-                        checkbox.id = `search-ui-feature-${side}-${index}`;
-                        checkbox.value = value;
-                        checkbox.name = 'selected_features';
+                        const input = document.createElement('input');
+                        input.type = inputType;
+                        input.id = `search-ui-feature-${side}-${index}`;
+                        input.value = value;
+                        input.name = side === 'left' ? 'selected_feature_left' : 'selected_features';
+                        
+                        // For right panel, check the box if this value is already selected
+                        if (side === 'right' && selectedFeaturesRight.includes(value)) {
+                            input.checked = true;
+                        }
 
                         const label = document.createElement('label');
                         label.htmlFor = `search-ui-feature-${side}-${index}`;
                         label.textContent = value;
 
-                        checkbox.addEventListener('change', function() {
-                            if (this.checked) {
-                                if (side === 'left') {
-                                    selectedFeaturesLeft.push(this.value);
-                                } else {
-                                    selectedFeaturesRight.push(this.value);
-                                }
+                        input.addEventListener('change', function() {
+                            if (side === 'left') {
+                                // For left side (radio buttons) - clear previous and add the new selection
+                                selectedFeaturesLeft = [this.value];
                             } else {
-                                if (side === 'left') {
-                                    const idx = selectedFeaturesLeft.indexOf(this.value);
-                                    if (idx > -1) selectedFeaturesLeft.splice(idx, 1);
+                                // For right side (checkboxes) - add/remove as before
+                                if (this.checked) {
+                                    selectedFeaturesRight.push(this.value);
                                 } else {
                                     const idx = selectedFeaturesRight.indexOf(this.value);
                                     if (idx > -1) selectedFeaturesRight.splice(idx, 1);
@@ -90,7 +105,7 @@ CMPortal.benchmark = {};
                             updateGlobalSubmitButton();
                         });
 
-                        checkboxItem.appendChild(checkbox);
+                        checkboxItem.appendChild(input);
                         checkboxItem.appendChild(label);
                         checkboxContainer.appendChild(checkboxItem);
                     });
@@ -107,8 +122,61 @@ CMPortal.benchmark = {};
         const selectionSummary = document.getElementById(`search-ui-selection-summary-${side}`);
         let selectedFeatures = side === 'left' ? selectedFeaturesLeft : selectedFeaturesRight;
         if (selectionSummary) {
-            selectionSummary.textContent = selectedFeatures.length ? `Selected ${selectedFeatures.length} feature(s)` : '';
+            // Clear any existing reset button and create a new container
+            selectionSummary.innerHTML = '';
+            
+            // Create a div to hold the text and possibly the button
+            const summaryDiv = document.createElement('div');
+            summaryDiv.style.display = 'flex';
+            summaryDiv.style.alignItems = 'center';
+            
+            // Create text span
+            const textSpan = document.createElement('span');
+            if (side === 'left') {
+                // For left panel, show the selected parameter name
+                textSpan.textContent = selectedFeatures.length ? `${selectedFeatures[0]} selected` : '';
+            } else {
+                // For right panel, show the count as before
+                textSpan.textContent = selectedFeatures.length ? `Selected ${selectedFeatures.length} feature(s)` : '';
+            }
+            summaryDiv.appendChild(textSpan);
+            
+            // If right panel and there are selected features, add reset button
+            if (side === 'right' && selectedFeatures.length > 0) {
+                const resetButton = document.createElement('button');
+                resetButton.type = 'button';
+                resetButton.className = 'search-ui-reset-button';
+                resetButton.textContent = 'Reset';
+                resetButton.style.marginLeft = '10px';
+                resetButton.style.padding = '2px 8px';
+                resetButton.style.fontSize = '12px';
+                resetButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    resetRightPanelSelections();
+                });
+                summaryDiv.appendChild(resetButton);
+            }
+            
+            selectionSummary.appendChild(summaryDiv);
         }
+    }
+    
+    function resetRightPanelSelections() {
+        // Clear all right panel selections
+        selectedFeaturesRight = [];
+        
+        // Uncheck all checkboxes in the right panel
+        const checkboxContainer = document.getElementById('search-ui-checkbox-container-right');
+        if (checkboxContainer) {
+            const checkboxes = checkboxContainer.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        }
+        
+        // Update the selection summary
+        updateSelectionSummary('right');
+        updateGlobalSubmitButton();
     }
 
     function updateGlobalSubmitButton() {
@@ -134,17 +202,17 @@ CMPortal.benchmark = {};
         }
 
         const formData = new FormData();
-        // Combine category selections from both forms into a JSON string.
-        const combinedCategory = JSON.stringify({
-            left: keyDropdownLeft ? keyDropdownLeft.value : "",
-            right: keyDropdownRight ? keyDropdownRight.value : ""
-        });
-        formData.append('category', combinedCategory);
-
-        // Merge the selected features from both forms.
-        const combinedFeatures = selectedFeaturesLeft.concat(selectedFeaturesRight);
-        combinedFeatures.forEach(feature => {
-            formData.append('features[]', feature);
+        
+        // Simplified format: Just add the parameter from left panel
+        if (selectedFeaturesLeft.length > 0) {
+            formData.append('parameter', selectedFeaturesLeft[0]);
+        } else {
+            formData.append('parameter', '');
+        }
+        
+        // Add features from right panel
+        selectedFeaturesRight.forEach(feature => {
+            formData.append('selected_features[]', feature);
         });
 
         submitButton.disabled = true;
@@ -201,8 +269,18 @@ CMPortal.benchmark = {};
         const tableContainer = document.getElementById('table-search-container');
         if (!tableContainer) return;
         tableContainer.innerHTML = '';
+        
+        // Use the new simplified format
+        const parameter = data.parameter || 'None';
         const featureCount = data.selected_features ? data.selected_features.length : 0;
-        tableContainer.innerHTML = `<p>Found protocols matching ${featureCount} selected feature(s) in category ${data.category}</p>`;
+        
+        let resultText = '';
+        if (parameter !== 'None' && parameter !== '') {
+            resultText += `Parameter: ${parameter}<br>`;
+        }
+        resultText += `Features: ${featureCount} selected`;
+        
+        tableContainer.innerHTML = `<p>${resultText}</p>`;
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -224,4 +302,3 @@ CMPortal.benchmark = {};
         isInitialized = true;
     });
 })();
-

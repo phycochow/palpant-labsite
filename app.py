@@ -18,11 +18,16 @@ app.logger.setLevel(logging.INFO)
 app.logger.info('Flask application startup')
 
 # ----- Preset databases -----
+# Original feature categories (for right panel)
 csv_filepath = os.path.join(app.static_folder, 'datasets/0_FeatureCategories_01Mar25.csv')
+# New target parameter findings (for left panel)
+target_param_filepath = os.path.join(app.static_folder, 'datasets/0_TargetParameterFindings_12Apr25.csv')
 
 FeatureCategories_dict = defaultdict(list)
+TargetParameters_dict = defaultdict(list)
 
 try:
+    # Load original feature categories
     with open(csv_filepath, mode='r', newline='', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -30,8 +35,17 @@ try:
                 FeatureCategories_dict[key].append(value)
     FeatureCategories_dict = dict(FeatureCategories_dict)
     app.logger.info('Successfully loaded feature categories')
+    
+    # Load target parameter findings
+    with open(target_param_filepath, mode='r', newline='', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            for key, value in row.items():
+                TargetParameters_dict[key].append(value)
+    TargetParameters_dict = dict(TargetParameters_dict)
+    app.logger.info('Successfully loaded target parameter findings')
 except Exception as e:
-    app.logger.error(f'Error loading feature categories: {str(e)}')
+    app.logger.error(f'Error loading feature categories or target parameters: {str(e)}')
 
 try:
     cleaned_df = pd.read_csv(os.path.join(app.static_folder, 'datasets/0_CleanedDatabase_25Feb25.csv'))
@@ -56,7 +70,7 @@ def api_viewer():
         app.logger.error(f'Error in api_viewer: {str(e)}')
         return jsonify({'error': str(e)}), 500
 
-# Code for dropdown menu
+# Code for dropdown menu - right panel (original)
 @app.route('/api/get_ProtocolFeatures', methods=['POST'])
 def get_ProtocolFeatures():
     try:
@@ -72,35 +86,51 @@ def get_ProtocolFeatures():
         app.logger.error(f'Error in get_ProtocolFeatures: {str(e)}')
         return jsonify({'error': str(e)}), 500
 
+# Code for dropdown menu - left panel (new target parameters)
+@app.route('/api/get_TargetParameters', methods=['POST'])
+def get_TargetParameters():
+    try:
+        # Get the selected key from the AJAX request
+        selected_key = request.form['selected_key']
+        
+        # Get the corresponding values for the selected key
+        values = TargetParameters_dict.get(selected_key, [])
+        
+        # Return the values as JSON
+        return jsonify(values=values)
+    except Exception as e:
+        app.logger.error(f'Error in get_TargetParameters: {str(e)}')
+        return jsonify({'error': str(e)}), 500
+
 # Handle feature submissions
 @app.route('/api/submit_features', methods=['POST'])
 def submit_features():
     try:
-        category = request.form.get('category', '')
-        # Get all selected features (multiple values with the same name)
-        features = request.form.getlist('features[]')
+        # Get the selected parameter (left panel)
+        parameter = request.form.get('parameter', '')
+        
+        # Get all selected features (right panel - multiple values with the same name)
+        features = request.form.getlist('selected_features[]')
         
         # You can process the submitted data here
         # For example, save to database, generate a file, etc.
         
-        # For now, just return the data as confirmation
+        # Simplified response format
         result = {
             'status': 'success',
-            'message': 'Features submitted successfully',
             'data': {
-                'category': category,
-                'selected_features': features,
-                'count': len(features)
+                'parameter': parameter,
+                'selected_features': features
             }
         }
         
         # Log the submission for debugging
-        app.logger.info(f"Feature submission received: {category} - {features}")
+        app.logger.info(f"Feature submission received: Parameter: {parameter} - Features: {features}")
         
         return jsonify(result)
     except Exception as e:
         app.logger.error(f'Error in submit_features: {str(e)}')
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'status': 'error', 'data': {'message': str(e)}}), 500
 
 # ----- Actual webpage rendering -----
 @app.route('/')
@@ -109,7 +139,9 @@ def home():
 
 @app.route('/cmportal')
 def cmportal():
-    return render_template('cmportal.html', FeatureCategories=FeatureCategories_dict.keys())
+    return render_template('cmportal.html', 
+                          FeatureCategories=FeatureCategories_dict.keys(),
+                          TargetParameters=TargetParameters_dict.keys())
 
 @app.route('/dash')
 def dash():
@@ -117,7 +149,9 @@ def dash():
 
 @app.route('/test')
 def test():
-    return render_template('testcase.html', FeatureCategories=FeatureCategories_dict.keys())
+    return render_template('testcase.html', 
+                          FeatureCategories=FeatureCategories_dict.keys(),
+                          TargetParameters=TargetParameters_dict.keys())
 
 if __name__ == '__main__':
     # Development server only – not used in production
