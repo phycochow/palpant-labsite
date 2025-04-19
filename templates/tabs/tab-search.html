@@ -44,7 +44,7 @@
           <label for="search-ui-key-dropdown-right" class="search-ui-label"></label>
           <select id="search-ui-key-dropdown-right" name="category" class="search-ui-select">
             <option value="">-- Select a Category --</option>
-            {% for category in LabelCategories %}
+            {% for category in FeatureCategories %}
               <option value="{{ category }}">{{ category }}</option>
             {% endfor %}
           </select>
@@ -67,54 +67,12 @@
     <button id="search-ui-submit-button" class="search-ui-button" disabled>Find Protocols</button>
   </div>
 
-  <!-- Placeholder sections for search outputs -->
-  <div class="well">
-    <p>Row 1 of Pie Charts</p>
-    <div id="table-search-container-row1"></div>
-  </div>
-
-  <div class="well">
-    <p>Row 2 of UMAPs</p>
-    <div id="table-search-container-row2"></div>
-  </div>
-
-  <div class="well">
-    <div id="table-search-container-row3"></div>
-    <p>Row 3 of UMAPs</p>
-  </div>
-
   <div class="search-ui-result search-ui-hidden" id="search-ui-result-display">
     <h3>Submission Result:</h3>
     <pre id="search-ui-submission-result" class="search-ui-pre"></pre>
   </div>
 
-  <!-- New Full-Width Form -->
-  <div class="search-ui-full-container" id="search-ui-container-filter">
-    <form id="features-form-filter">
-      <div class="search-ui-form-group">
-        <label for="search-ui-key-dropdown-filter" class="search-ui-label"></label>
-        <select id="search-ui-key-dropdown-filter" name="category" class="search-ui-select">
-          <option value="">-- Select a Category --</option>
-          {% for category in LabelCategories %}
-            <option value="{{ category }}">{{ category }}</option>
-          {% endfor %}
-        </select>
-      </div>
 
-      <div class="search-ui-form-group">
-        <label class="search-ui-label">Select Protocol Feature(s):</label>
-        <div id="search-ui-checkbox-container-filter" class="search-ui-checkbox-container search-ui-hidden">
-          <p id="search-ui-loading-message-filter">Please select a category first...</p>
-        </div>
-        <div class="search-ui-selection-summary" id="search-ui-selection-summary-filter"></div>
-      </div>
-      
-      <!-- Filter form has its own submit button -->
-      <div class="filter-submit-container">
-        <button id="filter-submit-button" type="button" class="search-ui-button" disabled>Filter Features</button>
-      </div>
-    </form>
-  </div>
 
   <div class="well">
     <div id="table-search-container-row4"></div>

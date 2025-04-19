@@ -18,12 +18,13 @@ app.logger.setLevel(logging.INFO)
 app.logger.info('Flask application startup')
 
 # ----- Preset databases -----
-# Original feature categories (for reference only)
+# Feature categories (for right panel)
 feature_categories_filepath = os.path.join(app.static_folder, 'datasets/0_FeatureCategories_01Mar25.csv')
-# New label categories (for right panel)
+# Label categories (for full-width filter form)
 label_categories_filepath = os.path.join(app.static_folder, 'datasets/0_LabelCategories_17Apr25.csv')
 # Target parameter findings (for left panel)
-target_param_filepath = os.path.join(app.static_folder, 'datasets/0_TargetParameterFindings_12Apr25.csv')
+target_param_filepath = os.path.join(app.static_folder, 'datasets/0_TargetParameters_12Apr25.csv')
+cleaned_database_filepath = os.path.join(app.static_folder, 'datasets/0_CleanedDatabase_25Feb25.csv')
 
 # Initialize dictionaries for each dataset
 FeatureCategories_dict = defaultdict(list)
@@ -31,7 +32,7 @@ LabelCategories_dict = defaultdict(list)
 TargetParameters_dict = defaultdict(list)
 
 try:
-    # Load original feature categories (for reference)
+    # Load feature categories (for right panel)
     with open(feature_categories_filepath, mode='r', newline='', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -40,7 +41,7 @@ try:
     FeatureCategories_dict = dict(FeatureCategories_dict)
     app.logger.info('Successfully loaded feature categories')
     
-    # Load new label categories (for right panel and full-width form)
+    # Load label categories (for filter form)
     with open(label_categories_filepath, mode='r', newline='', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -61,7 +62,7 @@ except Exception as e:
     app.logger.error(f'Error loading data files: {str(e)}')
 
 try:
-    cleaned_df = pd.read_csv(os.path.join(app.static_folder, 'datasets/0_CleanedDatabase_25Feb25.csv'))
+    cleaned_df = pd.read_csv(cleaned_database_filepath)
     cleaned_df = cleaned_df.fillna("NaN")
     app.logger.info(f'Successfully loaded database with {len(cleaned_df)} records')
 except Exception as e:
@@ -83,7 +84,7 @@ def api_viewer():
         app.logger.error(f'Error in api_viewer: {str(e)}')
         return jsonify({'error': str(e)}), 500
 
-# Original endpoint (now for reference only)
+# Endpoint for feature categories (right panel)
 @app.route('/api/get_ProtocolFeatures', methods=['POST'])
 def get_ProtocolFeatures():
     try:
@@ -99,7 +100,7 @@ def get_ProtocolFeatures():
         app.logger.error(f'Error in get_ProtocolFeatures: {str(e)}')
         return jsonify({'error': str(e)}), 500
 
-# New endpoint for label categories (right panel and full-width form)
+# Endpoint for label categories (filter form)
 @app.route('/api/get_LabelCategories', methods=['POST'])
 def get_LabelCategories():
     try:
@@ -131,7 +132,7 @@ def get_TargetParameters():
         app.logger.error(f'Error in get_TargetParameters: {str(e)}')
         return jsonify({'error': str(e)}), 500
 
-# Handle feature submissions
+# Handle feature submissions for top forms
 @app.route('/api/submit_features', methods=['POST'])
 def submit_features():
     try:
@@ -140,9 +141,6 @@ def submit_features():
         
         # Get all selected features (right panel - multiple values with the same name)
         features = request.form.getlist('selected_features[]')
-        
-        # You can process the submitted data here
-        # For example, save to database, generate a file, etc.
         
         # Simplified response format
         result = {
@@ -161,22 +159,18 @@ def submit_features():
         app.logger.error(f'Error in submit_features: {str(e)}')
         return jsonify({'status': 'error', 'data': {'message': str(e)}}), 500
 
-# New endpoint for the full-width form's filter submission
+# Endpoint for the filter form submission
 @app.route('/api/filter_features', methods=['POST'])
 def filter_features():
     try:
         # Get all selected features (multiple values with the same name)
         features = request.form.getlist('filter_features[]')
         
-        # You can process the submitted data here
-        # For example, filter database, generate visualizations, etc.
-        
         # Response format
         result = {
             'status': 'success',
             'data': {
                 'filtered_features': features,
-                'count': len(features)
             }
         }
         

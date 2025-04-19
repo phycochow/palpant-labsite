@@ -4,8 +4,8 @@ CMPortal.benchmark = {};
 /**
  * tab-search.js - Enhanced version with:
  * - Left panel: Target Parameters from 0_TargetParameterFindings_12Apr25.csv
- * - Right panel: Label Categories from 0_LabelCategories_17Apr25.csv
- * - Full-width filter form: Also using Label Categories
+ * - Right panel: Original FeatureCategories from 0_FeatureCategories_01Mar25.csv
+ * - Full-width filter form: Using new LabelCategories from 0_LabelCategories_17Apr25.csv
  */
 (function() {
     let isInitialized = false;
@@ -53,7 +53,7 @@ CMPortal.benchmark = {};
                 if (side === 'left') {
                     endpoint = '/api/get_TargetParameters';  // Left panel: target parameters
                 } else if (side === 'right') {
-                    endpoint = '/api/get_LabelCategories';   // Right panel: label categories
+                    endpoint = '/api/get_ProtocolFeatures';  // Right panel: original protocol features
                 }
 
                 fetch(endpoint, {
@@ -206,7 +206,7 @@ CMPortal.benchmark = {};
             }
         });
 
-        // Add Reset button for filter form
+        // Add event listener for filter form
         submitButton.addEventListener('click', function(e) {
             e.preventDefault();
             submitFilterSelection();
@@ -400,6 +400,9 @@ CMPortal.benchmark = {};
     
     function submitFilterSelection() {
         const submitButton = document.getElementById('filter-submit-button');
+        const resultDisplay = document.getElementById('filter-result-display');
+        const submissionResult = document.getElementById('filter-submission-result');
+        
         if (!submitButton) return;
         
         const formData = new FormData();
@@ -418,13 +421,30 @@ CMPortal.benchmark = {};
         })
         .then(response => response.json())
         .then(data => {
-            // Process filter results
-            updateFilterResults(data);
+            // Show results in the dedicated result display
+            if (resultDisplay) {
+                resultDisplay.classList.remove('search-ui-hidden');
+            }
+            if (submissionResult) {
+                submissionResult.textContent = JSON.stringify(data, null, 2);
+            }
+            
+            // Also log to console (but don't update row 4)
+            showFilterResults(data);
+            
             submitButton.disabled = false;
             submitButton.textContent = 'Filter Features';
         })
         .catch(error => {
             console.error('Error:', error);
+            
+            if (resultDisplay) {
+                resultDisplay.classList.remove('search-ui-hidden');
+            }
+            if (submissionResult) {
+                submissionResult.textContent = 'Error filtering features. Please try again.';
+            }
+            
             submitButton.disabled = false;
             submitButton.textContent = 'Filter Features';
         });
@@ -443,39 +463,19 @@ CMPortal.benchmark = {};
         if (umapContainer2) {
             umapContainer2.innerHTML = '<p>Alternative UMAP visualization for selected protocols</p>';
         }
-        if (data && data.data) {
-            populateSearchResults(data.data);
-        }
+        
+        // Removed any code that would modify row 4
     }
     
-    function updateFilterResults(data) {
-        // This function updates the display with filtered results
-        const tableContainer = document.getElementById('table-search-container-row4');
-        if (!tableContainer) return;
+    function showFilterResults(data) {
+        // Since we don't want to modify row 4 yet, we'll just log the data to console
+        console.log('Filter results received:', data);
         
+        // This will be implemented later when we're ready to update row 4
+        // For now we'll just show the response in the console
         if (data && data.data) {
-            const featureCount = data.data.filtered_features ? data.data.filtered_features.length : 0;
-            tableContainer.innerHTML = `<p>Filtered database showing protocols matching ${featureCount} selected feature(s)</p>`;
-            
-            // In a real implementation, you would display database results here
+            console.log(`Received ${data.data.count} filtered features`);
         }
-    }
-
-    function populateSearchResults(data) {
-        const tableContainer = document.getElementById('table-search-container-row4');
-        if (!tableContainer) return;
-        
-        // Use the new simplified format
-        const parameter = data.parameter || 'None';
-        const featureCount = data.selected_features ? data.selected_features.length : 0;
-        
-        let resultText = '';
-        if (parameter !== 'None' && parameter !== '') {
-            resultText += `Parameter: ${parameter}<br>`;
-        }
-        resultText += `Features: ${featureCount} selected`;
-        
-        tableContainer.innerHTML = `<p>${resultText}</p>`;
     }
 
     document.addEventListener('DOMContentLoaded', function() {
