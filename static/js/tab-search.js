@@ -1,212 +1,187 @@
+// tab-search.js
 window.CMPortal = window.CMPortal || {};
 CMPortal.benchmark = {};
 
 /**
- * tab-search.js - Enhanced version with:
- * - Left panel: Target Parameters from 0_TargetParameterFindings_12Apr25.csv
- * - Right panel: Original FeatureCategories from 0_FeatureCategories_01Mar25.csv
- * - Full-width filter form: Using new LabelCategories from 0_LabelCategories_17Apr25.csv
+ * tab-search.js - Enhanced version with URL‑encoded POSTs to handle special characters
+ * - Left panel: Target Parameters
+ * - Right panel: Protocol Features
+ * - Full-width filter form: Label Categories
+ * - Five toggle buttons that only become active once a left‐panel choice is made
+ * - Submission result now includes toggle button states
+ * - Global submit enabled if either left or right has a selection
  */
 (function() {
     let isInitialized = false;
     let selectedFeaturesLeft = [];
     let selectedFeaturesRight = [];
     let selectedFeaturesFilter = [];
+    const toggleStates = [false, false, false, false, false];
+    let toggleButtons = [];
 
     function initializeForm(side) {
-        const keyDropdown = document.getElementById(`search-ui-key-dropdown-${side}`);
+        const keyDropdown       = document.getElementById(`search-ui-key-dropdown-${side}`);
         const checkboxContainer = document.getElementById(`search-ui-checkbox-container-${side}`);
-        const selectionSummary = document.getElementById(`search-ui-selection-summary-${side}`);
 
-        if (!keyDropdown) {
-            console.error(`Dropdown element for side '${side}' not found.`);
-            return;
-        }
-        if (!checkboxContainer) {
-            console.error(`Checkbox container element for side '${side}' not found.`);
+        if (!keyDropdown || !checkboxContainer) {
+            console.error(`Missing elements for side '${side}'`);
             return;
         }
 
         keyDropdown.addEventListener('change', function() {
-            // Clear previous UI elements for this side
+            // Reset UI
             checkboxContainer.innerHTML = '';
             checkboxContainer.classList.add('search-ui-hidden');
-            
-            // Only clear selections for left panel (target parameter)
             if (side === 'left') {
                 selectedFeaturesLeft = [];
+                updateToggleButtons();
             }
-            // Right panel selections persist across category changes
-            
             updateSelectionSummary(side);
             updateGlobalSubmitButton();
 
             const selectedKey = this.value;
-            if (selectedKey) {
-                checkboxContainer.classList.remove('search-ui-hidden');
-                checkboxContainer.innerHTML = `<p id="search-ui-loading-message-${side}">Loading features...</p>`;
-                const formData = new FormData();
-                formData.append('selected_key', selectedKey);
+            if (!selectedKey) return;
 
-                // Use different endpoint based on which side we're loading for
-                let endpoint;
-                if (side === 'left') {
-                    endpoint = '/api/get_TargetParameters';  // Left panel: target parameters
-                } else if (side === 'right') {
-                    endpoint = '/api/get_ProtocolFeatures';  // Right panel: original protocol features
+            // Show loading
+            checkboxContainer.classList.remove('search-ui-hidden');
+            checkboxContainer.innerHTML = `<p id="search-ui-loading-message-${side}">Loading features...</p>`;
+
+            const payload = new URLSearchParams();
+            payload.append('selected_key', selectedKey);
+
+            const endpoint = side === 'left'
+                ? '/api/get_TargetParameters'
+                : '/api/get_ProtocolFeatures';
+
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+                body: payload.toString()
+            })
+            .then(res => res.json())
+            .then(data => {
+                checkboxContainer.innerHTML = '';
+                const validValues = (data.values || []).filter(v => v && v.trim());
+                if (!validValues.length) {
+                    checkboxContainer.textContent = 'No features available for this category.';
+                    return;
                 }
+                const inputType = side === 'left' ? 'radio' : 'checkbox';
+                validValues.forEach((value, idx) => {
+                    const item = document.createElement('div');
+                    item.className = 'search-ui-checkbox-item';
 
-                fetch(endpoint, {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    checkboxContainer.innerHTML = '';
-                    const validValues = data.values.filter(value => value && value.trim() !== '');
-                    if (validValues.length === 0) {
-                        const noItems = document.createElement('p');
-                        noItems.textContent = 'No features available for this category.';
-                        checkboxContainer.appendChild(noItems);
-                        return;
+                    const input = document.createElement('input');
+                    input.type  = inputType;
+                    input.id    = `search-ui-feature-${side}-${idx}`;
+                    input.value = value;
+                    input.name  = side === 'left' ? 'selected_feature_left' : 'selected_features';
+                    if (side === 'right' && selectedFeaturesRight.includes(value)) {
+                        input.checked = true;
                     }
-                    
-                    // Determine if we should use radio buttons (left side) or checkboxes (right side)
-                    const inputType = side === 'left' ? 'radio' : 'checkbox';
-                    
-                    validValues.forEach((value, index) => {
-                        const checkboxItem = document.createElement('div');
-                        checkboxItem.className = 'search-ui-checkbox-item';
 
-                        const input = document.createElement('input');
-                        input.type = inputType;
-                        input.id = `search-ui-feature-${side}-${index}`;
-                        input.value = value;
-                        input.name = side === 'left' ? 'selected_feature_left' : 'selected_features';
-                        
-                        // For right panel, check the box if this value is already selected
-                        if (side === 'right' && selectedFeaturesRight.includes(value)) {
-                            input.checked = true;
-                        }
-
-                        const label = document.createElement('label');
-                        label.htmlFor = `search-ui-feature-${side}-${index}`;
-                        label.textContent = value;
-
-                        input.addEventListener('change', function() {
-                            if (side === 'left') {
-                                // For left side (radio buttons) - clear previous and add the new selection
-                                selectedFeaturesLeft = [this.value];
+                    input.addEventListener('change', function() {
+                        if (side === 'left') {
+                            selectedFeaturesLeft = [this.value];
+                            updateToggleButtons();
+                        } else {
+                            if (this.checked) {
+                                selectedFeaturesRight.push(value);
                             } else {
-                                // For right side (checkboxes) - add/remove as before
-                                if (this.checked) {
-                                    selectedFeaturesRight.push(this.value);
-                                } else {
-                                    const idx = selectedFeaturesRight.indexOf(this.value);
-                                    if (idx > -1) selectedFeaturesRight.splice(idx, 1);
-                                }
+                                selectedFeaturesRight = selectedFeaturesRight.filter(f => f !== value);
                             }
-                            updateSelectionSummary(side);
-                            updateGlobalSubmitButton();
-                        });
-
-                        checkboxItem.appendChild(input);
-                        checkboxItem.appendChild(label);
-                        checkboxContainer.appendChild(checkboxItem);
+                        }
+                        updateSelectionSummary(side);
+                        updateGlobalSubmitButton();
                     });
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    checkboxContainer.innerHTML = '<p>Error loading features. Please try again.</p>';
+
+                    const label = document.createElement('label');
+                    label.htmlFor   = input.id;
+                    label.textContent = value;
+
+                    item.append(input, label);
+                    checkboxContainer.appendChild(item);
                 });
-            }
+            })
+            .catch(err => {
+                console.error('Error loading features:', err);
+                checkboxContainer.innerHTML = '<p>Error loading features. Please try again.</p>';
+            });
         });
     }
 
     function initializeFilterForm() {
-        const keyDropdown = document.getElementById('search-ui-key-dropdown-filter');
+        const keyDropdown       = document.getElementById('search-ui-key-dropdown-filter');
         const checkboxContainer = document.getElementById('search-ui-checkbox-container-filter');
-        const selectionSummary = document.getElementById('search-ui-selection-summary-filter');
-        const submitButton = document.getElementById('filter-submit-button');
+        const submitButton      = document.getElementById('filter-submit-button');
 
-        if (!keyDropdown || !checkboxContainer || !selectionSummary || !submitButton) {
-            console.error('One or more elements not found for filter form.');
+        if (!keyDropdown || !checkboxContainer || !submitButton) {
+            console.error('Missing filter form elements');
             return;
         }
 
         keyDropdown.addEventListener('change', function() {
-            // Clear previous UI elements but keep selections
             checkboxContainer.innerHTML = '';
             checkboxContainer.classList.add('search-ui-hidden');
-            
             updateFilterSelectionSummary();
             updateFilterSubmitButton();
 
             const selectedKey = this.value;
-            if (selectedKey) {
-                checkboxContainer.classList.remove('search-ui-hidden');
-                checkboxContainer.innerHTML = `<p id="search-ui-loading-message-filter">Loading features...</p>`;
-                const formData = new FormData();
-                formData.append('selected_key', selectedKey);
+            if (!selectedKey) return;
 
-                fetch('/api/get_LabelCategories', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    checkboxContainer.innerHTML = '';
-                    const validValues = data.values.filter(value => value && value.trim() !== '');
-                    if (validValues.length === 0) {
-                        const noItems = document.createElement('p');
-                        noItems.textContent = 'No features available for this category.';
-                        checkboxContainer.appendChild(noItems);
-                        return;
+            checkboxContainer.classList.remove('search-ui-hidden');
+            checkboxContainer.innerHTML = `<p id="search-ui-loading-message-filter">Loading features...</p>`;
+
+            const payload = new URLSearchParams();
+            payload.append('selected_key', selectedKey);
+
+            fetch('/api/get_LabelCategories', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+                body: payload.toString()
+            })
+            .then(res => res.json())
+            .then(data => {
+                checkboxContainer.innerHTML = '';
+                const validValues = (data.values || []).filter(v => v && v.trim());
+                if (!validValues.length) {
+                    checkboxContainer.textContent = 'No features available for this category.';
+                    return;
+                }
+                validValues.forEach((value, idx) => {
+                    const item = document.createElement('div');
+                    item.className = 'search-ui-checkbox-item';
+
+                    const input = document.createElement('input');
+                    input.type  = 'checkbox';
+                    input.id    = `search-ui-feature-filter-${idx}`;
+                    input.value = value;
+                    input.name  = 'filter_features';
+                    if (selectedFeaturesFilter.includes(value)) {
+                        input.checked = true;
                     }
-                    
-                    validValues.forEach((value, index) => {
-                        const checkboxItem = document.createElement('div');
-                        checkboxItem.className = 'search-ui-checkbox-item';
 
-                        const input = document.createElement('input');
-                        input.type = 'checkbox';
-                        input.id = `search-ui-feature-filter-${index}`;
-                        input.value = value;
-                        input.name = 'filter_features';
-                        
-                        // Check the box if this value is already selected
-                        if (selectedFeaturesFilter.includes(value)) {
-                            input.checked = true;
-                        }
-
-                        const label = document.createElement('label');
-                        label.htmlFor = `search-ui-feature-filter-${index}`;
-                        label.textContent = value;
-
-                        input.addEventListener('change', function() {
-                            if (this.checked) {
-                                selectedFeaturesFilter.push(this.value);
-                            } else {
-                                const idx = selectedFeaturesFilter.indexOf(this.value);
-                                if (idx > -1) selectedFeaturesFilter.splice(idx, 1);
-                            }
-                            updateFilterSelectionSummary();
-                            updateFilterSubmitButton();
-                        });
-
-                        checkboxItem.appendChild(input);
-                        checkboxItem.appendChild(label);
-                        checkboxContainer.appendChild(checkboxItem);
+                    input.addEventListener('change', function() {
+                        if (this.checked) selectedFeaturesFilter.push(value);
+                        else selectedFeaturesFilter = selectedFeaturesFilter.filter(f => f !== value);
+                        updateFilterSelectionSummary();
+                        updateFilterSubmitButton();
                     });
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    checkboxContainer.innerHTML = '<p>Error loading features. Please try again.</p>';
+
+                    const label = document.createElement('label');
+                    label.htmlFor   = input.id;
+                    label.textContent = value;
+
+                    item.append(input, label);
+                    checkboxContainer.appendChild(item);
                 });
-            }
+            })
+            .catch(err => {
+                console.error('Error loading filter features:', err);
+                checkboxContainer.innerHTML = '<p>Error loading features. Please try again.</p>';
+            });
         });
 
-        // Add event listener for filter form
         submitButton.addEventListener('click', function(e) {
             e.preventDefault();
             submitFilterSelection();
@@ -214,290 +189,236 @@ CMPortal.benchmark = {};
     }
 
     function updateSelectionSummary(side) {
-        const selectionSummary = document.getElementById(`search-ui-selection-summary-${side}`);
-        let selectedFeatures = side === 'left' ? selectedFeaturesLeft : selectedFeaturesRight;
-        if (selectionSummary) {
-            // Clear any existing reset button and create a new container
-            selectionSummary.innerHTML = '';
-            
-            // Create a div to hold the text and possibly the button
-            const summaryDiv = document.createElement('div');
-            summaryDiv.style.display = 'flex';
-            summaryDiv.style.alignItems = 'center';
-            
-            // Create text span
-            const textSpan = document.createElement('span');
-            if (side === 'left') {
-                // For left panel, show the selected parameter name
-                textSpan.textContent = selectedFeatures.length ? `${selectedFeatures[0]} selected` : '';
-            } else {
-                // For right panel, show the count as before
-                textSpan.textContent = selectedFeatures.length ? `Selected ${selectedFeatures.length} feature(s)` : '';
-            }
-            summaryDiv.appendChild(textSpan);
-            
-            // If right panel and there are selected features, add reset button
-            if (side === 'right' && selectedFeatures.length > 0) {
-                const resetButton = document.createElement('button');
-                resetButton.type = 'button';
-                resetButton.className = 'search-ui-reset-button';
-                resetButton.textContent = 'Reset';
-                resetButton.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    resetRightPanelSelections();
-                });
-                summaryDiv.appendChild(resetButton);
-            }
-            
-            selectionSummary.appendChild(summaryDiv);
+        const summaryEl = document.getElementById(`search-ui-selection-summary-${side}`);
+        const selected  = side === 'left' ? selectedFeaturesLeft : selectedFeaturesRight;
+        if (!summaryEl) return;
+        summaryEl.innerHTML = '';
+
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.alignItems = 'center';
+
+        const text = document.createElement('span');
+        text.textContent = side === 'left'
+            ? (selected[0] ? `${selected[0]} selected` : '')
+            : (selected.length ? `Selected ${selected.length} feature(s)` : '');
+        container.appendChild(text);
+
+        if (side === 'right' && selected.length) {
+            const resetBtn = document.createElement('button');
+            resetBtn.type        = 'button';
+            resetBtn.className   = 'search-ui-reset-button';
+            resetBtn.textContent = 'Reset';
+            resetBtn.addEventListener('click', e => {
+                e.preventDefault();
+                resetRightPanelSelections();
+            });
+            container.appendChild(resetBtn);
         }
+
+        summaryEl.appendChild(container);
     }
-    
+
     function updateFilterSelectionSummary() {
-        const selectionSummary = document.getElementById('search-ui-selection-summary-filter');
-        if (!selectionSummary) return;
-        
-        // Clear any existing content
-        selectionSummary.innerHTML = '';
-        
-        // Create a div to hold the text and possibly the button
-        const summaryDiv = document.createElement('div');
-        summaryDiv.style.display = 'flex';
-        summaryDiv.style.alignItems = 'center';
-        
-        // Create text span for feature count
-        const textSpan = document.createElement('span');
-        textSpan.textContent = selectedFeaturesFilter.length ? `Selected ${selectedFeaturesFilter.length} feature(s)` : '';
-        summaryDiv.appendChild(textSpan);
-        
-        // Add reset button if there are selected features
-        if (selectedFeaturesFilter.length > 0) {
-            const resetButton = document.createElement('button');
-            resetButton.type = 'button';
-            resetButton.className = 'search-ui-reset-button';
-            resetButton.textContent = 'Reset';
-            resetButton.addEventListener('click', function(e) {
+        const summaryEl = document.getElementById('search-ui-selection-summary-filter');
+        if (!summaryEl) return;
+        summaryEl.innerHTML = '';
+
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.alignItems = 'center';
+
+        const text = document.createElement('span');
+        text.textContent = selectedFeaturesFilter.length
+            ? `Selected ${selectedFeaturesFilter.length} feature(s)`
+            : '';
+        container.appendChild(text);
+
+        if (selectedFeaturesFilter.length) {
+            const resetBtn = document.createElement('button');
+            resetBtn.type        = 'button';
+            resetBtn.className   = 'search-ui-reset-button';
+            resetBtn.textContent = 'Reset';
+            resetBtn.addEventListener('click', e => {
                 e.preventDefault();
                 resetFilterSelections();
             });
-            summaryDiv.appendChild(resetButton);
+            container.appendChild(resetBtn);
         }
-        
-        selectionSummary.appendChild(summaryDiv);
+
+        summaryEl.appendChild(container);
     }
-    
+
     function updateGlobalSubmitButton() {
-        // Enable the global submit button if either form has at least one selected feature.
-        const submitButton = document.getElementById('search-ui-submit-button');
-        if (!submitButton) {
-            console.error('Global submit button with id "search-ui-submit-button" not found.');
-            return;
-        }
-        submitButton.disabled = !(selectedFeaturesLeft.length > 0 || selectedFeaturesRight.length > 0);
+        const btn = document.getElementById('search-ui-submit-button');
+        if (!btn) return;
+        // enable if there's any left or any right selection
+        btn.disabled = !(selectedFeaturesLeft.length > 0 || selectedFeaturesRight.length > 0);
     }
-    
+
     function updateFilterSubmitButton() {
-        const submitButton = document.getElementById('filter-submit-button');
-        if (!submitButton) return;
-        
-        // Enable button only if there are selected features
-        submitButton.disabled = selectedFeaturesFilter.length === 0;
+        const btn = document.getElementById('filter-submit-button');
+        if (!btn) return;
+        btn.disabled = selectedFeaturesFilter.length === 0;
     }
-    
+
     function resetRightPanelSelections() {
-        // Clear all right panel selections
         selectedFeaturesRight = [];
-        
-        // Uncheck all checkboxes in the right panel
-        const checkboxContainer = document.getElementById('search-ui-checkbox-container-right');
-        if (checkboxContainer) {
-            const checkboxes = checkboxContainer.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = false;
-            });
+        const container = document.getElementById('search-ui-checkbox-container-right');
+        if (container) {
+            container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
         }
-        
-        // Update the selection summary
         updateSelectionSummary('right');
         updateGlobalSubmitButton();
     }
-    
+
     function resetFilterSelections() {
-        // Clear all filter selections
         selectedFeaturesFilter = [];
-        
-        // Uncheck all checkboxes in the filter form
-        const checkboxContainer = document.getElementById('search-ui-checkbox-container-filter');
-        if (checkboxContainer) {
-            const checkboxes = checkboxContainer.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = false;
-            });
+        const container = document.getElementById('search-ui-checkbox-container-filter');
+        if (container) {
+            container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
         }
-        
-        // Update the selection summary and button
         updateFilterSelectionSummary();
         updateFilterSubmitButton();
     }
 
-    function submitAllSelections() {
-        const keyDropdownLeft = document.getElementById('search-ui-key-dropdown-left');
-        const keyDropdownRight = document.getElementById('search-ui-key-dropdown-right');
-        const submitButton = document.getElementById('search-ui-submit-button');
-        const resultDisplay = document.getElementById('search-ui-result-display');
-        const submissionResult = document.getElementById('search-ui-submission-result');
-
-        if (!submitButton) {
-            console.error('Global submit button with id "search-ui-submit-button" not found.');
-            return;
-        }
-
-        const formData = new FormData();
-        
-        // Simplified format: Just add the parameter from left panel
-        if (selectedFeaturesLeft.length > 0) {
-            formData.append('parameter', selectedFeaturesLeft[0]);
-        } else {
-            formData.append('parameter', '');
-        }
-        
-        // Add features from right panel
-        selectedFeaturesRight.forEach(feature => {
-            formData.append('selected_features[]', feature);
+    // --- toggle buttons setup ---
+    function initToggleButtons() {
+        toggleButtons = Array.from(document.querySelectorAll('.toggle-button'));
+        toggleButtons.forEach((btn, idx) => {
+            btn.disabled = true;
+            btn.classList.remove('active');
+            btn.addEventListener('click', e => {
+                e.preventDefault();
+                if (!btn.disabled) {
+                    toggleStates[idx] = !toggleStates[idx];
+                    btn.classList.toggle('active', toggleStates[idx]);
+                }
+            });
         });
+    }
+
+    function updateToggleButtons() {
+        const enable = selectedFeaturesLeft.length > 0;
+        toggleButtons.forEach(btn => btn.disabled = !enable);
+        if (!enable) {
+            toggleButtons.forEach((btn, idx) => {
+                toggleStates[idx] = false;
+                btn.classList.remove('active');
+            });
+        }
+    }
+    // --- end toggle setup ---
+
+    function submitAllSelections() {
+        const submitButton     = document.getElementById('search-ui-submit-button');
+        const resultDisplay    = document.getElementById('search-ui-result-display');
+        const submissionResult = document.getElementById('search-ui-submission-result');
+        if (!submitButton) return;
+
+        const payload = new URLSearchParams();
+        payload.append('parameter', selectedFeaturesLeft[0] || '');
+        selectedFeaturesRight.forEach(f => payload.append('selected_features[]', f));
+        toggleStates.forEach(state => payload.append('toggle_states[]', state));
 
         submitButton.disabled = true;
-        submitButton.textContent = 'Processing...';
+        submitButton.textContent = 'Processing…';
+        resultDisplay.classList.add('search-ui-hidden');
 
         fetch('/api/submit_features', {
             method: 'POST',
-            body: formData
+            headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+            body: payload.toString()
         })
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
-            if (resultDisplay) {
-                resultDisplay.classList.remove('search-ui-hidden');
+            const noParam    = !data.data.parameter;
+            const noFeatures = !data.data.selected_features ||
+                               data.data.selected_features.length === 0;
+            if (data.status === 'success' && noParam && noFeatures) {
+                data.status = 'failed';
             }
-            if (submissionResult) {
-                submissionResult.textContent = JSON.stringify(data, null, 2);
+
+            resultDisplay.classList.remove('search-ui-hidden');
+            if (data.status !== 'success') {
+                submissionResult.textContent = '❌ Search failed: Server is busy. Please try again.';
+            } else {
+                const displayObj = {
+                    status: data.status,
+                    data: data.data,
+                    toggle_states: toggleStates
+                };
+                submissionResult.textContent = JSON.stringify(displayObj, null, 2);
+                updateVisualizations(data);
             }
-            updateVisualizations(data);
+
             submitButton.disabled = false;
             submitButton.textContent = 'Find Protocols';
         })
-        .catch(error => {
-            console.error('Error:', error);
-            if (resultDisplay) {
-                resultDisplay.classList.remove('search-ui-hidden');
-            }
-            if (submissionResult) {
-                submissionResult.textContent = 'Error submitting selection. Please try again.';
-            }
+        .catch(err => {
+            console.error('Error submitting selection:', err);
+            resultDisplay.classList.remove('search-ui-hidden');
+            submissionResult.textContent = `❌ Network error: ${err.message}`;
             submitButton.disabled = false;
             submitButton.textContent = 'Find Protocols';
         });
     }
-    
+
     function submitFilterSelection() {
-        const submitButton = document.getElementById('filter-submit-button');
-        const resultDisplay = document.getElementById('filter-result-display');
+        const submitButton     = document.getElementById('filter-submit-button');
+        const resultDisplay    = document.getElementById('filter-result-display');
         const submissionResult = document.getElementById('filter-submission-result');
-        
         if (!submitButton) return;
-        
-        const formData = new FormData();
-        
-        // Add all selected filter features
-        selectedFeaturesFilter.forEach(feature => {
-            formData.append('filter_features[]', feature);
-        });
-        
+
+        const payload = new URLSearchParams();
+        selectedFeaturesFilter.forEach(f => payload.append('filter_features[]', f));
+
         submitButton.disabled = true;
-        submitButton.textContent = 'Processing...';
-        
+        submitButton.textContent = 'Processing…';
+
         fetch('/api/filter_features', {
             method: 'POST',
-            body: formData
+            headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+            body: payload.toString()
         })
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
-            // Show results in the dedicated result display
-            if (resultDisplay) {
-                resultDisplay.classList.remove('search-ui-hidden');
-            }
-            if (submissionResult) {
-                submissionResult.textContent = JSON.stringify(data, null, 2);
-            }
-            
-            // Also log to console (but don't update row 4)
-            showFilterResults(data);
-            
+            submissionResult.textContent = JSON.stringify(data, null, 2);
+            resultDisplay.classList.remove('search-ui-hidden');
             submitButton.disabled = false;
             submitButton.textContent = 'Filter Features';
         })
-        .catch(error => {
-            console.error('Error:', error);
-            
-            if (resultDisplay) {
-                resultDisplay.classList.remove('search-ui-hidden');
-            }
-            if (submissionResult) {
-                submissionResult.textContent = 'Error filtering features. Please try again.';
-            }
-            
+        .catch(err => {
+            console.error('Error filtering features:', err);
+            submissionResult.textContent = `Error: ${err.message}`;
+            resultDisplay.classList.remove('search-ui-hidden');
             submitButton.disabled = false;
             submitButton.textContent = 'Filter Features';
         });
     }
 
     function updateVisualizations(data) {
-        const chartContainer = document.getElementById('table-search-container-row1');
-        if (chartContainer) {
-            chartContainer.innerHTML = '<p>Feature distribution for selected protocols</p>';
-        }
-        const umapContainer = document.getElementById('table-search-container-row2');
-        if (umapContainer) {
-            umapContainer.innerHTML = '<p>UMAP visualization for selected protocols</p>';
-        }
-        const umapContainer2 = document.getElementById('table-search-container-row3');
-        if (umapContainer2) {
-            umapContainer2.innerHTML = '<p>Alternative UMAP visualization for selected protocols</p>';
-        }
-        
-        // Removed any code that would modify row 4
-    }
-    
-    function showFilterResults(data) {
-        // Since we don't want to modify row 4 yet, we'll just log the data to console
-        console.log('Filter results received:', data);
-        
-        // This will be implemented later when we're ready to update row 4
-        // For now we'll just show the response in the console
-        if (data && data.data) {
-            console.log(`Received ${data.data.count} filtered features`);
-        }
+        const c1 = document.getElementById('table-search-container-row1');
+        if (c1) c1.innerHTML = '<p>Feature distribution for selected protocols</p>';
+        const c2 = document.getElementById('table-search-container-row2');
+        if (c2) c2.innerHTML = '<p>UMAP visualization for selected protocols</p>';
+        const c3 = document.getElementById('table-search-container-row3');
+        if (c3) c3.innerHTML = '<p>Alternative UMAP visualization for selected protocols</p>';
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', () => {
         if (!isInitialized) {
-            // Initialize both left and right forms
             initializeForm('left');
             initializeForm('right');
-            
-            // Initialize the filter form
             initializeFilterForm();
-
-            // Attach the global submit event for the single submission button
-            const submitButton = document.getElementById('search-ui-submit-button');
-            if (submitButton) {
-                submitButton.addEventListener('click', function(event) {
-                    event.preventDefault();
+            initToggleButtons();
+            const submitBtn = document.getElementById('search-ui-submit-button');
+            if (submitBtn) {
+                submitBtn.addEventListener('click', e => {
+                    e.preventDefault();
                     submitAllSelections();
                 });
-            } else {
-                console.error('Global submit button with id "search-ui-submit-button" not found on DOMContentLoaded.');
             }
-
             isInitialized = true;
         }
     });

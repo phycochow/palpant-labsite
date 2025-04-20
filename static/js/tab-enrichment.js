@@ -3,23 +3,23 @@ window.CMPortal = window.CMPortal || {};
 CMPortal.enrichment = {};
 
 (function() {
-  // Initialize variables
   let selectedParameter = [];
   let isInitialized = false;
-  
+  let enrichmentTable = null;
+
   function initializeParameterForm() {
-    const keyDropdown = document.getElementById('parameter-dropdown');
+    const keyDropdown       = document.getElementById('parameter-dropdown');
     const checkboxContainer = document.getElementById('parameter-container');
-    const selectionSummary = document.getElementById('parameter-summary');
-    const submitButton = document.getElementById('enrichment-submit-button');
+    const selectionSummary  = document.getElementById('parameter-summary');
+    const submitButton      = document.getElementById('enrichment-submit-button');
 
     if (!keyDropdown || !checkboxContainer || !selectionSummary) {
-      console.error('One or more required elements not found for parameter form');
+      console.error('Required elements not found for enrichment form');
       return;
     }
 
     keyDropdown.addEventListener('change', function() {
-      // Clear previous selections and UI elements
+      // reset UI
       checkboxContainer.innerHTML = '';
       checkboxContainer.classList.add('enrichment-hidden');
       selectedParameter = [];
@@ -27,64 +27,61 @@ CMPortal.enrichment = {};
       updateSubmitButton();
 
       const selectedKey = this.value;
-      if (selectedKey) {
-        checkboxContainer.classList.remove('enrichment-hidden');
-        checkboxContainer.innerHTML = `<p>Loading parameters...</p>`;
-        const formData = new FormData();
-        formData.append('selected_key', selectedKey);
+      if (!selectedKey) return;
 
-        fetch('/api/get_TargetParameters', {
-          method: 'POST',
-          body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-          checkboxContainer.innerHTML = '';
-          const validValues = data.values.filter(value => value && value.trim() !== '');
-          if (validValues.length === 0) {
-            const noItems = document.createElement('p');
-            noItems.textContent = 'No parameters available for this category.';
-            checkboxContainer.appendChild(noItems);
-            return;
-          }
-          
-          // Create radio buttons for parameters (single selection)
-          validValues.forEach((value, index) => {
-            const checkboxItem = document.createElement('div');
-            checkboxItem.className = 'enrichment-checkbox-item';
+      // show loading
+      checkboxContainer.classList.remove('enrichment-hidden');
+      checkboxContainer.innerHTML = `<p>Loading parameters…</p>`;
 
-            const input = document.createElement('input');
-            input.type = 'radio';
-            input.id = `parameter-feature-${index}`;
-            input.value = value;
-            input.name = 'selected_feature_parameter'; // Use same name for all radio buttons
+      // build URL‑encoded payload
+      const payload = new URLSearchParams();
+      payload.append('selected_key', selectedKey);
 
-            const label = document.createElement('label');
-            label.htmlFor = `parameter-feature-${index}`;
-            label.textContent = value;
+      fetch('/api/get_TargetParameters', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        },
+        body: payload.toString()
+      })
+      .then(res => res.json())
+      .then(data => {
+        checkboxContainer.innerHTML = '';
+        const vals = (data.values || []).filter(v => v && v.trim());
+        if (!vals.length) {
+          checkboxContainer.textContent = 'No parameters available for this category.';
+          return;
+        }
+        vals.forEach((value, idx) => {
+          const item = document.createElement('div');
+          item.className = 'enrichment-checkbox-item';
 
-            input.addEventListener('change', function() {
-              if (this.checked) {
-                // For radio buttons - clear previous and add the new selection
-                selectedParameter = [this.value];
-              }
-              updateSelectionSummary();
-              updateSubmitButton();
-            });
+          const input = document.createElement('input');
+          input.type  = 'radio';
+          input.id    = `parameter-feature-${idx}`;
+          input.name  = 'selected_feature_parameter';
+          input.value = value;
 
-            checkboxItem.appendChild(input);
-            checkboxItem.appendChild(label);
-            checkboxContainer.appendChild(checkboxItem);
+          input.addEventListener('change', () => {
+            selectedParameter = [value];
+            updateSelectionSummary();
+            updateSubmitButton();
           });
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          checkboxContainer.innerHTML = '<p>Error loading parameters. Please try again.</p>';
+
+          const label = document.createElement('label');
+          label.htmlFor = input.id;
+          label.textContent = value;
+
+          item.append(input, label);
+          checkboxContainer.appendChild(item);
         });
-      }
+      })
+      .catch(err => {
+        console.error('Error loading parameters:', err);
+        checkboxContainer.innerHTML = '<p>Error loading parameters. Please try again.</p>';
+      });
     });
-    
-    // Submit button functionality
+
     if (submitButton) {
       submitButton.addEventListener('click', function(e) {
         e.preventDefault();
@@ -94,84 +91,131 @@ CMPortal.enrichment = {};
   }
 
   function updateSelectionSummary() {
-    const selectionSummary = document.getElementById('parameter-summary');
-    if (!selectionSummary) return;
-    
-    // Clear existing content
-    selectionSummary.innerHTML = '';
-    
-    // Create text showing the selected parameter
-    const textSpan = document.createElement('span');
-    textSpan.textContent = selectedParameter.length ? `${selectedParameter[0]} selected` : '';
-    selectionSummary.appendChild(textSpan);
+    const summary = document.getElementById('parameter-summary');
+    if (!summary) return;
+    summary.innerHTML = '';
+    const span = document.createElement('span');
+    span.textContent = selectedParameter[0]
+      ? `${selectedParameter[0]} selected`
+      : '';
+    summary.appendChild(span);
   }
-  
+
   function updateSubmitButton() {
-    const submitButton = document.getElementById('enrichment-submit-button');
-    if (!submitButton) return;
-    
-    // Enable button only if a parameter is selected
-    submitButton.disabled = selectedParameter.length === 0;
+    const btn = document.getElementById('enrichment-submit-button');
+    if (!btn) return;
+    btn.disabled = selectedParameter.length === 0;
   }
-  
+
   function submitSelection() {
-    const submitButton = document.getElementById('enrichment-submit-button');
-    if (!submitButton) return;
-    
+    const submitButton     = document.getElementById('enrichment-submit-button');
+    const resultDisplay    = document.getElementById('enrichment-result-display');
+    const submissionResult = document.getElementById('enrichment-submission-result');
+    if (!submitButton || !submissionResult || !resultDisplay) return;
+
+    // build URL-encoded payload
+    const payload = new URLSearchParams();
+    payload.append('parameter', selectedParameter[0] || '');
+
+    // UI state
     submitButton.disabled = true;
     submitButton.textContent = 'Processing...';
-    
-    const formData = new FormData();
-    if (selectedParameter.length > 0) {
-      formData.append('parameter', selectedParameter[0]);
-    } else {
-      formData.append('parameter', '');
-    }
-    
+    resultDisplay.classList.add('enrichment-hidden');
+
     fetch('/api/submit_features', {
       method: 'POST',
-      body: formData
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+      },
+      body: payload.toString()
     })
-    .then(response => response.json())
+    .then(res => res.json())
     .then(data => {
-      showResults(data);
+      // treat an empty-success as failure
+      if (data.status === 'success' && !data.data.parameter) {
+        data.status = 'failed';
+      }
+
+      resultDisplay.classList.remove('enrichment-hidden');
+
+      if (data.status !== 'success') {
+        submissionResult.textContent = '❌ Search failed: Server is busy. Please reclick and try again.';
+      } else {
+        submissionResult.textContent = '✅ Search success: 1 parameter submitted. Fetching dataset now.';
+        // **NEW**: load and render the enrichment table
+        loadEnrichmentTable(selectedParameter[0]);
+      }
+
+      // restore button
       submitButton.disabled = false;
       submitButton.textContent = 'Find Protocols';
     })
     .catch(error => {
-      console.error('Error:', error);
+      console.error('Error submitting enrichment:', error);
+      resultDisplay.classList.remove('enrichment-hidden');
+      submissionResult.textContent = `❌ Network error: ${error.message}`;
       submitButton.disabled = false;
       submitButton.textContent = 'Find Protocols';
     });
   }
-  
-  function showResults(data) {
+
+  function loadEnrichmentTable(label) {
     const tableContainer = document.getElementById('enrichment-table-container');
-    if (!tableContainer) return;
-    
-    // Use the response data to populate the results
-    if (data && data.data) {
-      const parameter = data.data.parameter || 'None';
-      
-      let resultHTML = '<div class="enrichment-results">';
-      resultHTML += `<h3>Enrichment Results for: ${parameter}</h3>`;
-      resultHTML += '<table class="enrichment-table">';
-      resultHTML += '<thead><tr><th>Enrichment ID</th><th>Description</th><th>Score</th></tr></thead>';
-      resultHTML += '<tbody>';
-      
-      // Example rows - in real implementation, these would be populated from the API response
-      resultHTML += '<tr><td>E001</td><td>Cell Viability</td><td>0.85</td></tr>';
-      resultHTML += '<tr><td>E002</td><td>Calcium Handling</td><td>0.72</td></tr>';
-      resultHTML += '<tr><td>E003</td><td>Sarcomere Organization</td><td>0.68</td></tr>';
-      
-      resultHTML += '</tbody></table>';
-      resultHTML += '</div>';
-      
-      tableContainer.innerHTML = resultHTML;
+    const tableEl        = document.getElementById('enrichment-data-table');
+    const submissionResult = document.getElementById('enrichment-submission-result');
+    if (!tableContainer || !tableEl) {
+      console.error('Table container or element not found');
+      return;
     }
+
+    fetch(`/api/enrichment_data?parameter=${encodeURIComponent(label)}`)
+      .then(res => res.json())
+      .then(json => {
+        if (json.error) {
+          throw new Error(json.error);
+        }
+
+        // clear previous table if any
+        if (enrichmentTable) {
+          enrichmentTable.destroy();
+          tableEl.innerHTML = '';
+        }
+
+        // build columns array for DataTables
+        const columns = json.columns.map(col => ({
+          data: col,
+          title: col.replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase()),
+        }));
+
+        // initialize DataTable
+        enrichmentTable = $(tableEl).DataTable({
+          data: json.data,
+          columns: columns,
+          scrollX: true,
+          scrollY: '50vh',
+          scrollCollapse: true,
+          pageLength: 10,
+          lengthChange: false,
+          autoWidth: false,
+          dom: '<"row mb-3"<"col-sm-8"B><"col-sm-4"f>>rtip',
+          buttons: [
+            { extend: 'csv', className: 'btn btn-sm btn-secondary', text: 'Export CSV' },
+            { extend: 'colvis', className: 'btn btn-sm btn-primary', text: 'Columns' }
+          ],
+          language: {
+            search: "_INPUT_",
+            searchPlaceholder: "Filter..."
+          }
+        });
+
+        tableContainer.classList.remove('enrichment-hidden');
+      })
+      .catch(err => {
+        console.error('Error loading enrichment data:', err);
+        submissionResult.textContent = `❌ Error loading dataset: ${err.message}`;
+      });
   }
 
-  // Initialize when the document is ready
   document.addEventListener('DOMContentLoaded', function() {
     if (!isInitialized) {
       initializeParameterForm();

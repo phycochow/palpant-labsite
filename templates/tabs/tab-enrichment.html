@@ -38,10 +38,25 @@
   <button id="enrichment-submit-button" class="enrichment-button" disabled>Find Protocols</button>
 </div>
 
+<!-- ↑→ New “debug” UI, copied from Search tab style →↓ -->
 <div class="well">
-  <p>Row 1 - Table(s) of Enrichment</p>
-  <div id="enrichment-table-container"></div>
+  <div id="enrichment-result-display" class="enrichment-hidden">
+    <h3>Submission Result:</h3>
+    <pre id="enrichment-submission-result" class="enrichment-pre"></pre>
+  </div>
 </div>
-  <script src="{{ url_for('static', filename='js/tab-enrichment.js') }}"></script>
+
+<!-- DataTable results (hidden until data is loaded) -->
+<div class="enrichment-results">
+  <div id="enrichment-table-container" class="enrichment-hidden">
+    <table
+      id="enrichment-data-table"
+      class="table table-striped table-bordered table-compact"
+      style="width:100%">
+    </table>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/tab-enrichment.js') }}"></script>
 </body>
 </html>

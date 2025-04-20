@@ -253,3 +253,29 @@
     border: 1px solid #eee;
     margin-top: 15px;
 }
+
+/* Toggle‐button styling */
+.toggle-button {
+    background-color: var(--gray);
+    color: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin: 0 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* When toggled “on” */
+.toggle-button.active {
+    background-color: var(--accent-dark);
+    color: var(--light);
+}
+
+/* Disabled state */
+.toggle-button:disabled {
+    background-color: #e0e0e0;
+    color: #aaa;
+    border-color: #ccc;
+    cursor: not-allowed;
+}
