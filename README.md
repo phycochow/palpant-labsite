@@ -144,7 +144,7 @@ sudo apt install -y certbot python3-certbot-nginx
 
 Request and Install SSL Certificate
 ```bash
-sudo certbot --nginx -d palpantlab.duckdns.org
+sudo certbot --nginx -d palpantlab.com
 ```
 Follow the prompts:
 - Accept Terms
@@ -219,3 +219,15 @@ sudo systemctl restart flaskapp
 ---
 if it crashes again
 sudo journalctl -u flaskapp -f
+
+---
+
+
+# Verify permissions - make sure they're readable by the web server
+chmod 644 static/datasets/*.csv
+---
+
+sudo ufw allow 80
+sudo ufw allow 443
+sudo ufw enable
+sudo ufw status
