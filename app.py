@@ -1,5 +1,6 @@
 from flask import Flask, render_template, jsonify, request
 import os, csv
+import pandas as pd
 from collections import defaultdict
 
 app = Flask(__name__)
@@ -8,74 +9,88 @@ app.logger.info('Flask application startup')
 
 # ----- Preset databases -----
 DATA_DIR        = os.path.join(app.static_folder, 'datasets')
-TARGET_PARAMS   = os.path.join(DATA_DIR, '0_TargetParameters_12Apr25.csv')
-FEATURE_CATS    = os.path.join(DATA_DIR, '0_FeatureCategories_01Mar25.csv')
-ENRICH_CSV      = os.path.join(DATA_DIR, '1_PermutatedImportancesTRUE_20Apr25.csv')
-VIEWER_CSV      = os.path.join(DATA_DIR, '0_CleanedDatabase_25Feb25.csv')
+target_param_filepath     = os.path.join(DATA_DIR, '0_TargetParameters_12Apr25.csv')
+feature_categories_filepath = os.path.join(DATA_DIR, '0_FeatureCategories_01Mar25.csv')
+enrich_filepath           = os.path.join(DATA_DIR, '1_PermutatedImportancesTRUE_20Apr25.csv')
+cleaned_database_filepath = os.path.join(DATA_DIR, '0_CleanedDatabase_25Feb25.csv')
 
-# Load the *small* lookup tables into memory (these are tiny)
+# ----- Load small lookup tables into memory -----
 FeatureCategories_dict = defaultdict(list)
 TargetParameters_dict  = defaultdict(list)
 
-for path, store, name in [
-    (FEATURE_CATS, FeatureCategories_dict, 'feature categories'),
-    (TARGET_PARAMS, TargetParameters_dict,  'target parameters')
-]:
-    try:
-        with open(path, newline='', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                # accumulate each column's values
-                for key, val in row.items():
-                    store[key].append(val)
-        app.logger.info(f'Successfully loaded {name}')
-    except FileNotFoundError:
-        app.logger.error(f'Could not find {name} file at {path}')
-    except Exception as e:
-        app.logger.error(f'Error loading {name}: {e}')
+try:
+    with open(feature_categories_filepath, newline='', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            for key, val in row.items():
+                FeatureCategories_dict[key].append(val)
+    app.logger.info('Successfully loaded feature categories')
+    
+    with open(target_param_filepath, newline='', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            for key, val in row.items():
+                TargetParameters_dict[key].append(val)
+    app.logger.info('Successfully loaded target parameter findings')
+except Exception as e:
+    app.logger.error(f'Error loading lookup tables: {e}')
 
-@app.route('/api/enrichment_data')
+# ----- Load larger CSVs once, convert to plain lists, then drop DataFrames -----
+try:
+    _df = pd.read_csv(cleaned_database_filepath)
+    _df = _df.fillna("NaN")
+    viewer_data = _df.to_dict(orient='records')
+    viewer_columns = _df.columns.tolist()
+    del _df
+    app.logger.info(f'Loaded cleaned database: {len(viewer_data)} rows')
+except Exception as e:
+    app.logger.error(f'Error loading cleaned database: {e}')
+    viewer_data = []
+    viewer_columns = []
+
+try:
+    _df = pd.read_csv(enrich_filepath)
+    _df = _df.fillna('')
+    enrichment_data = _df.to_dict(orient='records')
+    enrichment_columns = _df.columns.tolist()
+    del _df
+    app.logger.info(f'Loaded enrichment data: {len(enrichment_data)} rows')
+except Exception as e:
+    app.logger.error(f'Error loading enrichment data: {e}')
+    enrichment_data = []
+    enrichment_columns = []
+
+@app.route('/api/enrichment_data', methods=['GET'])
 def get_enrichment_data():
     """
-    Stream-filter the enrichment CSV by Target Label.
-    Only rows matching ?parameter=... are returned.
+    Serve the enrichment records, optionally filtered by ?parameter=...
     """
-    selected = request.args.get('parameter')
-    try:
-        with open(ENRICH_CSV, newline='', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            out = []
-            for row in reader:
-                if not selected or row.get('Target Label') == selected:
-                    out.append(row)
-            return jsonify({
-                'data':    out,
-                'columns': reader.fieldnames
-            })
-    except FileNotFoundError:
-        return jsonify({'error': 'Enrichment dataset not found'}), 404
-    except Exception as e:
-        app.logger.error(f'Error in enrichment_data: {e}')
-        return jsonify({'error': str(e)}), 500
+    if not enrichment_data:
+        return jsonify({'error': 'Enrichment data not available'}), 404
+
+    selected_label = request.args.get('parameter')
+    if selected_label:
+        filtered = [r for r in enrichment_data if r.get('Target Label') == selected_label]
+    else:
+        filtered = enrichment_data
+
+    return jsonify({
+        'data':    filtered,
+        'columns': enrichment_columns
+    })
 
 @app.route('/api/viewer')
 def api_viewer():
     """
-    Stream the entire cleaned database CSV.
+    Serve the entire cleaned database as JSON
     """
-    try:
-        with open(VIEWER_CSV, newline='', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            out = [row for row in reader]
-            return jsonify({
-                'data':    out,
-                'columns': reader.fieldnames
-            })
-    except FileNotFoundError:
-        return jsonify({'error': 'Viewer dataset not found'}), 404
-    except Exception as e:
-        app.logger.error(f'Error in api_viewer: {e}')
-        return jsonify({'error': str(e)}), 500
+    if not viewer_data:
+        return jsonify({'error': 'Viewer data not available'}), 404
+
+    return jsonify({
+        'data':    viewer_data,
+        'columns': viewer_columns
+    })
 
 @app.route('/api/get_ProtocolFeatures', methods=['POST'])
 def get_ProtocolFeatures():
@@ -92,7 +107,7 @@ def submit_features():
     parameter = request.form.get('parameter','')
     features  = request.form.getlist('selected_features[]')
     return jsonify({
-        'status':'success',
+        'status': 'success',
         'data': {
             'parameter': parameter,
             'selected_features': features
@@ -103,7 +118,7 @@ def submit_features():
 def filter_features():
     features = request.form.getlist('filter_features[]')
     return jsonify({
-        'status':'success',
+        'status': 'success',
         'data': {'filtered_features': features}
     })
 
@@ -115,7 +130,7 @@ def home():
 def cmportal():
     return render_template('cmportal.html',
         FeatureCategories=FeatureCategories_dict.keys(),
-        TargetParameters= TargetParameters_dict.keys()
+        TargetParameters=TargetParameters_dict.keys()
     )
 
 @app.route('/dash')
@@ -126,11 +141,12 @@ def dash():
 def test():
     return render_template('testcase.html',
         FeatureCategories=FeatureCategories_dict.keys(),
-        TargetParameters= TargetParameters_dict.keys()
+        TargetParameters=TargetParameters_dict.keys()
     )
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
+
 
     
 # you run this file by
