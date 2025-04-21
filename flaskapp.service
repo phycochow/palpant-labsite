@@ -7,7 +7,7 @@ User=ubuntu
 Group=www-data
 WorkingDirectory=/home/ubuntu/palpant-labsite
 Environment="PATH=/home/ubuntu/palpant-labsite/venv/bin"
-ExecStart=/home/ubuntu/palpant-labsite/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 app:app
+ExecStart=/home/ubuntu/palpant-labsite/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8000 app:app
 Restart=always
 RestartSec=10
 StandardOutput=journal
