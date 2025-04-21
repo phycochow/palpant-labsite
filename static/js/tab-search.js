@@ -270,65 +270,73 @@ CMPortal.search = {};
     }
 
     function submitAllSelections() {
-        const submitBtn = document.getElementById('search-ui-submit-button');
-        const resultDisplay = document.getElementById('search-ui-result-display');
-        const submissionResult = document.getElementById('search-ui-submission-result');
-        if (!submitBtn) return;
+      const submitBtn         = document.getElementById('search-ui-submit-button');
+      const resultDisplay     = document.getElementById('search-ui-result-display');
+      const submissionResult  = document.getElementById('search-ui-submission-result');
+      if (!submitBtn || !submissionResult || !resultDisplay) return;
 
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Processing…';
-        if (resultDisplay) resultDisplay.classList.add('search-ui-hidden');
+      // Step 1: Get selected parameter (left form)
+      const leftRadio = document.querySelector('#search-ui-checkbox-container-left input[type="radio"]:checked');
+      const parameter = leftRadio ? leftRadio.value : '';
 
-        const leftRadio = document.querySelector('#search-ui-checkbox-container-left input[type="radio"]:checked');
-        const parameter = leftRadio ? leftRadio.value : '';
+      if (!parameter) {
+        submissionResult.textContent = '⚠️ Please select a parameter from the left panel before submitting.';
+        resultDisplay.classList.remove('search-ui-hidden');
+        return;
+      }
 
-        const payload = new URLSearchParams();
-        payload.append('parameter', parameter);
-        selectedFeaturesRight.forEach(f => payload.append('selected_features[]', f));
-        toggleStates.forEach(state => payload.append('toggle_states[]', state));
+      // Step 2: Get selected features (right form memory)
+      const features = selectedFeaturesRight.slice(); // clone memory array
 
-        fetch('/api/submit_features', {
-            method: 'POST',
-            headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
-            body: payload.toString()
-        })
-        .then(res => {
-            if (!res.ok) throw new Error(`Server response: ${res.status} ${res.statusText}`);
-            return res.json();
-        })
-        .then(data => {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Find Protocols';
-            if (resultDisplay) resultDisplay.classList.remove('search-ui-hidden');
+      // Step 3: Get toggle states (from button classes)
+      const toggles = Array.from(toggleButtons).map(btn => btn.classList.contains('active'));
 
-            submissionResult.textContent = JSON.stringify({
-                status: data.status,
-                data: data.data,
-                toggle_states: toggleStates
-            }, null, 2);
+      // Step 4: Construct payload
+      const payload = new URLSearchParams();
+      payload.append('parameter', parameter);
+      features.forEach(f => payload.append('selected_features[]', f));
+      toggles.forEach(state => payload.append('toggle_states[]', state));
 
-            if (data.status !== 'success') {
-                submissionResult.textContent = `❌ Search failed: ${data.message || 'Server is busy. Please try again.'}`;
-                return;
-            }
+      // Step 5: Submit
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Processing…';
+      resultDisplay.classList.add('search-ui-hidden');
 
-            const hasResults = data.search_results?.data?.length > 0;
-            const hasSelections = parameter || selectedFeaturesRight.length;
-            if (hasResults && hasSelections) {
-                submissionResult.textContent += `\n\n✅ Search Successful: Found ${data.search_results.data.length} matching protocols.`;
-                displaySearchResults(data.search_results);
-            } else {
-                submissionResult.textContent = '❌ Search failed: Server is busy. Please reclick and try again to fetch the correct data.';
-            }
-        })
-        .catch(err => {
-            console.error('Error submitting selection:', err);
-            if (resultDisplay) resultDisplay.classList.remove('search-ui-hidden');
-            submissionResult.textContent = `❌ Network error: ${err.message}`;
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Find Protocols';
-        });
+      fetch('/api/submit_features', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: payload.toString()
+      })
+      .then(res => {
+        if (!res.ok) throw new Error(`Server response: ${res.status} ${res.statusText}`);
+        return res.json();
+      })
+      .then(data => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Find Protocols';
+        resultDisplay.classList.remove('search-ui-hidden');
+
+        if (data.status !== 'success') {
+          submissionResult.textContent = `❌ Search failed: ${data.message || 'Please try again.'}`;
+          return;
+        }
+
+        if (data.search_results?.data?.length > 0) {
+          submissionResult.textContent = `✅ Success! Found ${data.search_results.data.length} matching protocols.`;
+          displaySearchResults(data.search_results);
+        } else {
+          submissionResult.textContent = '❌ Search failed: No results found. Please refine your selection and try again.';
+        }
+      })
+      .catch(err => {
+        console.error('Submission error:', err);
+        resultDisplay.classList.remove('search-ui-hidden');
+        submissionResult.textContent = `❌ Network error: ${err.message}`;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Find Protocols';
+      });
     }
+
 
     document.addEventListener('DOMContentLoaded', () => {
         if (!isInitialized) {
