@@ -139,9 +139,9 @@ CMPortal.enrichment = {};
       resultDisplay.classList.remove('enrichment-hidden');
 
       if (data.status !== 'success') {
-        submissionResult.textContent = '❌ Search failed: Server is busy. Please reclick and try again.';
+        submissionResult.textContent = '❌ Search failed: Server is busy. Please reclick and try again to fetch the correct data.';
       } else {
-        submissionResult.textContent = '✅ Search success: 1 parameter submitted. Fetching dataset now.';
+        submissionResult.textContent = '✅ Search success: 1 parameter submitted. Dataset is fetched correctly..';
         // **NEW**: load and render the enrichment table
         loadEnrichmentTable(selectedParameter[0]);
       }
@@ -161,11 +161,26 @@ CMPortal.enrichment = {};
 
   function loadEnrichmentTable(label) {
     const tableContainer = document.getElementById('enrichment-table-container');
-    const tableEl        = document.getElementById('enrichment-data-table');
+    const tableEl = document.getElementById('enrichment-data-table');
     const submissionResult = document.getElementById('enrichment-submission-result');
+    
     if (!tableContainer || !tableEl) {
       console.error('Table container or element not found');
       return;
+    }
+
+    // First, properly check if DataTable already exists and destroy it
+    try {
+      // Use DataTables API to check if table is already initialized
+      const existingTable = $.fn.dataTable.isDataTable(tableEl);
+      if (existingTable) {
+        // Get the DataTable instance and destroy it properly
+        $(tableEl).DataTable().destroy();
+        // Clear the HTML after destroying
+        tableEl.innerHTML = '';
+      }
+    } catch (e) {
+      console.warn('Error while checking/destroying existing table:', e);
     }
 
     fetch(`/api/enrichment_data?parameter=${encodeURIComponent(label)}`)
@@ -175,11 +190,8 @@ CMPortal.enrichment = {};
           throw new Error(json.error);
         }
 
-        // clear previous table if any
-        if (enrichmentTable) {
-          enrichmentTable.destroy();
-          tableEl.innerHTML = '';
-        }
+        // Make sure container is visible before initializing DataTable
+        tableContainer.classList.remove('enrichment-hidden');
 
         // build columns array for DataTables
         const columns = json.columns.map(col => ({
@@ -187,7 +199,7 @@ CMPortal.enrichment = {};
           title: col.replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase()),
         }));
 
-        // initialize DataTable
+        // initialize DataTable with improved configuration
         enrichmentTable = $(tableEl).DataTable({
           data: json.data,
           columns: columns,
@@ -196,7 +208,9 @@ CMPortal.enrichment = {};
           scrollCollapse: true,
           pageLength: 10,
           lengthChange: false,
-          autoWidth: false,
+          autoWidth: true, // Let DataTables calculate the width initially
+          responsive: true, // Add responsive behavior
+          destroy: true, // Allow table to be destroyed and recreated
           dom: '<"row mb-3"<"col-sm-8"B><"col-sm-4"f>>rtip',
           buttons: [
             { extend: 'csv', className: 'btn btn-sm btn-secondary', text: 'Export CSV' },
@@ -205,10 +219,19 @@ CMPortal.enrichment = {};
           language: {
             search: "_INPUT_",
             searchPlaceholder: "Filter..."
+          },
+          // Add these callbacks to handle column sizing
+          initComplete: function() {
+            // Adjust column widths after table is fully initialized
+            setTimeout(() => {
+              $(tableEl).DataTable().columns.adjust().draw();
+            }, 100);
+          },
+          drawCallback: function() {
+            // Re-adjust when pages change
+            $(tableEl).DataTable().columns.adjust();
           }
         });
-
-        tableContainer.classList.remove('enrichment-hidden');
       })
       .catch(err => {
         console.error('Error loading enrichment data:', err);

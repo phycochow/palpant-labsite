@@ -104,14 +104,22 @@ def get_TargetParameters():
 
 @app.route('/api/submit_features', methods=['POST'])
 def submit_features():
-    parameter = request.form.get('parameter','')
-    features  = request.form.getlist('selected_features[]')
+    # existing form fields
+    parameter     = request.form.get('parameter', '')
+    features      = request.form.getlist('selected_features[]')
+    
+    # new: pull in the toggle_states[] values (strings "true"/"false")
+    raw_states    = request.form.getlist('toggle_states[]')
+    # optional: convert them to real Python bools
+    toggle_states = [s.lower() == 'true' for s in raw_states]
+
     return jsonify({
         'status': 'success',
         'data': {
             'parameter': parameter,
             'selected_features': features
-        }
+        },
+        'toggle_states': toggle_states
     })
 
 @app.route('/api/filter_features', methods=['POST'])
