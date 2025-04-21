@@ -279,3 +279,60 @@
     border-color: #ccc;
     cursor: not-allowed;
 }
+
+/* Custom CSS for centering table contents */
+
+/* Center align all cells in search results table */
+#search-results-table td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Center align all header cells */
+#search-results-table th {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Specific styling for the title column (typically needs to be left-aligned) */
+#search-results-table td:first-child,
+#search-results-table th:first-child {
+  text-align: left;
+}
+
+/* Adjust padding for better readability */
+#search-results-table td, 
+#search-results-table th {
+  padding: 8px 10px;
+}
+
+/* Optional: Add vertical borders between columns for better readability */
+#search-results-table td, 
+#search-results-table th {
+  border-right: 1px solid #ddd;
+}
+
+#search-results-table td:last-child, 
+#search-results-table th:last-child {
+  border-right: none;
+}
+
+/* Optional: Highlight numeric columns with light background */
+#search-results-table td.dt-numeric {
+  background-color: #f9f9f9;
+}
+
+/* DataTables specific class for centering */
+.dt-center {
+  text-align: center !important;
+}
+
+/* Additional class that can be added to specific columns that should be left-aligned */
+.dt-left {
+  text-align: left !important;
+}
+
+/* Fix for DataTables scrolling with centered content */
+.dataTables_scrollBody {
+  min-height: 200px;
+}

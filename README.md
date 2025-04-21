@@ -231,3 +231,11 @@ sudo ufw allow 80
 sudo ufw allow 443
 sudo ufw enable
 sudo ufw status
+--
+no swap is risky
+
+sudo fallocate -l 512M /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab

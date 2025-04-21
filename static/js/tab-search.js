@@ -1,21 +1,12 @@
 // tab-search.js
 window.CMPortal = window.CMPortal || {};
-CMPortal.benchmark = {};
+CMPortal.search = {};
 
-/**
- * tab-search.js - Enhanced version with URL‑encoded POSTs to handle special characters
- * - Left panel: Target Parameters
- * - Right panel: Protocol Features
- * - Five toggle buttons that only become active once a left‐panel choice is made
- * - Submission result now includes toggle button states
- * - Global submit enabled if either left or right has a selection
- */
 (function() {
     let isInitialized = false;
-    let selectedFeaturesLeft = [];
-    let selectedFeaturesRight = [];
     const toggleStates = [false, false, false, false, false];
     let toggleButtons = [];
+    let searchResultsTable = null;
 
     function initializeForm(side) {
         const keyDropdown       = document.getElementById(`search-ui-key-dropdown-${side}`);
@@ -30,10 +21,13 @@ CMPortal.benchmark = {};
             // Reset UI
             checkboxContainer.innerHTML = '';
             checkboxContainer.classList.add('search-ui-hidden');
+
             if (side === 'left') {
-                selectedFeaturesLeft = [];
+                // Whenever left panel changes, also clear right selections
+                resetRightPanelSelections();
                 updateToggleButtons();
             }
+
             updateSelectionSummary(side);
             updateGlobalSubmitButton();
 
@@ -74,23 +68,16 @@ CMPortal.benchmark = {};
                     input.id    = `search-ui-feature-${side}-${idx}`;
                     input.value = value;
                     input.name  = side === 'left' ? 'selected_feature_left' : 'selected_features';
-                    if (side === 'right' && selectedFeaturesRight.includes(value)) {
-                        input.checked = true;
-                    }
+
+                    // No need to pre-check, we'll read the actual DOM on submit
 
                     input.addEventListener('change', function() {
-                        if (side === 'left') {
-                            selectedFeaturesLeft = [this.value];
-                            updateToggleButtons();
-                        } else {
-                            if (this.checked) {
-                                selectedFeaturesRight.push(value);
-                            } else {
-                                selectedFeaturesRight = selectedFeaturesRight.filter(f => f !== value);
-                            }
-                        }
+                        // Update summaries and button enables
                         updateSelectionSummary(side);
                         updateGlobalSubmitButton();
+                        if (side === 'left') {
+                            updateToggleButtons();
+                        }
                     });
 
                     const label = document.createElement('label');
@@ -110,7 +97,6 @@ CMPortal.benchmark = {};
 
     function updateSelectionSummary(side) {
         const summaryEl = document.getElementById(`search-ui-selection-summary-${side}`);
-        const selected  = side === 'left' ? selectedFeaturesLeft : selectedFeaturesRight;
         if (!summaryEl) return;
         summaryEl.innerHTML = '';
 
@@ -118,22 +104,33 @@ CMPortal.benchmark = {};
         container.style.display = 'flex';
         container.style.alignItems = 'center';
 
-        const text = document.createElement('span');
-        text.textContent = side === 'left'
-            ? (selected[0] ? `${selected[0]} selected` : '')
-            : (selected.length ? `Selected ${selected.length} feature(s)` : '');
-        container.appendChild(text);
+        if (side === 'left') {
+            const checked = document.querySelector(
+              '#search-ui-checkbox-container-left input[type="radio"]:checked'
+            );
+            const text = document.createElement('span');
+            text.textContent = checked ? `${checked.value} selected` : '';
+            container.appendChild(text);
+        } else {
+            const checkedBoxes = document.querySelectorAll(
+              '#search-ui-checkbox-container-right input[type="checkbox"]:checked'
+            );
+            const count = checkedBoxes.length;
+            const text = document.createElement('span');
+            text.textContent = count ? `Selected ${count} feature(s)` : '';
+            container.appendChild(text);
 
-        if (side === 'right' && selected.length) {
-            const resetBtn = document.createElement('button');
-            resetBtn.type        = 'button';
-            resetBtn.className   = 'search-ui-reset-button';
-            resetBtn.textContent = 'Reset';
-            resetBtn.addEventListener('click', e => {
-                e.preventDefault();
-                resetRightPanelSelections();
-            });
-            container.appendChild(resetBtn);
+            if (count) {
+                const resetBtn = document.createElement('button');
+                resetBtn.type        = 'button';
+                resetBtn.className   = 'search-ui-reset-button';
+                resetBtn.textContent = 'Reset';
+                resetBtn.addEventListener('click', e => {
+                    e.preventDefault();
+                    resetRightPanelSelections();
+                });
+                container.appendChild(resetBtn);
+            }
         }
 
         summaryEl.appendChild(container);
@@ -142,12 +139,18 @@ CMPortal.benchmark = {};
     function updateGlobalSubmitButton() {
         const btn = document.getElementById('search-ui-submit-button');
         if (!btn) return;
-        // enable if there's any left or any right selection
-        btn.disabled = !(selectedFeaturesLeft.length > 0 || selectedFeaturesRight.length > 0);
+
+        const leftChecked   = !!document.querySelector(
+          '#search-ui-checkbox-container-left input[type="radio"]:checked'
+        );
+        const rightChecked  = !!document.querySelector(
+          '#search-ui-checkbox-container-right input[type="checkbox"]:checked'
+        );
+
+        btn.disabled = !(leftChecked || rightChecked);
     }
 
     function resetRightPanelSelections() {
-        selectedFeaturesRight = [];
         const container = document.getElementById('search-ui-checkbox-container-right');
         if (container) {
             container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
@@ -156,7 +159,6 @@ CMPortal.benchmark = {};
         updateGlobalSubmitButton();
     }
 
-    // --- toggle buttons setup ---
     function initToggleButtons() {
         toggleButtons = Array.from(document.querySelectorAll('.toggle-button'));
         toggleButtons.forEach((btn, idx) => {
@@ -173,78 +175,166 @@ CMPortal.benchmark = {};
     }
 
     function updateToggleButtons() {
-        const enable = selectedFeaturesLeft.length > 0;
-        toggleButtons.forEach(btn => btn.disabled = !enable);
-        if (!enable) {
+        const leftChecked = !!document.querySelector(
+          '#search-ui-checkbox-container-left input[type="radio"]:checked'
+        );
+        toggleButtons.forEach(btn => btn.disabled = !leftChecked);
+        if (!leftChecked) {
             toggleButtons.forEach((btn, idx) => {
                 toggleStates[idx] = false;
                 btn.classList.remove('active');
             });
         }
     }
-    // --- end toggle setup ---
+
+    function initSearchResultsTable() {
+        if (!document.getElementById('search-results-container')) {
+            const well = document.querySelector('#tab-search .well:last-of-type');
+            if (well) {
+                well.innerHTML = '<h3>Search Results</h3><div id="search-results-container"></div>';
+            }
+        }
+        const container = document.getElementById('search-results-container');
+        if (container && !document.getElementById('search-results-table')) {
+            container.innerHTML = '<table id="search-results-table" class="table table-striped table-bordered table-compact" style="width:100%"></table>';
+        }
+    }
+
+    function displaySearchResults(results) {
+        if (!results || !results.data || !results.columns) {
+            console.error('Invalid search results data');
+            return;
+        }
+
+        initSearchResultsTable();
+        const tableEl = document.getElementById('search-results-table');
+        if (!tableEl) return;
+
+        if ($.fn.dataTable.isDataTable('#search-results-table')) {
+            $('#search-results-table').DataTable().destroy();
+        }
+
+        const columns = results.columns.map(col => ({
+            data: col,
+            title: col.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            className: 'dt-center',
+            render: (data, type) => {
+                if (data == null || (typeof data === 'number' && isNaN(data))) return '';
+                if (type === 'display' && col.toLowerCase() === 'doi') {
+                    let url = data.startsWith('http') ? data : 'https://doi.org/' + data.replace(/^doi:?\s*/i, '');
+                    return `<a href="${url}" target="_blank">${data}</a>`;
+                }
+                return data;
+            }
+        }));
+
+        const cleanData = results.data.map(row => {
+            const out = {};
+            for (let key in row) {
+                let v = row[key];
+                out[key] = (v == null || (typeof v === 'number' && isNaN(v))) ? '' : v;
+            }
+            return out;
+        });
+
+        try {
+            $(tableEl).DataTable({
+                data: cleanData,
+                columns,
+                scrollX: true,
+                scrollY: '50vh',
+                scrollCollapse: true,
+                pageLength: 10,
+                lengthChange: false,
+                autoWidth: false,
+                dom: '<"row mb-3"<"col-sm-8"B><"col-sm-4"f>>rtip',
+                buttons: [
+                    { extend: 'csv', className: 'btn btn-sm btn-secondary', text: 'Export CSV' },
+                    { extend: 'colvis', className: 'btn btn-sm btn-primary', text: 'Columns' }
+                ],
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Filter records..."
+                },
+                ordering: false,
+                initComplete() {
+                    setTimeout(() => $(tableEl).DataTable().columns.adjust().draw(), 100);
+                }
+            });
+            document.getElementById('search-results-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (error) {
+            console.error('Error initializing DataTable:', error);
+            document.getElementById('search-results-container').innerHTML = '<div class="alert alert-danger">Error displaying results. Please try again.</div>';
+        }
+    }
 
     function submitAllSelections() {
-        const submitButton     = document.getElementById('search-ui-submit-button');
-        const resultDisplay    = document.getElementById('search-ui-result-display');
+        const submitBtn = document.getElementById('search-ui-submit-button');
+        const resultDisplay = document.getElementById('search-ui-result-display');
         const submissionResult = document.getElementById('search-ui-submission-result');
-        if (!submitButton) return;
+        if (!submitBtn) return;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Processing…';
+        if (resultDisplay) resultDisplay.classList.add('search-ui-hidden');
+
+        // Read current selections from the DOM
+        const leftRadio = document.querySelector(
+          '#search-ui-checkbox-container-left input[type="radio"]:checked'
+        );
+        const parameter = leftRadio ? leftRadio.value : '';
+
+        const rightChecks = Array.from(
+          document.querySelectorAll('#search-ui-checkbox-container-right input[type="checkbox"]:checked')
+        );
+        const features = rightChecks.map(cb => cb.value);
+
+        const toggles = Array.from(toggleButtons).map(btn => btn.classList.contains('active'));
 
         const payload = new URLSearchParams();
-        payload.append('parameter', selectedFeaturesLeft[0] || '');
-        selectedFeaturesRight.forEach(f => payload.append('selected_features[]', f));
-        toggleStates.forEach(state => payload.append('toggle_states[]', state));
-
-        submitButton.disabled = true;
-        submitButton.textContent = 'Processing…';
-        resultDisplay.classList.add('search-ui-hidden');
+        payload.append('parameter', parameter);
+        features.forEach(f => payload.append('selected_features[]', f));
+        toggles.forEach(state => payload.append('toggle_states[]', state));
 
         fetch('/api/submit_features', {
             method: 'POST',
             headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
             body: payload.toString()
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error(`Server response: ${res.status} ${res.statusText}`);
+            return res.json();
+        })
         .then(data => {
-            const noParam    = !data.data.parameter;
-            const noFeatures = !data.data.selected_features ||
-                               data.data.selected_features.length === 0;
-            if (data.status === 'success' && noParam && noFeatures) {
-                data.status = 'failed';
-            }
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Find Protocols';
+            if (resultDisplay) resultDisplay.classList.remove('search-ui-hidden');
 
-            resultDisplay.classList.remove('search-ui-hidden');
+            submissionResult.textContent = JSON.stringify({
+                status: data.status,
+                data: data.data,
+                toggle_states: toggles
+            }, null, 2);
+
             if (data.status !== 'success') {
-                submissionResult.textContent = '❌ Search failed: Server is busy. Please try again.';
-            } else {
-                const displayObj = {
-                    status: data.status,
-                    data: data.data,
-                    toggle_states: toggleStates
-                };
-                submissionResult.textContent = JSON.stringify(displayObj, null, 2);
-                updateVisualizations(data);
+                submissionResult.textContent = `❌ Search failed: ${data.message || 'Server is busy. Please try again.'}`;
+                return;
             }
 
-            submitButton.disabled = false;
-            submitButton.textContent = 'Find Protocols';
+            if (data.search_results?.data?.length > 0 && (parameter || features.length)) {
+                submissionResult.textContent += `\n\n✅ Found ${data.search_results.data.length} matching protocols.`;
+                displaySearchResults(data.search_results);
+            } else {
+                submissionResult.textContent = '❌ Search failed: Server is busy. Please reclick and try again to fetch the correct data.';
+            }
         })
         .catch(err => {
             console.error('Error submitting selection:', err);
-            resultDisplay.classList.remove('search-ui-hidden');
+            if (resultDisplay) resultDisplay.classList.remove('search-ui-hidden');
             submissionResult.textContent = `❌ Network error: ${err.message}`;
-            submitButton.disabled = false;
-            submitButton.textContent = 'Find Protocols';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Find Protocols';
         });
-    }
-
-    function updateVisualizations(data) {
-        const c1 = document.getElementById('table-search-container-row1');
-        if (c1) c1.innerHTML = '<p>Feature distribution for selected protocols</p>';
-        const c2 = document.getElementById('table-search-container-row2');
-        if (c2) c2.innerHTML = '<p>UMAP visualization for selected protocols</p>';
-        const c3 = document.getElementById('table-search-container-row3');
-        if (c3) c3.innerHTML = '<p>Alternative UMAP visualization for selected protocols</p>';
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -252,6 +342,8 @@ CMPortal.benchmark = {};
             initializeForm('left');
             initializeForm('right');
             initToggleButtons();
+            initSearchResultsTable();
+
             const submitBtn = document.getElementById('search-ui-submit-button');
             if (submitBtn) {
                 submitBtn.addEventListener('click', e => {
@@ -259,7 +351,17 @@ CMPortal.benchmark = {};
                     submitAllSelections();
                 });
             }
+
             isInitialized = true;
+        }
+    });
+
+    // Re-adjust DataTable when the tab becomes active
+    $(document).on('tab-activated', (event, tabId) => {
+        if (tabId === 'tab-search' && searchResultsTable) {
+            setTimeout(() => {
+                searchResultsTable.columns.adjust().draw();
+            }, 100);
         }
     });
 })();
