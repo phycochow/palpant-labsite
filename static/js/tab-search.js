@@ -4,12 +4,13 @@ CMPortal.search = {};
 
 (function() {
     let isInitialized = false;
+    let selectedFeaturesRight = []; // Remember selections across right panel categories
     const toggleStates = [false, false, false, false, false];
     let toggleButtons = [];
     let searchResultsTable = null;
 
     function initializeForm(side) {
-        const keyDropdown       = document.getElementById(`search-ui-key-dropdown-${side}`);
+        const keyDropdown = document.getElementById(`search-ui-key-dropdown-${side}`);
         const checkboxContainer = document.getElementById(`search-ui-checkbox-container-${side}`);
 
         if (!keyDropdown || !checkboxContainer) {
@@ -17,14 +18,12 @@ CMPortal.search = {};
             return;
         }
 
-        keyDropdown.addEventListener('change', function() {
-            // Reset UI
+        keyDropdown.addEventListener('change', function () {
             checkboxContainer.innerHTML = '';
             checkboxContainer.classList.add('search-ui-hidden');
 
             if (side === 'left') {
-                // Whenever left panel changes, also clear right selections
-                resetRightPanelSelections();
+                resetRightPanelSelections(); // Clear right on left change
                 updateToggleButtons();
             }
 
@@ -34,7 +33,6 @@ CMPortal.search = {};
             const selectedKey = this.value;
             if (!selectedKey) return;
 
-            // Show loading
             checkboxContainer.classList.remove('search-ui-hidden');
             checkboxContainer.innerHTML = `<p id="search-ui-loading-message-${side}">Loading features...</p>`;
 
@@ -58,30 +56,40 @@ CMPortal.search = {};
                     checkboxContainer.textContent = 'No features available for this category.';
                     return;
                 }
+
                 const inputType = side === 'left' ? 'radio' : 'checkbox';
                 validValues.forEach((value, idx) => {
                     const item = document.createElement('div');
                     item.className = 'search-ui-checkbox-item';
 
                     const input = document.createElement('input');
-                    input.type  = inputType;
-                    input.id    = `search-ui-feature-${side}-${idx}`;
+                    input.type = inputType;
+                    input.id = `search-ui-feature-${side}-${idx}`;
                     input.value = value;
-                    input.name  = side === 'left' ? 'selected_feature_left' : 'selected_features';
+                    input.name = side === 'left' ? 'selected_feature_left' : 'selected_features';
 
-                    // No need to pre-check, we'll read the actual DOM on submit
+                    if (side === 'right' && selectedFeaturesRight.includes(value)) {
+                        input.checked = true;
+                    }
 
-                    input.addEventListener('change', function() {
-                        // Update summaries and button enables
+                    input.addEventListener('change', function () {
+                        if (side === 'right') {
+                            if (this.checked) {
+                                if (!selectedFeaturesRight.includes(value)) {
+                                    selectedFeaturesRight.push(value);
+                                }
+                            } else {
+                                selectedFeaturesRight = selectedFeaturesRight.filter(f => f !== value);
+                            }
+                        }
+
                         updateSelectionSummary(side);
                         updateGlobalSubmitButton();
-                        if (side === 'left') {
-                            updateToggleButtons();
-                        }
+                        if (side === 'left') updateToggleButtons();
                     });
 
                     const label = document.createElement('label');
-                    label.htmlFor   = input.id;
+                    label.htmlFor = input.id;
                     label.textContent = value;
 
                     item.append(input, label);
@@ -105,25 +113,20 @@ CMPortal.search = {};
         container.style.alignItems = 'center';
 
         if (side === 'left') {
-            const checked = document.querySelector(
-              '#search-ui-checkbox-container-left input[type="radio"]:checked'
-            );
+            const checked = document.querySelector('#search-ui-checkbox-container-left input[type="radio"]:checked');
             const text = document.createElement('span');
             text.textContent = checked ? `${checked.value} selected` : '';
             container.appendChild(text);
         } else {
-            const checkedBoxes = document.querySelectorAll(
-              '#search-ui-checkbox-container-right input[type="checkbox"]:checked'
-            );
-            const count = checkedBoxes.length;
+            const count = selectedFeaturesRight.length;
             const text = document.createElement('span');
             text.textContent = count ? `Selected ${count} feature(s)` : '';
             container.appendChild(text);
 
             if (count) {
                 const resetBtn = document.createElement('button');
-                resetBtn.type        = 'button';
-                resetBtn.className   = 'search-ui-reset-button';
+                resetBtn.type = 'button';
+                resetBtn.className = 'search-ui-reset-button';
                 resetBtn.textContent = 'Reset';
                 resetBtn.addEventListener('click', e => {
                     e.preventDefault();
@@ -140,17 +143,14 @@ CMPortal.search = {};
         const btn = document.getElementById('search-ui-submit-button');
         if (!btn) return;
 
-        const leftChecked   = !!document.querySelector(
-          '#search-ui-checkbox-container-left input[type="radio"]:checked'
+        const leftChecked = !!document.querySelector(
+            '#search-ui-checkbox-container-left input[type="radio"]:checked'
         );
-        const rightChecked  = !!document.querySelector(
-          '#search-ui-checkbox-container-right input[type="checkbox"]:checked'
-        );
-
-        btn.disabled = !(leftChecked || rightChecked);
+        btn.disabled = !(leftChecked || selectedFeaturesRight.length > 0);
     }
 
     function resetRightPanelSelections() {
+        selectedFeaturesRight = [];
         const container = document.getElementById('search-ui-checkbox-container-right');
         if (container) {
             container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
@@ -176,7 +176,7 @@ CMPortal.search = {};
 
     function updateToggleButtons() {
         const leftChecked = !!document.querySelector(
-          '#search-ui-checkbox-container-left input[type="radio"]:checked'
+            '#search-ui-checkbox-container-left input[type="radio"]:checked'
         );
         toggleButtons.forEach(btn => btn.disabled = !leftChecked);
         if (!leftChecked) {
@@ -194,6 +194,7 @@ CMPortal.search = {};
                 well.innerHTML = '<h3>Search Results</h3><div id="search-results-container"></div>';
             }
         }
+
         const container = document.getElementById('search-results-container');
         if (container && !document.getElementById('search-results-table')) {
             container.innerHTML = '<table id="search-results-table" class="table table-striped table-bordered table-compact" style="width:100%"></table>';
@@ -278,23 +279,13 @@ CMPortal.search = {};
         submitBtn.textContent = 'Processing…';
         if (resultDisplay) resultDisplay.classList.add('search-ui-hidden');
 
-        // Read current selections from the DOM
-        const leftRadio = document.querySelector(
-          '#search-ui-checkbox-container-left input[type="radio"]:checked'
-        );
+        const leftRadio = document.querySelector('#search-ui-checkbox-container-left input[type="radio"]:checked');
         const parameter = leftRadio ? leftRadio.value : '';
-
-        const rightChecks = Array.from(
-          document.querySelectorAll('#search-ui-checkbox-container-right input[type="checkbox"]:checked')
-        );
-        const features = rightChecks.map(cb => cb.value);
-
-        const toggles = Array.from(toggleButtons).map(btn => btn.classList.contains('active'));
 
         const payload = new URLSearchParams();
         payload.append('parameter', parameter);
-        features.forEach(f => payload.append('selected_features[]', f));
-        toggles.forEach(state => payload.append('toggle_states[]', state));
+        selectedFeaturesRight.forEach(f => payload.append('selected_features[]', f));
+        toggleStates.forEach(state => payload.append('toggle_states[]', state));
 
         fetch('/api/submit_features', {
             method: 'POST',
@@ -313,7 +304,7 @@ CMPortal.search = {};
             submissionResult.textContent = JSON.stringify({
                 status: data.status,
                 data: data.data,
-                toggle_states: toggles
+                toggle_states: toggleStates
             }, null, 2);
 
             if (data.status !== 'success') {
@@ -321,8 +312,10 @@ CMPortal.search = {};
                 return;
             }
 
-            if (data.search_results?.data?.length > 0 && (parameter || features.length)) {
-                submissionResult.textContent += `\n\n✅ Found ${data.search_results.data.length} matching protocols.`;
+            const hasResults = data.search_results?.data?.length > 0;
+            const hasSelections = parameter || selectedFeaturesRight.length;
+            if (hasResults && hasSelections) {
+                submissionResult.textContent += `\n\n✅ Search Successful: Found ${data.search_results.data.length} matching protocols.`;
                 displaySearchResults(data.search_results);
             } else {
                 submissionResult.textContent = '❌ Search failed: Server is busy. Please reclick and try again to fetch the correct data.';
@@ -356,7 +349,6 @@ CMPortal.search = {};
         }
     });
 
-    // Re-adjust DataTable when the tab becomes active
     $(document).on('tab-activated', (event, tabId) => {
         if (tabId === 'tab-search' && searchResultsTable) {
             setTimeout(() => {

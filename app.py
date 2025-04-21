@@ -369,7 +369,7 @@ def submit_features():
         if result_table.empty:
             return jsonify({
                 'status': 'error',
-                'message': 'No results found for the given parameters'
+                'message': 'No results found. None of the 322 protocols co-reported the selected features of interest. Try with less.'
             })
         
         # Fill NaN values with None for proper JSON serialization

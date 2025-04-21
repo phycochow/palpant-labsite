@@ -3,7 +3,6 @@ window.CMPortal = window.CMPortal || {};
 CMPortal.enrichment = {};
 
 (function() {
-  let selectedParameter = [];
   let isInitialized = false;
   let enrichmentTable = null;
 
@@ -13,27 +12,23 @@ CMPortal.enrichment = {};
     const selectionSummary  = document.getElementById('parameter-summary');
     const submitButton      = document.getElementById('enrichment-submit-button');
 
-    if (!keyDropdown || !checkboxContainer || !selectionSummary) {
+    if (!keyDropdown || !checkboxContainer || !selectionSummary || !submitButton) {
       console.error('Required elements not found for enrichment form');
       return;
     }
 
     keyDropdown.addEventListener('change', function() {
-      // reset UI
       checkboxContainer.innerHTML = '';
       checkboxContainer.classList.add('enrichment-hidden');
-      selectedParameter = [];
       updateSelectionSummary();
       updateSubmitButton();
 
       const selectedKey = this.value;
       if (!selectedKey) return;
 
-      // show loading
       checkboxContainer.classList.remove('enrichment-hidden');
       checkboxContainer.innerHTML = `<p>Loading parameters…</p>`;
 
-      // build URL‑encoded payload
       const payload = new URLSearchParams();
       payload.append('selected_key', selectedKey);
 
@@ -52,6 +47,7 @@ CMPortal.enrichment = {};
           checkboxContainer.textContent = 'No parameters available for this category.';
           return;
         }
+
         vals.forEach((value, idx) => {
           const item = document.createElement('div');
           item.className = 'enrichment-checkbox-item';
@@ -63,7 +59,6 @@ CMPortal.enrichment = {};
           input.value = value;
 
           input.addEventListener('change', () => {
-            selectedParameter = [value];
             updateSelectionSummary();
             updateSubmitButton();
           });
@@ -82,42 +77,48 @@ CMPortal.enrichment = {};
       });
     });
 
-    if (submitButton) {
-      submitButton.addEventListener('click', function(e) {
-        e.preventDefault();
-        submitSelection();
-      });
-    }
+    submitButton.addEventListener('click', function(e) {
+      e.preventDefault();
+      submitSelection();
+    });
+  }
+
+  function getSelectedParameterFromDOM() {
+    const radio = document.querySelector('#parameter-container input[type="radio"]:checked');
+    return radio ? radio.value : '';
   }
 
   function updateSelectionSummary() {
     const summary = document.getElementById('parameter-summary');
     if (!summary) return;
+
     summary.innerHTML = '';
+    const selectedValue = getSelectedParameterFromDOM();
     const span = document.createElement('span');
-    span.textContent = selectedParameter[0]
-      ? `${selectedParameter[0]} selected`
-      : '';
+    span.textContent = selectedValue ? `${selectedValue} selected` : '';
     summary.appendChild(span);
   }
 
   function updateSubmitButton() {
     const btn = document.getElementById('enrichment-submit-button');
     if (!btn) return;
-    btn.disabled = selectedParameter.length === 0;
+
+    const hasSelection = !!getSelectedParameterFromDOM();
+    btn.disabled = !hasSelection;
   }
 
   function submitSelection() {
     const submitButton     = document.getElementById('enrichment-submit-button');
     const resultDisplay    = document.getElementById('enrichment-result-display');
     const submissionResult = document.getElementById('enrichment-submission-result');
+
     if (!submitButton || !submissionResult || !resultDisplay) return;
 
-    // build URL-encoded payload
-    const payload = new URLSearchParams();
-    payload.append('parameter', selectedParameter[0] || '');
+    const selectedValue = getSelectedParameterFromDOM();
 
-    // UI state
+    const payload = new URLSearchParams();
+    payload.append('parameter', selectedValue);
+
     submitButton.disabled = true;
     submitButton.textContent = 'Processing...';
     resultDisplay.classList.add('enrichment-hidden');
@@ -131,22 +132,15 @@ CMPortal.enrichment = {};
     })
     .then(res => res.json())
     .then(data => {
-      // treat an empty-success as failure
-      if (data.status === 'success' && !data.data.parameter) {
-        data.status = 'failed';
-      }
-
       resultDisplay.classList.remove('enrichment-hidden');
 
-      if (data.status !== 'success') {
+      if (data.status !== 'success' || !data.data?.parameter) {
         submissionResult.textContent = '❌ Search failed: Server is busy. Please reclick and try again to fetch the correct data.';
       } else {
-        submissionResult.textContent = '✅ Search success: 1 parameter submitted. Dataset is fetched correctly..';
-        // **NEW**: load and render the enrichment table
-        loadEnrichmentTable(selectedParameter[0]);
+        submissionResult.textContent = '✅ Search success: 1 parameter submitted. Dataset is fetched correctly.';
+        loadEnrichmentTable(selectedValue);
       }
 
-      // restore button
       submitButton.disabled = false;
       submitButton.textContent = 'Find Protocols';
     })
@@ -169,14 +163,9 @@ CMPortal.enrichment = {};
       return;
     }
 
-    // First, properly check if DataTable already exists and destroy it
     try {
-      // Use DataTables API to check if table is already initialized
-      const existingTable = $.fn.dataTable.isDataTable(tableEl);
-      if (existingTable) {
-        // Get the DataTable instance and destroy it properly
+      if ($.fn.dataTable.isDataTable(tableEl)) {
         $(tableEl).DataTable().destroy();
-        // Clear the HTML after destroying
         tableEl.innerHTML = '';
       }
     } catch (e) {
@@ -186,31 +175,26 @@ CMPortal.enrichment = {};
     fetch(`/api/enrichment_data?parameter=${encodeURIComponent(label)}`)
       .then(res => res.json())
       .then(json => {
-        if (json.error) {
-          throw new Error(json.error);
-        }
+        if (json.error) throw new Error(json.error);
 
-        // Make sure container is visible before initializing DataTable
         tableContainer.classList.remove('enrichment-hidden');
 
-        // build columns array for DataTables
         const columns = json.columns.map(col => ({
           data: col,
           title: col.replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase()),
         }));
 
-        // initialize DataTable with improved configuration
         enrichmentTable = $(tableEl).DataTable({
           data: json.data,
-          columns: columns,
+          columns,
           scrollX: true,
           scrollY: '50vh',
           scrollCollapse: true,
           pageLength: 10,
           lengthChange: false,
-          autoWidth: true, // Let DataTables calculate the width initially
-          responsive: true, // Add responsive behavior
-          destroy: true, // Allow table to be destroyed and recreated
+          autoWidth: true,
+          responsive: true,
+          destroy: true,
           dom: '<"row mb-3"<"col-sm-8"B><"col-sm-4"f>>rtip',
           buttons: [
             { extend: 'csv', className: 'btn btn-sm btn-secondary', text: 'Export CSV' },
@@ -220,15 +204,12 @@ CMPortal.enrichment = {};
             search: "_INPUT_",
             searchPlaceholder: "Filter..."
           },
-          // Add these callbacks to handle column sizing
-          initComplete: function() {
-            // Adjust column widths after table is fully initialized
+          initComplete() {
             setTimeout(() => {
               $(tableEl).DataTable().columns.adjust().draw();
             }, 100);
           },
-          drawCallback: function() {
-            // Re-adjust when pages change
+          drawCallback() {
             $(tableEl).DataTable().columns.adjust();
           }
         });
@@ -239,7 +220,7 @@ CMPortal.enrichment = {};
       });
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', () => {
     if (!isInitialized) {
       initializeParameterForm();
       isInitialized = true;
