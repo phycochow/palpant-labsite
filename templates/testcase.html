@@ -1,222 +1,296 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Category and Features Selection</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        select {
-            width: 100%;
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
-        .checkbox-container {
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            padding: 10px;
-            margin-top: 5px;
-        }
-        .checkbox-item {
-            margin-bottom: 8px;
-        }
-        .checkbox-item label {
-            font-weight: normal;
-            display: inline;
-            margin-left: 5px;
-        }
-        .result {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f5f5f5;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 15px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .hidden {
-            display: none;
-        }
-        .selection-summary {
-            margin-top: 15px;
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Benchmark Visualization Testcase</title>
+  <style>
+    :root {
+      --primary: #2c3e50;
+      --secondary: #34495e;
+      --accent: #3498db;
+      --success: #2ecc71;
+      --warning: #f39c12;
+      --danger: #e74c3c;
+      --light: #ecf0f1;
+      --dark: #2c3e50;
+      --gray: #95a5a6;
+      --border: #ddd;
+      --table-hover: #e2e8ea;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--light);
+      padding: 20px;
+      margin: 0;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1 {
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .benchmark-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    
+    .benchmark-table th,
+    .benchmark-table td {
+      border: 1px solid var(--border);
+      text-align: center;
+      vertical-align: middle;
+      transition: background-color 0.3s ease;
+    }
+    
+    .indicator-header {
+      width: 200px;
+      text-align: left;
+      padding: 10px;
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .quantile-header {
+      width: 80px;
+      text-align: center;
+      padding: 10px;
+      background-color: var(--light);
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    .indicator-cell {
+      text-align: left;
+      padding: 10px;
+      font-weight: bold;
+      background-color: #f8f9fa;
+    }
+    
+    .quantile-cell {
+      width: 80px;
+      height: 40px;
+      text-align: center;
+      vertical-align: middle;
+      background-color: white;
+      position: relative;
+    }
+    
+    .quantile-cell:hover {
+      background-color: var(--table-hover);
+      cursor: default;
+    }
+    
+    .protocol-marker {
+      color: var(--accent);
+      font-weight: bold;
+      font-size: 22px;
+    }
+    
+    .database-marker {
+      color: var(--danger);
+      font-weight: bold;
+      font-size: 22px;
+    }
+    
+    .marker-left {
+      position: absolute;
+      left: 10px;
+    }
+    
+    .marker-right {
+      position: absolute;
+      right: 10px;
+    }
+    
+    .legend {
+      margin-top: 20px;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .description {
+      margin-top: 30px;
+      text-align: center;
+      color: var(--gray);
+      font-style: italic;
+    }
+    
+    .btn {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      display: block;
+      margin: 0 auto 20px;
+    }
+    
+    .btn:hover {
+      background-color: #2980b9;
+    }
+  </style>
 </head>
 <body>
-    <h1>Category and Features Selection</h1>
+  <div class="container">
+    <h1>Protocol Benchmark Visualization</h1>
     
-    <form id="features-form">
-        <div class="form-group">
-            <label for="key-dropdown">Select Category:</label>
-            <select id="key-dropdown" name="category">
-                <option value="">-- Select a Category --</option>
-                {% for category in FeatureCategories %}
-                <option value="{{ category }}">{{ category }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label>Select Features:</label>
-            <div id="checkbox-container" class="checkbox-container hidden">
-                <p id="loading-message">Please select a category first...</p>
-            </div>
-            <div class="selection-summary" id="selection-summary"></div>
-        </div>
-        
-        <button type="submit" id="submit-button" disabled>Submit Selection</button>
-    </form>
+    <button id="generate-btn" class="btn">Generate Random Data</button>
     
-    <div class="result hidden" id="result-display">
-        <h3>Submission Result:</h3>
-        <pre id="submission-result"></pre>
+    <table id="benchmark-table" class="benchmark-table">
+      <thead>
+        <tr>
+          <th class="indicator-header">Indicator</th>
+          <th class="quantile-header">Q1 (Best)</th>
+          <th class="quantile-header">Q2 (Good)</th>
+          <th class="quantile-header">Q3 (Average)</th>
+          <th class="quantile-header">Q4 (Below Average)</th>
+          <th class="quantile-header">Q5 (Worst)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Table rows will be populated by JavaScript -->
+      </tbody>
+    </table>
+    
+    <div class="legend">
+      <div class="legend-item">
+        <span class="protocol-marker">X</span>
+        <span>Your Protocol</span>
+      </div>
+      <div class="legend-item">
+        <span class="database-marker">O</span>
+        <span>Database Average</span>
+      </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const keyDropdown = document.getElementById('key-dropdown');
-            const checkboxContainer = document.getElementById('checkbox-container');
-            const resultDisplay = document.getElementById('result-display');
-            const selectionSummary = document.getElementById('selection-summary');
-            const submitButton = document.getElementById('submit-button');
-            const submissionResult = document.getElementById('submission-result');
-            const featuresForm = document.getElementById('features-form');
+    
+    <div class="description">
+      <p>This visualization compares your uploaded protocol against the database average across different performance quantiles.</p>
+    </div>
+  </div>
+  
+  <script>
+    // Sample indicators for the benchmark
+    const indicators = [
+      'Cell Viability', 
+      'APD90', 
+      'Calcium Transient', 
+      'Sarcomere Length', 
+      'Mitochondrial Function',
+      'Contractility'
+    ];
+    
+    // Function to generate random benchmark data
+    function generateBenchmarkData() {
+      return indicators.map(indicator => {
+        // Random quantile index (0-4) for "Your Protocol"
+        const yourProtocolQuantile = Math.floor(Math.random() * 5);
+        // Random quantile index (0-4) for "Database Average"
+        const databaseAvgQuantile = Math.floor(Math.random() * 5);
+        
+        return {
+          indicator,
+          yourProtocolQuantile,
+          databaseAvgQuantile
+        };
+      });
+    }
+    
+    // Function to populate the table with benchmark data
+    function populateTable(data) {
+      const tableBody = document.querySelector('#benchmark-table tbody');
+      if (!tableBody) return;
+      
+      // Clear existing rows
+      tableBody.innerHTML = '';
+      
+      // Create table rows
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        
+        // Add indicator cell
+        const indicatorCell = document.createElement('td');
+        indicatorCell.className = 'indicator-cell';
+        indicatorCell.textContent = row.indicator;
+        tr.appendChild(indicatorCell);
+        
+        // Add quantile cells
+        for (let i = 0; i < 5; i++) {
+          const td = document.createElement('td');
+          td.className = 'quantile-cell';
+          
+          // Add protocol marker if this is the right quantile
+          if (row.yourProtocolQuantile === i) {
+            const protocolMarker = document.createElement('span');
+            protocolMarker.className = 'protocol-marker';
+            protocolMarker.textContent = 'X';
             
-            let selectedFeatures = [];
-            
-            keyDropdown.addEventListener('change', function() {
-                const selectedKey = this.value;
-                
-                checkboxContainer.innerHTML = '';
-                checkboxContainer.classList.add('hidden');
-                selectedFeatures = [];
-                updateSelectionSummary();
-                submitButton.disabled = true;
-                
-                if (selectedKey) {
-                    checkboxContainer.classList.remove('hidden');
-                    checkboxContainer.innerHTML = '<p>Loading features...</p>';
-                    
-                    const formData = new FormData();
-                    formData.append('selected_key', selectedKey);
-                    
-                    fetch('/api/get_ProtocolFeatures', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        checkboxContainer.innerHTML = '';
-                        
-                        const validValues = data.values.filter(value => value && value.trim() !== '');
-                        
-                        if (validValues.length === 0) {
-                            const noItems = document.createElement('p');
-                            noItems.textContent = 'No features available for this category.';
-                            checkboxContainer.appendChild(noItems);
-                            return;
-                        }
-                        
-                        validValues.forEach((value, index) => {
-                            const checkboxItem = document.createElement('div');
-                            checkboxItem.className = 'checkbox-item';
-
-                            const checkbox = document.createElement('input');
-                            checkbox.type = 'checkbox';
-                            checkbox.id = `feature-${index}`;
-                            checkbox.value = value;
-                            checkbox.name = 'selected_features';
-
-                            const label = document.createElement('label');
-                            label.htmlFor = `feature-${index}`;
-                            label.textContent = value;
-
-                            checkbox.addEventListener('change', function() {
-                                if (this.checked) {
-                                    selectedFeatures.push(this.value);
-                                } else {
-                                    const index = selectedFeatures.indexOf(this.value);
-                                    if (index > -1) {
-                                        selectedFeatures.splice(index, 1);
-                                    }
-                                }
-
-                                updateSelectionSummary();
-                                submitButton.disabled = selectedFeatures.length === 0;
-                            });
-
-                            checkboxItem.appendChild(checkbox);
-                            checkboxItem.appendChild(label);
-                            checkboxContainer.appendChild(checkboxItem);
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        checkboxContainer.innerHTML = '<p>Error loading features. Please try again.</p>';
-                    });
-                }
-            });
-            
-            function updateSelectionSummary() {
-                if (selectedFeatures.length === 0) {
-                    selectionSummary.textContent = '';
-                } else {
-                    selectionSummary.textContent = `Selected ${selectedFeatures.length} feature(s)`;
-                }
+            // Position the marker if both markers are in the same cell
+            if (row.databaseAvgQuantile === i) {
+              protocolMarker.classList.add('marker-left');
             }
             
-            featuresForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-                
-                const formData = new FormData();
-                formData.append('category', keyDropdown.value);
-                selectedFeatures.forEach(feature => {
-                    formData.append('features[]', feature);
-                });
-                
-                fetch('/api/submit_features', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    resultDisplay.classList.remove('hidden');
-                    submissionResult.textContent = JSON.stringify(data, null, 2);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    resultDisplay.classList.remove('hidden');
-                    submissionResult.textContent = 'Error submitting selection. Please try again.';
-                });
-            });
+            td.appendChild(protocolMarker);
+          }
+          
+          // Add database average marker if this is the right quantile
+          if (row.databaseAvgQuantile === i) {
+            const databaseMarker = document.createElement('span');
+            databaseMarker.className = 'database-marker';
+            databaseMarker.textContent = 'O';
+            
+            // Position the marker if both markers are in the same cell
+            if (row.yourProtocolQuantile === i) {
+              databaseMarker.classList.add('marker-right');
+            }
+            
+            td.appendChild(databaseMarker);
+          }
+          
+          tr.appendChild(td);
+        }
+        
+        tableBody.appendChild(tr);
+      });
+    }
+    
+    // Initialize the page and add event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      // Generate and populate table on page load
+      const initialData = generateBenchmarkData();
+      populateTable(initialData);
+      
+      // Add event listener to the generate button
+      const generateBtn = document.getElementById('generate-btn');
+      if (generateBtn) {
+        generateBtn.addEventListener('click', function() {
+          const newData = generateBenchmarkData();
+          populateTable(newData);
         });
-    </script>
+      }
+    });
+  </script>
 </body>
 </html>
