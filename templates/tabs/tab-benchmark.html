@@ -25,17 +25,18 @@
         </form>
     </div>
     
-    <!-- Middle: Upload area -->
+    <!-- Middle: Upload areas -->
     <div class="search-ui-container">
+        <!-- First upload area (Protocol file) -->
         <div class="upload-area mb-3">
             <p>Drag and drop your protocol file here or select features on the right</p>
             <input type="file" id="protocol-file" style="display: none;">
             <button class="btn btn-secondary" id="browse-button">Browse Files</button>
         </div>
 
-        <!-- New upload area below -->
-        <div class="upload-area">
-            <p>Upload comparison file (e.g., published protocol or reference dataset)</p>
+        <!-- Second upload area (Comparison file) - required -->
+        <div class="upload-area" style="border-color: #e74c3c;">
+            <p><strong>Required:</strong> Upload comparison file (e.g., published protocol or reference dataset)</p>
             <input type="file" id="comparison-file" style="display: none;">
             <button class="btn btn-secondary" id="comparison-browse-button">Upload Comparison</button>
         </div>
@@ -67,6 +68,7 @@
 <!-- Submit button -->
 <div class="global-submit-container">
     <button id="benchmark-submit-button" class="btn btn-primary">Benchmark Protocol</button>
+    <p class="text-muted mt-2 small">Note: Comparison file upload is required to enable benchmarking</p>
 </div>
 
 <!-- Result visualization for JSON data -->

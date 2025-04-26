@@ -20,7 +20,7 @@ CMPortal.benchmark.init = function() {
     // Initialize form components
     CMPortal.benchmark.initializeForm('left');
     CMPortal.benchmark.initializeForm('right');
-    CMPortal.benchmark.initializeUploadArea();
+    CMPortal.benchmark.initializeUploadAreas();
     CMPortal.benchmark.initializeSubmitButton();
     
     CMPortal.benchmark.initialized = true;
@@ -126,64 +126,114 @@ CMPortal.benchmark.initializeForm = function(side) {
     });
 };
 
-// Initialize the file upload area
-CMPortal.benchmark.initializeUploadArea = function() {
-    const uploadArea = document.querySelector('.upload-area');
+// Initialize both file upload areas
+CMPortal.benchmark.initializeUploadAreas = function() {
+    // Initialize the protocol upload area
+    const uploadArea = document.querySelector('.upload-area:first-of-type');
     const fileInput = document.getElementById('protocol-file');
     const browseButton = document.getElementById('browse-button');
     
-    if (!uploadArea || !fileInput || !browseButton) {
-        console.error('Upload area elements not found');
-        return;
+    if (uploadArea && fileInput && browseButton) {
+        // File upload via drag and drop
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.style.borderColor = '#2E7D32';
+            this.style.backgroundColor = '#E8F5E9';
+        });
+        
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.style.borderColor = '';
+            this.style.backgroundColor = '';
+        });
+        
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.style.borderColor = '';
+            this.style.backgroundColor = '';
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                CMPortal.benchmark.updateUploadAreaText(uploadArea, e.dataTransfer.files[0].name);
+                CMPortal.benchmark.updateSubmitButton();
+            }
+        });
+        
+        // File upload via browse button
+        browseButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', function() {
+            if (this.files.length) {
+                CMPortal.benchmark.updateUploadAreaText(uploadArea, this.files[0].name);
+                CMPortal.benchmark.updateSubmitButton();
+            }
+        });
+    } else {
+        console.error('Protocol upload area elements not found');
     }
     
-    // File upload via drag and drop
-    uploadArea.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.style.borderColor = '#2E7D32';
-        this.style.backgroundColor = '#E8F5E9';
-    });
+    // Initialize the comparison upload area
+    const comparisonArea = document.querySelector('.upload-area:nth-of-type(2)');
+    const comparisonInput = document.getElementById('comparison-file');
+    const comparisonButton = document.getElementById('comparison-browse-button');
     
-    uploadArea.addEventListener('dragleave', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.style.borderColor = '';
-        this.style.backgroundColor = '';
-    });
-    
-    uploadArea.addEventListener('drop', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.style.borderColor = '';
-        this.style.backgroundColor = '';
+    if (comparisonArea && comparisonInput && comparisonButton) {
+        // File upload via drag and drop
+        comparisonArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.style.borderColor = '#2E7D32';
+            this.style.backgroundColor = '#E8F5E9';
+        });
         
-        if (e.dataTransfer.files.length) {
-            fileInput.files = e.dataTransfer.files;
-            CMPortal.benchmark.updateUploadAreaText(e.dataTransfer.files[0].name);
-            CMPortal.benchmark.updateSubmitButton();
-        }
-    });
-    
-    // File upload via browse button
-    browseButton.addEventListener('click', function(e) {
-        e.preventDefault();
-        fileInput.click();
-    });
-    
-    fileInput.addEventListener('change', function() {
-        if (this.files.length) {
-            CMPortal.benchmark.updateUploadAreaText(this.files[0].name);
-            CMPortal.benchmark.updateSubmitButton();
-        }
-    });
+        comparisonArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.style.borderColor = '';
+            this.style.backgroundColor = '';
+        });
+        
+        comparisonArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.style.borderColor = '';
+            this.style.backgroundColor = '';
+            
+            if (e.dataTransfer.files.length) {
+                comparisonInput.files = e.dataTransfer.files;
+                CMPortal.benchmark.updateUploadAreaText(comparisonArea, e.dataTransfer.files[0].name);
+                CMPortal.benchmark.updateSubmitButton();
+            }
+        });
+        
+        // File upload via browse button
+        comparisonButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            comparisonInput.click();
+        });
+        
+        comparisonInput.addEventListener('change', function() {
+            if (this.files.length) {
+                CMPortal.benchmark.updateUploadAreaText(comparisonArea, this.files[0].name);
+                CMPortal.benchmark.updateSubmitButton();
+            }
+        });
+    } else {
+        console.error('Comparison upload area elements not found');
+    }
 };
 
 // Update the upload area text to show selected file
-CMPortal.benchmark.updateUploadAreaText = function(filename) {
-    const uploadArea = document.querySelector('.upload-area p');
-    if (uploadArea) {
-        uploadArea.textContent = `Selected file: ${filename}`;
+CMPortal.benchmark.updateUploadAreaText = function(area, filename) {
+    const textElement = area.querySelector('p');
+    if (textElement) {
+        textElement.textContent = `Selected file: ${filename}`;
     }
 };
 
@@ -256,14 +306,6 @@ CMPortal.benchmark.initializeSubmitButton = function() {
         e.preventDefault();
         CMPortal.benchmark.submitBenchmark();
     });
-    
-    // Also add event listener to the protocol purpose dropdown
-    const purposeSelect = document.getElementById('protocol-purpose');
-    if (purposeSelect) {
-        purposeSelect.addEventListener('change', function() {
-            CMPortal.benchmark.updateSubmitButton();
-        });
-    }
 };
 
 // Update the submit button state
@@ -271,72 +313,89 @@ CMPortal.benchmark.updateSubmitButton = function() {
     const submitBtn = document.getElementById('benchmark-submit-button');
     if (!submitBtn) return;
     
-    const fileInput = document.getElementById('protocol-file');
-    const purposeSelect = document.getElementById('protocol-purpose');
+    const protocolFile = document.getElementById('protocol-file');
+    const comparisonFile = document.getElementById('comparison-file');
     
-    const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+    const hasProtocolFile = protocolFile && protocolFile.files && protocolFile.files.length > 0;
+    const hasComparisonFile = comparisonFile && comparisonFile.files && comparisonFile.files.length > 0;
     const hasRightFeatures = CMPortal.benchmark.selectedFeaturesRight.length > 0;
     const hasLeftParameter = CMPortal.benchmark.selectedParameterLeft !== null;
-    const hasPurpose = purposeSelect && purposeSelect.value;
     
     // Enable button if:
-    // 1. Protocol purpose is selected AND
-    // 2. EITHER a file is uploaded OR at least one feature is selected from either form
-    submitBtn.disabled = !(hasPurpose && (hasFile || hasRightFeatures || hasLeftParameter));
+    // 1. Comparison file is uploaded (required) AND
+    // 2. EITHER a protocol file is uploaded OR at least one feature is selected from either form
+    submitBtn.disabled = !(hasComparisonFile && (hasProtocolFile || hasRightFeatures || hasLeftParameter));
 };
 
 // Submit the benchmark request
 CMPortal.benchmark.submitBenchmark = function() {
-    const fileInput = document.getElementById('protocol-file');
-    const purposeSelect = document.getElementById('protocol-purpose');
+    const protocolFile = document.getElementById('protocol-file');
+    const comparisonFile = document.getElementById('comparison-file');
     const resultDisplay = document.getElementById('benchmark-result-display');
     const submissionResult = document.getElementById('benchmark-submission-result');
     
-    if (!purposeSelect || !resultDisplay || !submissionResult) {
+    if (!comparisonFile || !resultDisplay || !submissionResult) {
         console.error('Required elements not found for submission');
         return;
     }
     
-    // Check if we have a file or selections from either form
-    const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+    // Check if comparison file is uploaded (required)
+    const hasComparisonFile = comparisonFile && comparisonFile.files && comparisonFile.files.length > 0;
+    if (!hasComparisonFile) {
+        alert('Please upload a comparison file to benchmark against.');
+        return;
+    }
+    
+    // Check if we have a protocol file or selections from either form
+    const hasProtocolFile = protocolFile && protocolFile.files && protocolFile.files.length > 0;
     const hasRightFeatures = CMPortal.benchmark.selectedFeaturesRight.length > 0;
     const hasLeftParameter = CMPortal.benchmark.selectedParameterLeft !== null;
     
-    // Validate that we have at least one selection method
-    if (!hasFile && !hasRightFeatures && !hasLeftParameter) {
-        alert('Please either upload a file or select features/parameters to benchmark.');
+    // Validate that we have at least one selection method for the protocol
+    if (!hasProtocolFile && !hasRightFeatures && !hasLeftParameter) {
+        alert('Please either upload a protocol file or select features/parameters to benchmark.');
         return;
     }
     
     const formData = new FormData();
-    formData.append('protocol_purpose', purposeSelect.value);
     
-    if (hasFile) {
-        formData.append('protocol_file', fileInput.files[0]);
+    // Add comparison file (required)
+    formData.append('comparison_file', comparisonFile.files[0]);
+    
+    // Add protocol file if available
+    if (hasProtocolFile) {
+        formData.append('protocol_file', protocolFile.files[0]);
     }
     
+    // Add parameter information if selected
     if (hasLeftParameter) {
         formData.append('target_parameter', CMPortal.benchmark.selectedParameterLeft);
     }
     
+    // Add right features if selected
     CMPortal.benchmark.selectedFeaturesRight.forEach(feature => {
         formData.append('selected_features[]', feature);
     });
     
     // For demo purposes, display the submission data instead of sending
     const submissionData = {
-        purpose: purposeSelect.value,
-        useUploadedFile: hasFile,
+        useProtocolFile: hasProtocolFile,
+        useComparisonFile: hasComparisonFile,
         useLeftParameter: hasLeftParameter,
         useRightFeatures: hasRightFeatures
     };
     
-    // Add file information only if a file was uploaded
-    if (hasFile) {
-        submissionData.fileName = fileInput.files[0].name;
-        submissionData.fileSize = fileInput.files[0].size;
-        submissionData.fileType = fileInput.files[0].type;
+    // Add protocol file information if uploaded
+    if (hasProtocolFile) {
+        submissionData.protocolFileName = protocolFile.files[0].name;
+        submissionData.protocolFileSize = protocolFile.files[0].size;
+        submissionData.protocolFileType = protocolFile.files[0].type;
     }
+    
+    // Add comparison file information
+    submissionData.comparisonFileName = comparisonFile.files[0].name;
+    submissionData.comparisonFileSize = comparisonFile.files[0].size;
+    submissionData.comparisonFileType = comparisonFile.files[0].type;
     
     // Add parameter information if selected
     if (hasLeftParameter) {
