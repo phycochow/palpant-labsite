@@ -1,296 +1,291 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Benchmark Visualization Testcase</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cardiomyocyte Maturity Radar Chart</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
   <style>
-    :root {
-      --primary: #2c3e50;
-      --secondary: #34495e;
-      --accent: #3498db;
-      --success: #2ecc71;
-      --warning: #f39c12;
-      --danger: #e74c3c;
-      --light: #ecf0f1;
-      --dark: #2c3e50;
-      --gray: #95a5a6;
-      --border: #ddd;
-      --table-hover: #e2e8ea;
-    }
-    
     body {
       font-family: Arial, sans-serif;
-      background-color: var(--light);
-      padding: 20px;
-      margin: 0;
-    }
-    
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      background-color: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-    
-    h1 {
-      color: var(--primary);
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    
-    .benchmark-table {
-      width: 100%;
-      border-collapse: collapse;
-      border: 1px solid var(--border);
-      margin-bottom: 20px;
-    }
-    
-    .benchmark-table th,
-    .benchmark-table td {
-      border: 1px solid var(--border);
-      text-align: center;
-      vertical-align: middle;
-      transition: background-color 0.3s ease;
-    }
-    
-    .indicator-header {
-      width: 200px;
-      text-align: left;
-      padding: 10px;
-      background-color: var(--primary);
-      color: white;
-    }
-    
-    .quantile-header {
-      width: 80px;
-      text-align: center;
-      padding: 10px;
-      background-color: var(--light);
-      font-weight: bold;
-      font-size: 14px;
-    }
-    
-    .indicator-cell {
-      text-align: left;
-      padding: 10px;
-      font-weight: bold;
+      margin: 0; padding: 20px;
       background-color: #f8f9fa;
     }
-    
-    .quantile-cell {
-      width: 80px;
-      height: 40px;
-      text-align: center;
-      vertical-align: middle;
-      background-color: white;
+    .container {
+      max-width: 900px; margin: 0 auto;
+      background: #fff; padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    h1 {
+      text-align: center; color: #2c3e50;
+      margin-bottom: 30px;
+    }
+    .chart-container {
       position: relative;
+      height: 70vh; width: 80vw; max-width: 800px;
+      margin: 0 auto;
     }
-    
-    .quantile-cell:hover {
-      background-color: var(--table-hover);
-      cursor: default;
-    }
-    
-    .protocol-marker {
-      color: var(--accent);
-      font-weight: bold;
-      font-size: 22px;
-    }
-    
-    .database-marker {
-      color: var(--danger);
-      font-weight: bold;
-      font-size: 22px;
-    }
-    
-    .marker-left {
-      position: absolute;
-      left: 10px;
-    }
-    
-    .marker-right {
-      position: absolute;
-      right: 10px;
-    }
-    
-    .legend {
-      margin-top: 20px;
-      text-align: center;
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-    }
-    
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .description {
-      margin-top: 30px;
-      text-align: center;
-      color: var(--gray);
-      font-style: italic;
-    }
-    
     .btn {
-      background-color: var(--accent);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
-      display: block;
-      margin: 0 auto 20px;
+      background: #3498db; color: #fff; border: none;
+      padding: 10px 20px; border-radius: 4px;
+      cursor: pointer; font-size: 14px;
+      margin: 20px auto; display: block;
+      transition: background-color 0.3s;
     }
-    
-    .btn:hover {
-      background-color: #2980b9;
+    .btn:hover { background: #2980b9; }
+    .legend {
+      display: flex; justify-content: center; gap: 20px;
+      margin-bottom: 20px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-color { width:20px; height:20px; border-radius:50%; }
+    .your-protocol { background: rgba(54,162,235,0.5); border:1px solid rgba(54,162,235,1); }
+    .reference { background: rgba(255,99,132,0.5); border:1px solid rgba(255,99,132,1); }
+    .info-box {
+      background: #f1f8ff; border:1px solid #cce5ff;
+      border-radius:4px; padding:10px 15px;
+      margin-top:20px; font-size:14px; color:#0c5460;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Protocol Benchmark Visualization</h1>
-    
-    <button id="generate-btn" class="btn">Generate Random Data</button>
-    
-    <table id="benchmark-table" class="benchmark-table">
-      <thead>
-        <tr>
-          <th class="indicator-header">Indicator</th>
-          <th class="quantile-header">Q1 (Best)</th>
-          <th class="quantile-header">Q2 (Good)</th>
-          <th class="quantile-header">Q3 (Average)</th>
-          <th class="quantile-header">Q4 (Below Average)</th>
-          <th class="quantile-header">Q5 (Worst)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Table rows will be populated by JavaScript -->
-      </tbody>
-    </table>
-    
+    <h1>Cardiomyocyte Maturity Analysis</h1>
     <div class="legend">
       <div class="legend-item">
-        <span class="protocol-marker">X</span>
-        <span>Your Protocol</span>
+        <div class="legend-color your-protocol"></div><span>Your Protocol</span>
       </div>
       <div class="legend-item">
-        <span class="database-marker">O</span>
-        <span>Database Average</span>
+        <div class="legend-color reference"></div><span id="refLabel">Reference 1</span>
       </div>
     </div>
-    
-    <div class="description">
-      <p>This visualization compares your uploaded protocol against the database average across different performance quantiles.</p>
+    <div class="chart-container">
+      <canvas id="maturityChart"></canvas>
+    </div>
+    <button id="regenerateBtn" class="btn">Next Reference</button>
+    <div class="info-box">
+      <strong>Chart Interpretation:</strong>
+      Outer rings (higher values) = more adult-like; inner rings = more fetal-like.
+      Each indicator has its own number of quantile bins (2–5).
     </div>
   </div>
-  
+
   <script>
-    // Sample indicators for the benchmark
     const indicators = [
-      'Cell Viability', 
-      'APD90', 
-      'Calcium Transient', 
-      'Sarcomere Length', 
-      'Mitochondrial Function',
-      'Contractility'
+      { label: "Sarcomere Length (um)",                    rings: 5 },
+      { label: "Cell Area (um²)",                           rings: 3 },
+      { label: "Contractile Force (mN)",                    rings: 5 },
+      { label: "Contractile Stress (mN/mm²)",               rings: 4 },
+      { label: "Contraction Upstroke Velocity (um/s)",      rings: 4 },
+      { label: "Calcium Flux Amplitude (F/F0)",             rings: 5 },
+      { label: "Time to Calcium Flux Peak (ms)",            rings: 5 },
+      { label: "Time from Calcium Peak to Relaxation (ms)", rings: 2 },
+      { label: "Conduction Velocity from Calcium Imaging (cm/s)", rings: 3 },
+      { label: "Action Potential Conduction Velocity (cm/s)",     rings: 4 },
+      { label: "Action Potential Amplitude (mV)",            rings: 4 },
+      { label: "Resting Membrane Potential (mV)",            rings: 5 },
+      { label: "Beat Rate (bpm)",                           rings: 5 },
+      { label: "Max Capture Rate of Paced CMs (Hz)",        rings: 2 },
+      { label: "MYH7 Percentage (MYH6)",                    rings: 2 },
+      { label: "MYL2 Percentage (MYL7)",                    rings: 2 },
+      { label: "TNNI3 Percentage (TTNI1)",                  rings: 2 }
     ];
-    
-    // Function to generate random benchmark data
-    function generateBenchmarkData() {
-      return indicators.map(indicator => {
-        // Random quantile index (0-4) for "Your Protocol"
-        const yourProtocolQuantile = Math.floor(Math.random() * 5);
-        // Random quantile index (0-4) for "Database Average"
-        const databaseAvgQuantile = Math.floor(Math.random() * 5);
-        
-        return {
-          indicator,
-          yourProtocolQuantile,
-          databaseAvgQuantile
-        };
-      });
-    }
-    
-    // Function to populate the table with benchmark data
-    function populateTable(data) {
-      const tableBody = document.querySelector('#benchmark-table tbody');
-      if (!tableBody) return;
-      
-      // Clear existing rows
-      tableBody.innerHTML = '';
-      
-      // Create table rows
-      data.forEach(row => {
-        const tr = document.createElement('tr');
-        
-        // Add indicator cell
-        const indicatorCell = document.createElement('td');
-        indicatorCell.className = 'indicator-cell';
-        indicatorCell.textContent = row.indicator;
-        tr.appendChild(indicatorCell);
-        
-        // Add quantile cells
-        for (let i = 0; i < 5; i++) {
-          const td = document.createElement('td');
-          td.className = 'quantile-cell';
-          
-          // Add protocol marker if this is the right quantile
-          if (row.yourProtocolQuantile === i) {
-            const protocolMarker = document.createElement('span');
-            protocolMarker.className = 'protocol-marker';
-            protocolMarker.textContent = 'X';
-            
-            // Position the marker if both markers are in the same cell
-            if (row.databaseAvgQuantile === i) {
-              protocolMarker.classList.add('marker-left');
-            }
-            
-            td.appendChild(protocolMarker);
-          }
-          
-          // Add database average marker if this is the right quantile
-          if (row.databaseAvgQuantile === i) {
-            const databaseMarker = document.createElement('span');
-            databaseMarker.className = 'database-marker';
-            databaseMarker.textContent = 'O';
-            
-            // Position the marker if both markers are in the same cell
-            if (row.yourProtocolQuantile === i) {
-              databaseMarker.classList.add('marker-right');
-            }
-            
-            td.appendChild(databaseMarker);
-          }
-          
-          tr.appendChild(td);
-        }
-        
-        tableBody.appendChild(tr);
-      });
-    }
-    
-    // Initialize the page and add event listeners
-    document.addEventListener('DOMContentLoaded', function() {
-      // Generate and populate table on page load
-      const initialData = generateBenchmarkData();
-      populateTable(initialData);
-      
-      // Add event listener to the generate button
-      const generateBtn = document.getElementById('generate-btn');
-      if (generateBtn) {
-        generateBtn.addEventListener('click', function() {
-          const newData = generateBenchmarkData();
-          populateTable(newData);
-        });
+
+
+  // yourQ values
+  const yourQList = [
+      3,    // Sarcomere Length → Q3
+      1.5,  // Cell Area       → Q1 or Q2
+      4,    // Contractile Force → Q4
+      3,    // Contractile Stress → Q3
+      3,    // Contraction Upstroke Velocity → Q3
+      2,    // Calcium Flux Amplitude → Q2
+      2,    // Time to Calcium Flux Peak → Q2
+      1,    // Time from Calcium Peak to Relaxation → Q1
+      3,    // Conduction Velocity from Calcium Imaging → Q3
+      3,    // Action Potential Conduction Velocity → Q3
+      4,    // Action Potential Amplitude → Q4
+      3,    // Resting Membrane Potential → Q3
+      2,    // Beat Rate → Q2
+      1.5,  // Max Capture Rate → Q1 or Q2
+      2,    // MYH7 Percentage → Q2
+      2,    // MYL2 Percentage → Q2
+      2     // TNNI3 Percentage → Q2
+    ];
+
+  // generate three reference-Q lists at init
+  const referenceQLists = Array.from({length:3}, () =>
+    indicators.map(ind => Math.floor(Math.random()*ind.rings) + 1)
+  );
+
+  let currentRefIndex = 0;
+  let gridCoordinates = {};
+
+  function calculateGridCoordinates(chartRadius) {
+    const coords = {};
+    indicators.forEach((ind, i) => {
+      coords[i] = {};
+      for (let q = 0; q < ind.rings; q++) {
+        const ringPosition = (ind.rings - q) / ind.rings;
+        coords[i][q] = ringPosition * chartRadius;
       }
     });
+    return coords;
+  }
+
+  function customRadarPlugin() {
+    return {
+      id: 'customRadar',
+      beforeDatasetsUpdate(chart) {
+        const scale = chart.scales.r;
+        const radius = scale.drawingArea;
+        gridCoordinates = calculateGridCoordinates(radius);
+
+        chart.data.datasets.forEach((ds, di) => {
+          ds.data = ds.data.map((_, i) => {
+            const ind = indicators[i];
+            let r;
+            if (di === 0) {
+              // Your Protocol
+              const qv = yourQList[i];
+              const ringPos = (ind.rings - (qv - 1)) / ind.rings;
+              r = ringPos * radius;
+            } else {
+              // Reference dataset
+              const qv = referenceQLists[currentRefIndex][i];
+              const ringPos = (ind.rings - (qv - 1)) / ind.rings;
+              r = ringPos * radius;
+            }
+            return r / radius;
+          });
+        });
+      },
+      beforeDraw(chart) {
+        const ctx = chart.ctx;
+        const scale = chart.scales.r;
+        const radius = scale.drawingArea;
+        const cx = scale.xCenter, cy = scale.yCenter;
+        ctx.save();
+        drawCustomGrid(ctx, cx, cy, radius);
+        ctx.restore();
+      }
+    };
+  }
+
+  function drawCustomGrid(ctx, cx, cy, radius) {
+    const n = indicators.length;
+    const angleStep = (Math.PI * 2) / n;
+
+    // spokes
+    ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < n; i++) {
+      const ang = i * angleStep - Math.PI / 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(ang)*radius, cy + Math.sin(ang)*radius);
+      ctx.stroke();
+    }
+
+    // alternating background
+    for (let i = 0; i < n; i++) {
+      const ang = i * angleStep - Math.PI / 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, radius, ang - angleStep/2, ang + angleStep/2);
+      ctx.closePath();
+      ctx.fillStyle = i % 2 ? 'rgba(0,0,0,0.04)' : 'rgba(0,0,0,0.02)';
+      ctx.fill();
+    }
+
+    // rings per indicator
+    indicators.forEach((ind, i) => {
+      const baseAng = i * angleStep - Math.PI/2;
+      const startAng = baseAng - angleStep/2, endAng = baseAng + angleStep/2;
+      for (let q=0; q<ind.rings; q++) {
+        const r = ((ind.rings - q)/ind.rings)*radius;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, startAng, endAng);
+        ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+        ctx.stroke();
+      }
+    });
+  }
+
+  function prepareChartData() {
+    const zeros = Array(indicators.length).fill(0);
+    return {
+      labels: indicators.map(i=>i.label),
+      datasets: [{
+          label: 'Your Protocol',
+          data: zeros.slice(),
+          backgroundColor: 'rgba(54,162,235,0.3)',
+          borderColor:   'rgba(54,162,235,1)',
+          borderWidth: 2, pointBackgroundColor:'rgba(54,162,235,1)', pointRadius:4
+        },{
+          label: `Reference ${currentRefIndex+1}`,
+          data: zeros.slice(),
+          backgroundColor: 'rgba(255,99,132,0.3)',
+          borderColor:   'rgba(255,99,132,1)',
+          borderWidth: 2, pointBackgroundColor:'rgba(255,99,132,1)', pointRadius:4
+        }]
+    };
+  }
+
+  let maturityChart;
+  function initChart(){
+    const ctx = document.getElementById('maturityChart').getContext('2d');
+    if (maturityChart) maturityChart.destroy();
+    maturityChart = new Chart(ctx, {
+      type: 'radar',
+      data: prepareChartData(),
+      options: {
+        scales: {
+          r: {
+            min:0, max:1,
+            ticks:{ stepSize:0.25, display:false },
+            pointLabels:{ font:{ size:11 } },
+            grid:{ display:false },
+            angleLines:{ display:false }
+          }
+        },
+        plugins: {
+          legend:{ display:false },
+          tooltip:{
+            callbacks:{
+              label(ctx) {
+                const ds = ctx.dataset.label, idx = ctx.dataIndex;
+                const ind = indicators[idx];
+                let qv;
+                if (ds==='Your Protocol') {
+                  qv = yourQList[idx];
+                  return `Your Protocol: Q${qv} of ${ind.rings}`;
+                } else {
+                  qv = referenceQLists[currentRefIndex][idx];
+                  return `${ds}: Q${qv} of ${ind.rings}`;
+                }
+              }
+            }
+          }
+        },
+        elements:{ line:{ tension:0.1 } },
+        responsive:true, maintainAspectRatio:false
+      },
+      plugins: [ customRadarPlugin() ]
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initChart);
+  document.getElementById('regenerateBtn').addEventListener('click', () => {
+    // cycle reference index
+    currentRefIndex = (currentRefIndex + 1) % referenceQLists.length;
+    // update legend label
+    document.getElementById('refLabel').textContent = `Reference ${currentRefIndex+1}`;
+    // update dataset label
+    maturityChart.data.datasets[1].label = `Reference ${currentRefIndex+1}`;
+    maturityChart.update();
+  });
   </script>
 </body>
 </html>
