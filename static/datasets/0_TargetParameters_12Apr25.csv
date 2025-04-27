@@ -1,4 +1,4 @@
-Cell Profile,Disease Modelling,Drug Testing,Adult-like Maturity,Fetal-like Maturity,Average Maturity
+Cell Profile,Disease Modelling,Drug Testing,Best Adult-like Maturity,Least Maturity,Average Maturity
 Cell Line Sex - Both (118),Disease Modelling - Genetic Disorders (18),Pharmacological Intervention - Adrenaline (83),Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),Sarcomere Length (um) Quantiles - Q5 (>1.01 and ≤1.64) (14),Sarcomere Length (um) Quantiles - Q2 (>1.88 and ≤1.95) (14)
 Cell Line Sex - Male (64),Disease Modelling - Arrhythmic (15),Pharmacological Intervention - β1/β2-Adrenergic Agonists (Pure β-Agonists) (73),Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),Cell Area (um2) Quantiles - Q3 (>350 and ≤1800) (13),Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14)
 Cell Line Sex - Female (40),Disease Modelling - Ischemic Infarction (9),Pharmacological Intervention - Isoproterenol (71),Contractile Force (mN) Quantiles - Q1 (>1.04 and ≤20) (10),Contractile Force (mN) Quantiles - Q5 (>0 and ≤0.04) (10),Sarcomere Length (um) Quantiles - Q3 (>1.75 and ≤1.88) (13)
