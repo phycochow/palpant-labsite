@@ -1,21 +1,16 @@
-/* tab-enrichment.css */
-
-/* Reset some default styles */
-* {
-  box-sizing: border-box;
-}
+/* tab-enrichment.css - Specific styles for the enrichment tab */
 
 /* Full-width container styling */
 .enrichment-form-container {
   width: 100%;
   padding: 20px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   border-radius: 4px;
   background-color: #f9f9f9;
   margin-bottom: 20px;
 }
 
-/* Form elements */
+/* Form elements - enrichment specific */
 .enrichment-form-group {
   margin-bottom: 15px;
   width: 100%;
@@ -25,26 +20,26 @@
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
-  color: #333;
+  color: var(--dark);
 }
 
 .enrichment-select {
   width: 100%;
   padding: 8px;
   border-radius: 4px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   font-size: 1rem;
 }
 
-/* Checkbox container */
+/* Checkbox container - enrichment specific */
 .enrichment-checkbox-container {
   max-height: 200px;
   overflow-y: auto;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   border-radius: 4px;
   padding: 10px;
   margin-top: 5px;
-  background-color: #fff;
+  background-color: var(--white);
   width: 100%;
 }
 
@@ -80,7 +75,7 @@
 .enrichment-selection-summary {
   margin-top: 15px;
   min-height: 24px;
-  color: #3498db;
+  color: var(--accent);
   font-weight: bold;
 }
 
@@ -93,8 +88,8 @@
 
 /* Button styling */
 .enrichment-button {
-  background-color: #3498db;
-  color: white;
+  background-color: var(--accent);
+  color: var(--white);
   padding: 10px 20px;
   border: none;
   border-radius: 4px;
@@ -104,11 +99,11 @@
 }
 
 .enrichment-button:hover {
-  background-color: #2980b9;
+  background-color: var(--accent-dark);
 }
 
 .enrichment-button:disabled {
-  background-color: #95a5a6;
+  background-color: var(--gray);
   cursor: not-allowed;
 }
 
@@ -134,7 +129,7 @@
 .enrichment-table td {
   padding: 8px 12px;
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border);
 }
 
 .enrichment-table th {
@@ -146,20 +141,20 @@
   background-color: #f5f5f5;
 }
 
-/* Utility classes */
+/* Utility classes - enrichment specific */
 .enrichment-hidden {
   display: none;
 }
 
-/* Well container styling */
-.well {
-  min-height: 20px;
-  padding: 19px;
-  margin-bottom: 20px;
-  background-color: #f5f5f5;
-  border: 1px solid #e3e3e3;
+/* Match the Search tab's <pre> style */
+.enrichment-pre {
+  background-color: var(--white);
+  padding: 10px;
   border-radius: 4px;
-  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  font-family: Menlo, Consolas, monospace;
+  max-height: 400px;
 }
 
 /* Make everything responsive */
@@ -173,20 +168,3 @@
     width: 100%;
   }
 }
-
-/* Hide/show helper */
-.enrichment-hidden {
-  display: none;
-}
-
-/* Match the Search tab’s <pre> style */
-.enrichment-pre {
-  background-color: #fff;
-  padding: 10px;
-  border-radius: 4px;
-  overflow-x: auto;
-  border: 1px solid #ddd;
-  font-family: Menlo, Consolas, monospace;
-  max-height: 400px;
-}
-

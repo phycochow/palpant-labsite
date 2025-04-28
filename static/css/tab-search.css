@@ -1,3 +1,5 @@
+/* tab-search.css - Specific styles for the search tab */
+
 /* Flex container for side-by-side panels */
 .search-row {
     display: flex;
@@ -8,16 +10,15 @@
 
 /* Each form container */
 .search-ui-container {
-    font-family: Arial, sans-serif;
     width: 48%;
     padding: 20px;
     border: 1px solid var(--border);
     border-radius: 4px;
+    background-color: #f9f9f9;
 }
 
 /* Full-width form container */
 .search-ui-full-container {
-    font-family: Arial, sans-serif;
     width: 100%;
     padding: 20px;
     border: 1px solid var(--border);
@@ -54,7 +55,7 @@
     font-size: 1rem;
 }
 
-/* Checkbox container */
+/* Checkbox container - search specific styling */
 .search-ui-checkbox-container {
     max-height: 350px;
     overflow-y: auto;
@@ -62,7 +63,7 @@
     border-radius: 4px;
     padding: 10px;
     margin-top: 5px;
-    background-color: #fff;
+    background-color: var(--white);
 }
 
 .search-ui-checkbox-item {
@@ -74,7 +75,7 @@
 
 /* Set alternating background colors */
 .search-ui-checkbox-item:nth-child(odd) {
-    background-color: white;
+    background-color: var(--white);
 }
 
 .search-ui-checkbox-item:nth-child(even) {
@@ -93,138 +94,13 @@
     margin-left: 5px;
 }
 
-
-/* Result display */
-.search-ui-result {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #f5f5f5;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-}
-
-.search-ui-pre {
-    background-color: #fff;
-    padding: 10px;
-    border-radius: 4px;
-    overflow-x: auto;
-    border: 1px solid #eee;
-}
-
-/* Button styling within container */
-.search-ui-button {
-    background-color: var(--accent);
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: 15px;
-}
-
-.search-ui-button:hover {
-    background-color: var(--accent-dark);
-}
-
-.search-ui-button:disabled {
-    background-color: var(--gray);
-    cursor: not-allowed;
-}
-
-/* Global submit button styling */
-.global-submit-container {
-    text-align: center;
-    margin: 20px 0;
-}
-
-#search-ui-submit-button {
-    background-color: var(--accent-dark);
-    text-transform: none;
-    font-size: 1.1rem;
-    padding: 12px 20px;
-    border-radius: 4px;
-}
-
-#search-ui-submit-button:hover {
-    background-color: var(--accent-dark);
-}
-
-/* Filter submit button styling */
-.filter-submit-container {
-    margin-top: 15px;
-}
-
-#filter-submit-button {
-    background-color: #4caf50; /* Green color to differentiate */
-    font-size: 1rem;
-    padding: 8px 16px;
-}
-
-#filter-submit-button:hover {
-    background-color: #388e3c; /* Darker green */
-}
-
-/* Reset button styling */
-.search-ui-reset-button {
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    color: #333;
-    cursor: pointer;
-    font-size: 12px;
-    margin-left: 10px;
-    padding: 2px 8px;
-    transition: all 0.2s ease;
-}
-
-.search-ui-reset-button:hover {
-    background-color: #e0e0e0;
-    border-color: #999;
-}
-
-/* Utility classes */
-.search-ui-hidden {
-    display: none;
-}
-
-.search-ui-selection-summary {
-    margin-top: 15px;
-    font-weight: bold;
-    color: var(--accent);
-}
-
-/* Visualization section */
-.search-ui-visualization-container {
-    margin-top: 30px;
-}
-
-.search-ui-viz-row {
-    margin-bottom: 20px;
-}
-
-.search-ui-viz-row h3 {
-    margin-bottom: 10px;
-    font-size: 1.2rem;
-    color: var(--primary);
-}
-
-.search-ui-chart-placeholder {
-    background-color: var(--light);
-    border: 1px dashed var(--border);
-    border-radius: 4px;
-    padding: 40px;
-    text-align: center;
-    color: var(--gray);
-}
-
 /* Filter Results Display */
 #filter-results-display {
     width: 100%;
     padding: 20px;
     margin-top: 20px;
     margin-bottom: 20px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border);
     border-radius: 4px;
     background-color: #f9f9f9;
 }
@@ -246,38 +122,12 @@
 }
 
 #filter-results-display pre {
-    background-color: #fff;
+    background-color: var(--white);
     padding: 10px;
     border-radius: 4px;
     overflow-x: auto;
     border: 1px solid #eee;
     margin-top: 15px;
-}
-
-/* Toggle‐button styling */
-.toggle-button {
-    background-color: var(--gray);
-    color: var(--light);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 8px 12px;
-    margin: 0 5px;
-    cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-/* When toggled “on” */
-.toggle-button.active {
-    background-color: var(--accent-dark);
-    color: var(--light);
-}
-
-/* Disabled state */
-.toggle-button:disabled {
-    background-color: #e0e0e0;
-    color: #aaa;
-    border-color: #ccc;
-    cursor: not-allowed;
 }
 
 /* Custom CSS for centering table contents */
@@ -309,7 +159,7 @@
 /* Optional: Add vertical borders between columns for better readability */
 #search-results-table td, 
 #search-results-table th {
-  border-right: 1px solid #ddd;
+  border-right: 1px solid var(--border);
 }
 
 #search-results-table td:last-child, 
@@ -335,4 +185,45 @@
 /* Fix for DataTables scrolling with centered content */
 .dataTables_scrollBody {
   min-height: 200px;
+}
+
+/* Global submit button styling */
+.global-submit-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
+#search-ui-submit-button {
+    background-color: var(--accent-dark);
+    text-transform: none;
+    font-size: 1.1rem;
+    padding: 12px 20px;
+    border-radius: 4px;
+}
+
+#search-ui-submit-button:hover {
+    background-color: var(--accent-dark);
+}
+
+/* Utility classes specific to search */
+.search-ui-hidden {
+    display: none;
+}
+
+.search-ui-selection-summary {
+    margin-top: 15px;
+    font-weight: bold;
+    color: var(--accent);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .search-row {
+        flex-direction: column;
+    }
+    
+    .search-ui-container {
+        width: 100%;
+        margin-bottom: 15px;
+    }
 }
