@@ -773,3 +773,110 @@ $(document).on('tab-activated', function(event, tabId) {
         CMPortal.benchmark.init();
     }
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Add to existing initialization
+    CMPortal.benchmark.initializeCombinedUI = function() {
+        // Update UI components based on completion status
+        const updateUIState = function() {
+            const protocolFile = document.getElementById('protocol-file');
+            const experimentalFile = document.getElementById('experimental-file');
+            
+            const hasProtocolFile = protocolFile && protocolFile.files && protocolFile.files.length > 0;
+            const hasFeatures = CMPortal.benchmark.selectedFeatures.length > 0;
+            const hasExperimentalFile = experimentalFile && experimentalFile.files && experimentalFile.files.length > 0;
+            const hasPurpose = CMPortal.benchmark.selectedPurpose !== null;
+            
+            // Update progress bar segments
+            if (hasProtocolFile || hasFeatures) {
+                document.getElementById('protocol-progress').classList.add('complete');
+            } else {
+                document.getElementById('protocol-progress').classList.remove('complete');
+            }
+            
+            if (hasExperimentalFile) {
+                document.getElementById('experimental-progress').classList.add('complete');
+            } else {
+                document.getElementById('experimental-progress').classList.remove('complete');
+            }
+            
+            if (hasPurpose) {
+                document.getElementById('purpose-progress').classList.add('complete');
+            } else {
+                document.getElementById('purpose-progress').classList.remove('complete');
+            }
+            
+            // Update step status indicators
+            const protocolStatus = document.getElementById('protocol-step-status');
+            if (protocolStatus) {
+                if (hasProtocolFile || hasFeatures) {
+                    protocolStatus.textContent = 'Complete';
+                    protocolStatus.classList.add('complete');
+                } else {
+                    protocolStatus.textContent = 'Incomplete';
+                    protocolStatus.classList.remove('complete');
+                }
+            }
+            
+            const experimentStatus = document.getElementById('experiment-step-status');
+            if (experimentStatus) {
+                if (hasExperimentalFile) {
+                    experimentStatus.textContent = 'Complete';
+                    experimentStatus.classList.add('complete');
+                } else {
+                    experimentStatus.textContent = 'Incomplete';
+                    experimentStatus.classList.remove('complete');
+                }
+            }
+            
+            const purposeStatus = document.getElementById('purpose-step-status');
+            if (purposeStatus) {
+                if (hasPurpose) {
+                    purposeStatus.textContent = 'Complete';
+                    purposeStatus.classList.add('complete');
+                } else {
+                    purposeStatus.textContent = 'Incomplete';
+                    purposeStatus.classList.remove('complete');
+                }
+            }
+            
+            // Update completion markers
+            const experimentalMarker = document.getElementById('experimental-file-marker');
+            if (experimentalMarker) {
+                if (hasExperimentalFile) {
+                    experimentalMarker.classList.add('complete');
+                } else {
+                    experimentalMarker.classList.remove('complete');
+                }
+            }
+            
+            const purposeMarker = document.getElementById('purpose-marker');
+            if (purposeMarker) {
+                if (hasPurpose) {
+                    purposeMarker.classList.add('complete');
+                } else {
+                    purposeMarker.classList.remove('complete');
+                }
+            }
+        };
+        
+        // Extend existing prototype function to update UI
+        const originalUpdateSubmitButton = CMPortal.benchmark.updateSubmitButton;
+        CMPortal.benchmark.updateSubmitButton = function() {
+            originalUpdateSubmitButton.call(this);
+            updateUIState();
+        };
+        
+        // Initial update
+        updateUIState();
+    };
+    
+    // Call after other initializations
+    if (typeof CMPortal.benchmark.init === 'function') {
+        const originalInit = CMPortal.benchmark.init;
+        CMPortal.benchmark.init = function() {
+            originalInit.call(this);
+            this.initializeCombinedUI();
+        };
+    }
+});
