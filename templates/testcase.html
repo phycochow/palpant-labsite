@@ -75,6 +75,7 @@
     const indicators = [
       { label: "Sarcomere Length (um)",                    rings: 5 },
       { label: "Cell Area (um²)",                           rings: 3 },
+      { label: "T-tubule Structure (Found)",                  rings: 2 },
       { label: "Contractile Force (mN)",                    rings: 5 },
       { label: "Contractile Stress (mN/mm²)",               rings: 4 },
       { label: "Contraction Upstroke Velocity (um/s)",      rings: 4 },
@@ -89,7 +90,8 @@
       { label: "Max Capture Rate of Paced CMs (Hz)",        rings: 2 },
       { label: "MYH7 Percentage (MYH6)",                    rings: 2 },
       { label: "MYL2 Percentage (MYL7)",                    rings: 2 },
-      { label: "TNNI3 Percentage (TTNI1)",                  rings: 2 }
+      { label: "TNNI3 Percentage (TTNI1)",                  rings: 2 },
+
     ];
 
 
@@ -97,6 +99,7 @@
   const yourQList = [
       3,    // Sarcomere Length → Q3
       1.5,  // Cell Area       → Q1 or Q2
+      1,
       4,    // Contractile Force → Q4
       3,    // Contractile Stress → Q3
       3,    // Contraction Upstroke Velocity → Q3
