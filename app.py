@@ -14,7 +14,7 @@ app.logger.info('Flask application startup')
 DATA_DIR = os.path.join(app.static_folder, 'datasets')
 target_param_filepath = os.path.join(DATA_DIR, '0_TargetParameters_12Apr25.csv')
 feature_categories_filepath = os.path.join(DATA_DIR, '0_FeatureCategories_01Mar25.csv')
-enrich_filepath = os.path.join(DATA_DIR, '1_PermutatedImportancesTRUE_20Apr25.csv')
+enrich_filepath = os.path.join(DATA_DIR, '1_PermutatedImportancesTRUE_02May25.csv')
 cleaned_database_filepath = os.path.join(DATA_DIR, '0_CleanedDatabase_25Feb25.csv')
 binary_filepath = os.path.join(DATA_DIR, '1_BinaryFeatures_25Feb25.csv')
 odds_filepath = os.path.join(DATA_DIR, '1_PositiveOddsEnrichments_19Apr25.csv')
@@ -230,10 +230,19 @@ def add_and_sort_by_matches(BinaryFeature_df, selected_columns, categories_dict,
     # 6) Return the index and final columns
     return sorted_df.index, sorted_df.iloc[:, -6:]
 
-def get_search_table(FeaturesOfInterest, LabelOfInterest=None, CategoriesOfInterest=[True,False,False,False,False]):
+def get_search_table(FeaturesOfInterest, LabelOfInterest=None, CategoriesOfInterest=[True,False,False,False,False], SearchMode=None):
     """
     Get a search result table with protocols matching the specified features and criteria.
-    Uses lazy-loaded dataframes for better memory efficiency while preserving original behavior.
+    Now handles three explicitly defined modes:
+    - normal: Find protocols with ALL selected features
+    - enrichment: Find protocols based on target topic key characteristics
+    - combined: Find protocols by target topic and filter by specific features
+    
+    Args:
+        FeaturesOfInterest: List of features to search for
+        LabelOfInterest: Target topic to search for (optional)
+        CategoriesOfInterest: List of booleans indicating which categories to filter by
+        SearchMode: Explicit mode to use ('normal', 'enrichment', or 'combined')
     """
     Categories = ['Protocol Variable', 'Analysis Method', 'Cell Profile', 'Study Characteristic', 'Measured Endpoint']
     
@@ -243,17 +252,42 @@ def get_search_table(FeaturesOfInterest, LabelOfInterest=None, CategoriesOfInter
     target_feature_dict = get_target_feature_dict()
     categories_dict = get_categories_dict()
     
-    if LabelOfInterest is None or LabelOfInterest == '':
-        mode = 'normal'  # search protocols by selected features
+    # Determine mode based on inputs if not explicitly provided
+    if not SearchMode:
+        has_label = LabelOfInterest is not None and LabelOfInterest != ''
+        has_features = bool(FeaturesOfInterest)
+        
+        if not has_label and has_features:
+            mode = 'normal'
+        elif has_label and not has_features:
+            mode = 'enrichment'
+        elif has_label and has_features:
+            mode = 'combined'
+        else:
+            # Failsafe if somehow nothing was provided
+            return pd.DataFrame()
     else:
-        mode = 'enrich'  # search protocols by enrichments, filter with FeaturesOfInterest
-
+        mode = SearchMode
+    
     if mode == 'normal':
+        # Normal mode: search protocols by ALL selected features
         selected_features = FeaturesOfInterest
-        filter_features = []
-        filter_categories = []
-        wanted_cols = ['Title', 'DOI']
-    elif mode == 'enrich':
+        filter_features = FeaturesOfInterest  # In normal mode, filter by ALL selected features
+        filter_categories = []  # Categories not used in normal mode
+        wanted_cols = ['Protocol ID', 'Title', 'DOI']
+    
+    elif mode == 'enrichment':
+        # Pure enrichment: just search for protocols with enrichment for target
+        if LabelOfInterest not in target_feature_dict:
+            return pd.DataFrame()  # Return empty DataFrame if label not found
+            
+        selected_features = target_feature_dict[LabelOfInterest]
+        filter_features = []  # No feature filtering
+        filter_categories = [cat for cat, boo in zip(Categories, CategoriesOfInterest) if boo]
+        wanted_cols = ['Title', 'DOI', LabelOfInterest.split(' -')[0]]
+    
+    elif mode == 'combined':
+        # Combined mode: find protocols enriched for target topic and filter by features
         if LabelOfInterest not in target_feature_dict:
             return pd.DataFrame()  # Return empty DataFrame if label not found
             
@@ -261,6 +295,10 @@ def get_search_table(FeaturesOfInterest, LabelOfInterest=None, CategoriesOfInter
         filter_features = FeaturesOfInterest
         filter_categories = [cat for cat, boo in zip(Categories, CategoriesOfInterest) if boo]
         wanted_cols = ['Title', 'DOI', LabelOfInterest.split(' -')[0]]
+    
+    else:
+        # Invalid mode
+        return pd.DataFrame()
     
     # Rank and filter protocols
     sorted_index, additional_columns = add_and_sort_by_matches(
@@ -271,16 +309,26 @@ def get_search_table(FeaturesOfInterest, LabelOfInterest=None, CategoriesOfInter
         filter_categories
     )
     
-    # Handle normal mode special case
-    if mode == 'normal':
-        if isinstance(additional_columns, pd.DataFrame):
-            additional_columns = additional_columns['Protocol Similarity Rank']
-    
     # Get info from cleaned_df and create result dataframe
     result_df = cleaned_df[wanted_cols].iloc[1:].reset_index(drop=True).loc[sorted_index].copy()
     
-    return pd.concat([result_df, additional_columns], axis=1)
-
+    # Handle additional columns correctly to preserve column names
+    if mode == 'normal':
+        if isinstance(additional_columns, pd.DataFrame):
+            # Convert specific column to a Series with proper name
+            rank_series = additional_columns['Protocol Similarity Rank']
+            result_df['Protocol Similarity Rank'] = rank_series
+        else:
+            # If it's already a Series, add it with its name
+            result_df['Protocol Similarity Rank'] = additional_columns
+    else:
+        # For enrichment modes, ensure we preserve all column names when concatenating
+        if isinstance(additional_columns, pd.DataFrame):
+            # Use pandas merge instead of concat to preserve columns
+            for col in additional_columns.columns:
+                result_df[col] = additional_columns[col].values
+    
+    return result_df
 # Custom JSON encoder to handle NaN values
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -312,6 +360,7 @@ def get_enrichment_data():
     selected_label = request.args.get('parameter')
     if selected_label:
         filtered = [r for r in enrichment_data if r.get('Target Label') == selected_label]
+        print(filtered)
     else:
         filtered = enrichment_data
 
@@ -351,6 +400,47 @@ def submit_features():
     # Get form fields
     parameter = request.form.get('parameter', '')
     features = request.form.getlist('selected_features[]')
+    explicit_mode = request.form.get('mode', '')  # Get explicitly selected mode from UI
+    
+    # Determine search mode based on combination of selections and explicit mode
+    if explicit_mode:
+        # Use the mode explicitly selected by the user
+        mode = explicit_mode
+    else:
+        # Fall back to determining mode from parameters for compatibility
+        has_parameter = bool(parameter)
+        has_features = bool(features)
+        
+        if not has_parameter and has_features:
+            mode = 'normal'
+        elif has_parameter and not has_features:
+            mode = 'enrichment'
+        elif has_parameter and has_features:
+            mode = 'combined'
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid search criteria. Please select a mode and appropriate parameters.'
+            })
+    
+    # Validate requirements for each mode
+    if mode == 'normal' and not features:
+        return jsonify({
+            'status': 'error',
+            'message': 'Normal mode requires at least one feature to be selected.'
+        })
+    
+    if mode == 'enrichment' and not parameter:
+        return jsonify({
+            'status': 'error',
+            'message': 'Enrichment mode requires a target topic to be selected.'
+        })
+    
+    if mode == 'combined' and (not parameter or not features):
+        return jsonify({
+            'status': 'error',
+            'message': 'Combined mode requires both a target topic and at least one feature.'
+        })
     
     # Pull in the toggle_states[] values (strings "true"/"false")
     raw_states = request.form.getlist('toggle_states[]')
@@ -362,14 +452,23 @@ def submit_features():
         result_table = get_search_table(
             FeaturesOfInterest=features, 
             LabelOfInterest=parameter, 
-            CategoriesOfInterest=toggle_states
+            CategoriesOfInterest=toggle_states,
+            SearchMode=mode
         )
         
         # Check if result table is empty
         if result_table.empty:
+            error_msg = 'No results found. '
+            if mode == 'normal':
+                error_msg += 'None of the protocols include all selected features. Try with fewer features.'
+            elif mode == 'enrichment':
+                error_msg += 'No protocols match the target topic. Try a different topic.'
+            else:
+                error_msg += 'No protocols match both the target topic and selected features. Try fewer constraints.'
+                
             return jsonify({
                 'status': 'error',
-                'message': 'No results found. None of the 322 protocols co-reported the selected features of interest. Try with less.'
+                'message': error_msg
             })
         
         # Fill NaN values with None for proper JSON serialization
@@ -384,7 +483,8 @@ def submit_features():
             'status': 'success',
             'data': {
                 'parameter': parameter,
-                'selected_features': features
+                'selected_features': features,
+                'mode': mode
             },
             'toggle_states': toggle_states,
             'search_results': {

@@ -135,7 +135,7 @@ CMPortal.enrichment = {};
       resultDisplay.classList.remove('enrichment-hidden');
 
       if (data.status !== 'success' || !data.data?.parameter) {
-        submissionResult.textContent = '❌ Search failed: Server is busy. Please reclick and try again to fetch the correct data.';
+        submissionResult.textContent = `❌ Search failed: ${data.message} Server is busy. Please reclick and try again to fetch the correct data.`;
       } else {
         submissionResult.textContent = '✅ Search success: 1 parameter submitted. Dataset is fetched correctly.';
         loadEnrichmentTable(selectedValue);

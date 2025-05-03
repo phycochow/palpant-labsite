@@ -463,3 +463,52 @@
         text-align: center;
     }
 }
+
+/* Reference pair side-by-side */
+.reference-pair {
+  margin-bottom: 15px;
+}
+.reference-pair .upload-pair {
+  display: flex;
+  gap: 10px;
+}
+.reference-pair .upload-area {
+  flex: 1;
+  position: relative;
+  border: 2px dashed var(--border);
+  border-radius: 4px;
+  padding: 20px;
+  text-align: center;
+  background-color: var(--light);
+  cursor: pointer;
+}
+.reference-pair .upload-area p {
+  margin-bottom: 10px;
+  color: var(--medium-gray);
+}
+.reference-pair .filename {
+  margin-top: 8px;
+  font-size: 0.9em;
+  color: var(--dark);
+  word-break: break-all;
+}
+
+/* Add-button */
+#add-reference-btn {
+  margin-top: 10px;
+}
+
+/* Block submission on incomplete refs */
+/* no extra CSS needed */
+
+/* Adjust OR separator smaller */
+.or-separator:before, .or-separator:after {
+  width: 20%;
+}
+
+/* Responsive */
+@media (max-width:768px) {
+  .reference-pair .upload-pair {
+    flex-direction: column;
+  }
+}

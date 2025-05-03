@@ -1,13 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Protocol Search</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/tab-search.css') }}">
-</head>
-<body>
-
 <div class="well">
   <p>
     Retrieve protocols by target parameters regardless of their intended purpose using outcome-specific features (Fig 2j).
@@ -23,14 +13,53 @@
   </ul>
 </div>
 
-&nbsp;
+<!-- Search Mode Selection -->
+<div class="search-ui-full-container" id="search-mode-container">
+  <h3>Select Search Mode</h3>
+  <div class="search-mode-options">
+    <div class="search-mode-option" data-mode="normal">
+      <input type="radio" id="mode-normal" name="search-mode" value="normal">
+      <label for="mode-normal">
+        <h4>Normal Mode</h4>
+        <p>Find protocols that have ALL selected features</p>
+      </label>
+    </div>
+    
+    <div class="search-mode-option" data-mode="enrichment">
+      <input type="radio" id="mode-enrichment" name="search-mode" value="enrichment">
+      <label for="mode-enrichment">
+        <h4>Enrichment Mode</h4>
+        <p>Find protocols based on a target topic's key characteristics</p>
+      </label>
+    </div>
+    
+    <div class="search-mode-option" data-mode="combined">
+      <input type="radio" id="mode-combined" name="search-mode" value="combined">
+      <label for="mode-combined">
+        <h4>Combined Mode</h4>
+        <p>Find protocols by target topic and further filter by specific features</p>
+      </label>
+    </div>
+  </div>
+  
+  <!-- Mode information display -->
+  <div class="mode-info-box" id="current-mode-info">
+    <span class="current-mode-label">Current Mode: </span>
+    <span class="current-mode-value">Please select a search mode</span>
+  </div>
+</div>
 
-<!-- A container for two side-by-side search UI panels. The CSS should arrange these containers at 50% width each. -->
+<!-- Side-by-side search panels (maintaining original layout) -->
 <div class="search-row">
+  <!-- Left Panel: Target Topic Selection -->
   <div class="search-ui-container" id="search-ui-container-left">
+    <div class="panel-header">
+      <h4>Target Topic</h4>
+      <span class="panel-requirement" id="left-panel-requirement"></span>
+    </div>
     <form id="features-form-left">
       <div class="search-ui-form-group">
-        <label for="search-ui-key-dropdown-left" class="search-ui-label"></label>
+        <label for="search-ui-key-dropdown-left" class="search-ui-label">Topic Category:</label>
         <select id="search-ui-key-dropdown-left" name="category" class="search-ui-select">
           <option value="">-- Select a Topic Category --</option>
           {% for category in TargetParameters %}
@@ -40,7 +69,7 @@
       </div>
 
       <div class="search-ui-form-group">
-        <label class="search-ui-label">Select a target topic for their key characteristics to search protocols:</label>
+        <label class="search-ui-label">Select a target topic for their key characteristics:</label>
         <div id="search-ui-checkbox-container-left" class="search-ui-checkbox-container search-ui-hidden">
           <p id="search-ui-loading-message-left">Please select a category first...</p>
         </div>
@@ -49,10 +78,15 @@
     </form>
   </div>
 
+  <!-- Right Panel: Feature Selection -->
   <div class="search-ui-container" id="search-ui-container-right">
+    <div class="panel-header">
+      <h4>Protocol Features</h4>
+      <span class="panel-requirement" id="right-panel-requirement"></span>
+    </div>
     <form id="features-form-right">
       <div class="search-ui-form-group">
-        <label for="search-ui-key-dropdown-right" class="search-ui-label"></label>
+        <label for="search-ui-key-dropdown-right" class="search-ui-label">Feature Category:</label>
         <select id="search-ui-key-dropdown-right" name="category" class="search-ui-select">
           <option value="">-- Select Feature Category --</option>
           {% for category in FeatureCategories %}
@@ -62,7 +96,7 @@
       </div>
 
       <div class="search-ui-form-group">
-        <label class="search-ui-label">Select features and reagents of interest to further filter the results (optional):</label>
+        <label class="search-ui-label">Select features and reagents of interest:</label>
         <div id="search-ui-checkbox-container-right" class="search-ui-checkbox-container search-ui-hidden">
           <p id="search-ui-loading-message-right">Please select a category first...</p>
         </div>
@@ -72,21 +106,27 @@
   </div>
 </div>
 
-<!-- Global submit & toggle buttons for dual-form aggregation -->
+<!-- Enrichment Category Filters (below the panels) -->
+<div class="search-ui-full-container" id="enrichment-filters-container">
+  <h4>Enrichment Category Filters</h4>
+  <p class="filter-description">Select which enrichment categories to include in the search results:</p>
+  <div class="enrichment-filters">
+    <button type="button" id="toggle-btn-1" class="search-ui-button toggle-button" disabled>Protocol Variable</button>
+    <button type="button" id="toggle-btn-2" class="search-ui-button toggle-button" disabled>Analysis Method</button>
+    <button type="button" id="toggle-btn-3" class="search-ui-button toggle-button" disabled>Cell Profile</button>
+    <button type="button" id="toggle-btn-4" class="search-ui-button toggle-button" disabled>Study Characteristic</button>
+    <button type="button" id="toggle-btn-5" class="search-ui-button toggle-button" disabled>Measured Endpoint</button>
+  </div>
+</div>
+
+<!-- Global submit button -->
 <div class="global-submit-container">
-  <!-- Five toggle buttons -->
-  <button type="button" id="toggle-btn-1" class="search-ui-button toggle-button" disabled>Protocol Variable Enrichments</button>
-  <button type="button" id="toggle-btn-2" class="search-ui-button toggle-button" disabled>Analysis Method Enrichments</button>
-  <button type="button" id="toggle-btn-3" class="search-ui-button toggle-button" disabled>Cell Profile Enrichments</button>
-  <button type="button" id="toggle-btn-4" class="search-ui-button toggle-button" disabled>Study Characteristic Enrichments</button>
-  <button type="button" id="toggle-btn-5" class="search-ui-button toggle-button" disabled>Measured Endpoint Enrichments</button>
-  <!-- Main submit button -->
-  <button id="search-ui-submit-button" class="search-ui-button" disabled>Find Protocols</button>
+  <button id="search-ui-submit-button" class="search-ui-button" disabled>Search Protocols</button>
 </div>
 
 <!-- Request processing results display -->
 <div class="search-ui-result search-ui-hidden" id="search-ui-result-display">
-  <h3>Submission Result:</h3>
+  <h3>Search Results:</h3>
   <pre id="search-ui-submission-result" class="search-ui-pre"></pre>
 </div>
 
@@ -95,8 +135,3 @@
   <h3>Search Results</h3>
   <div id="search-results-container"></div>
 </div>
-
-<!-- Include the associated JavaScript for interactivity -->
-<script src="{{ url_for('static', filename='js/tab-search.js') }}"></script>
-</body>
-</html>
