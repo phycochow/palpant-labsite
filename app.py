@@ -17,7 +17,7 @@ feature_categories_filepath = os.path.join(DATA_DIR, '0_FeatureCategories_01Mar2
 enrich_filepath = os.path.join(DATA_DIR, '1_PermutatedImportancesTRUE_02May25.csv')
 cleaned_database_filepath = os.path.join(DATA_DIR, '0_CleanedDatabase_25Feb25.csv')
 binary_filepath = os.path.join(DATA_DIR, '1_BinaryFeatures_25Feb25.csv')
-odds_filepath = os.path.join(DATA_DIR, '1_PositiveOddsEnrichments_19Apr25.csv')
+odds_filepath = os.path.join(DATA_DIR, '1_PositiveOddsEnrichments_03May25.csv')
 
 # ----- Global dataframe holders -----
 # Initialize variables that will be used later for lazy loading
@@ -279,9 +279,13 @@ def get_search_table(FeaturesOfInterest, LabelOfInterest=None, CategoriesOfInter
     elif mode == 'enrichment':
         # Pure enrichment: just search for protocols with enrichment for target
         if LabelOfInterest not in target_feature_dict:
+            print(f"DEBUG: Label '{LabelOfInterest}' not found in target_feature_dict. Available keys: {list(target_feature_dict.keys())[:5]}...")
             return pd.DataFrame()  # Return empty DataFrame if label not found
             
         selected_features = target_feature_dict[LabelOfInterest]
+        # Debug print to check what features were found for this label
+        print(f"DEBUG: Found {len(selected_features)} features for '{LabelOfInterest}'")
+        
         filter_features = []  # No feature filtering
         filter_categories = [cat for cat, boo in zip(Categories, CategoriesOfInterest) if boo]
         wanted_cols = ['Title', 'DOI', LabelOfInterest.split(' -')[0]]
