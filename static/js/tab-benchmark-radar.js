@@ -87,18 +87,13 @@ CMPortal.benchmarkRadar.createRadarContainer = function() {
   const resultsContainer = document.getElementById('benchmark-results-container');
   if (!resultsContainer) return;
   
-  // Clear any existing content
-  resultsContainer.innerHTML = '';
-  
   // Create radar container
   const radarContainer = document.createElement('div');
   radarContainer.className = 'container';
   radarContainer.innerHTML = `
-    <h1>Cardiomyocyte Maturity Analysis</h1>
-    
     <div class="legend">
       <div class="legend-item">
-        <div class="legend-color your-protocol"></div><span>Your Protocol</span>
+        <div class="legend-color your-protocol"></div><span id="userProtocolLabel">Your Protocol</span>
       </div>
       <div class="legend-item">
         <div class="legend-color reference"></div><span id="refLabel">Reference 1</span>
@@ -157,10 +152,6 @@ CMPortal.benchmarkRadar.createRadarContainer = function() {
       background: #fff; padding: 20px;
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-    h1 {
-      text-align: center; color: #2c3e50;
-      margin-bottom: 30px;
     }
     .chart-container {
       position: relative;
@@ -255,7 +246,7 @@ CMPortal.benchmarkRadar.createRadarContainer = function() {
   `;
   
   // Append elements to the results container
-  resultsContainer.appendChild(style);
+  document.head.appendChild(style);
   resultsContainer.appendChild(radarContainer);
   
   // Add event listener for Next Reference button
@@ -269,13 +260,52 @@ CMPortal.benchmarkRadar.createRadarContainer = function() {
   }, 100);
 };
 
-// Initialize the radar chart
-CMPortal.benchmarkRadar.initChart = function() {
-  const ctx = document.getElementById('maturityChart');
-  if (!ctx) return;
-  
-  // Custom radar plugin for drawing custom grid
-  const customRadarPlugin = {
+// Draw custom grid for radar chart
+CMPortal.benchmarkRadar.drawCustomGrid = function(ctx, cx, cy, radius) {
+  const n = CMPortal.benchmarkRadar.indicators.length;
+  const angleStep = (Math.PI * 2) / n;
+
+  ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+  ctx.lineWidth = 1;
+
+  // Spokes
+  for (let i = 0; i < n; i++) {
+    const ang = i * angleStep - Math.PI / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(ang) * radius, cy + Math.sin(ang) * radius);
+    ctx.stroke();
+  }
+
+  // Alternating background
+  for (let i = 0; i < n; i++) {
+    const ang = i * angleStep - Math.PI / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, ang - angleStep / 2, ang + angleStep / 2);
+    ctx.closePath();
+    ctx.fillStyle = i % 2 ? 'rgba(0,0,0,0.04)' : 'rgba(0,0,0,0.02)';
+    ctx.fill();
+  }
+
+  // Curved rings for each indicator's quantiles
+  CMPortal.benchmarkRadar.indicators.forEach((ind, i) => {
+    const baseAng = i * angleStep - Math.PI / 2;
+    const startAng = baseAng - angleStep / 2;
+    const endAng = baseAng + angleStep / 2;
+    
+    for (let q = 0; q < ind.rings; q++) {
+      const r = ((ind.rings - q) / ind.rings) * radius;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, startAng, endAng);
+      ctx.stroke();
+    }
+  });
+};
+
+// Custom radar plugin for Chart.js
+CMPortal.benchmarkRadar.customRadarPlugin = function() {
+  return {
     id: 'customRadar',
     beforeDraw(chart) {
       const ctx = chart.ctx;
@@ -287,122 +317,14 @@ CMPortal.benchmarkRadar.initChart = function() {
       ctx.restore();
     }
   };
-  
-  // Create chart
-  CMPortal.benchmarkRadar.chart = new Chart(ctx, {
-    type: 'radar',
-    data: CMPortal.benchmarkRadar.prepareChartData(),
-    options: {
-      scales: {
-        r: {
-          min: 0, max: 1,
-          ticks: { display: false },
-          pointLabels: { font: { size: 11 } },
-          grid: { display: false },
-          angleLines: { display: false }
-        }
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: function(ctx) {
-              const idx = ctx.dataIndex;
-              const ind = CMPortal.benchmarkRadar.indicators[idx];
-              const isRef = ctx.dataset.label.includes("Reference");
-              
-              let dataEntry, qv, flag, kind;
-              
-              if (isRef) {
-                const refIdx = CMPortal.benchmarkRadar.currentRefIndex;
-                const refData = CMPortal.benchmarkRadar.benchmarkData[refIdx + 1][1]; // +1 to skip user protocol
-                const indLabel = ind.label;
-                
-                if (refData[indLabel]) {
-                  [qv, flag] = refData[indLabel];
-                  kind = CMPortal.benchmarkRadar.getFlagDescription(flag);
-                  return `Reference: ${kind}: ${qv} of ${ind.rings}`;
-                }
-                return `Reference: No data for ${indLabel}`;
-              } else {
-                const userData = CMPortal.benchmarkRadar.benchmarkData[0][1];
-                const indLabel = ind.label;
-                
-                if (userData[indLabel]) {
-                  [qv, flag] = userData[indLabel];
-                  kind = CMPortal.benchmarkRadar.getFlagDescription(flag);
-                  return `Your Protocol: ${kind}: ${qv} of ${ind.rings}`;
-                }
-                return `Your Protocol: No data for ${indLabel}`;
-              }
-            }
-          }
-        }
-      },
-      elements: { line: { tension: 0.1 } },
-      responsive: true, 
-      maintainAspectRatio: false,
-      animation: {
-        duration: 800,
-        easing: 'easeOutQuart',
-      },
-      transitions: {
-        active: {
-          animation: {
-            duration: 800
-          }
-        }
-      }
-    },
-    plugins: [customRadarPlugin]
-  });
 };
 
-// Draw custom grid for radar chart
-CMPortal.benchmarkRadar.drawCustomGrid = function(ctx, cx, cy, radius) {
-  const indicators = CMPortal.benchmarkRadar.indicators;
-  const n = indicators.length;
-  const angleStep = (Math.PI * 2) / n;
-
-  ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-  ctx.lineWidth = 1;
-
-  // Draw spokes
-  for (let i = 0; i < n; i++) {
-    const ang = i * angleStep - Math.PI / 2;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + Math.cos(ang) * radius, cy + Math.sin(ang) * radius);
-    ctx.stroke();
-  }
-
-  // Draw alternating background
-  for (let i = 0; i < n; i++) {
-    const ang = i * angleStep - Math.PI / 2;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, radius, ang - angleStep / 2, ang + angleStep / 2);
-    ctx.closePath();
-    ctx.fillStyle = i % 2 ? 'rgba(0,0,0,0.04)' : 'rgba(0,0,0,0.02)';
-    ctx.fill();
-  }
-
-  // Draw curved rings for each indicator
-  indicators.forEach((ind, i) => {
-    const baseAng = i * angleStep - Math.PI / 2;
-    const startAng = baseAng - angleStep / 2, endAng = baseAng + angleStep / 2;
-    for (let q = 0; q < ind.rings; q++) {
-      const r = ((ind.rings - q) / ind.rings) * radius;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, startAng, endAng);
-      ctx.stroke();
-    }
-  });
-};
-
-// Get styling for data points based on flag
+// Get styling for data points based on flag value
 CMPortal.benchmarkRadar.getDataPointStyling = function(flag, isReference) {
-  // Base colors (updated with darker/more distinct shades)
+  // Default flag to 0 if not provided
+  flag = parseInt(flag) || 0;
+  
+  // Base colors
   const blueBase = 'rgba(30,120,190,1)'; // Darker standard blue
   const redBase = 'rgba(255,99,132,1)';
   
@@ -454,7 +376,108 @@ CMPortal.benchmarkRadar.getDataPointStyling = function(flag, isReference) {
     }
   };
   
+  // Return the appropriate style based on flag and protocol type
   return isReference ? refStyles[flag] || refStyles[1] : yourStyles[flag] || yourStyles[1];
+};
+
+// Prepare chart data for the radar chart
+CMPortal.benchmarkRadar.prepareChartData = function() {
+  if (!CMPortal.benchmarkRadar.benchmarkData || CMPortal.benchmarkRadar.benchmarkData.length === 0) {
+    console.error('No benchmark data available');
+    return null;
+  }
+  
+  // Get the user protocol data (first entry in benchmark data)
+  const userProtocol = CMPortal.benchmarkRadar.benchmarkData[0];
+  const userProtocolName = userProtocol[0];
+  const userProtocolData = userProtocol[1];
+  
+  // Get the reference protocol data (based on current reference index)
+  const refIndex = CMPortal.benchmarkRadar.currentRefIndex + 1; // +1 because index 0 is user protocol
+  
+  // Make sure the reference index is valid
+  if (refIndex >= CMPortal.benchmarkRadar.benchmarkData.length) {
+    // Wrap around to the first reference if needed
+    CMPortal.benchmarkRadar.currentRefIndex = 0;
+  }
+  
+  const referenceProtocol = CMPortal.benchmarkRadar.benchmarkData[refIndex] || CMPortal.benchmarkRadar.benchmarkData[1];
+  const referenceProtocolName = referenceProtocol[0];
+  const referenceProtocolData = referenceProtocol[1];
+  
+  // Prepare data arrays and styling for chart
+  const yourData = [], yourBg = [], yourBorder = [], yourRadius = [];
+  const refData = [], refBg = [], refBorder = [], refRadius = [];
+  
+  // Process your data
+  CMPortal.benchmarkRadar.indicators.forEach(indicator => {
+    const id = indicator.label;
+    const rings = indicator.rings;
+    
+    // Get the user's data for this indicator
+    const userValue = userProtocolData[id] || ['Q1', 0]; // Default to Q1 if not found
+    const userQuantile = userValue[0];
+    const userFlag = userValue[1];
+    
+    // Calculate the ring position (value from 0 to 1)
+    const userQNum = parseFloat(userQuantile.replace('Q', ''));
+    const userRingPos = (rings - (userQNum - 1)) / rings;
+    
+    // Add to your data arrays
+    yourData.push(userRingPos);
+    
+    // Get styling based on flag
+    const userStyle = CMPortal.benchmarkRadar.getDataPointStyling(userFlag, false);
+    yourBg.push(userStyle.bg);
+    yourBorder.push(userStyle.border);
+    yourRadius.push(userStyle.radius);
+    
+    // Get the reference data for this indicator
+    const refValue = referenceProtocolData[id] || ['Q1', 0]; // Default to Q1 if not found
+    const refQuantile = refValue[0];
+    const refFlag = refValue[1];
+    
+    // Calculate the ring position (value from 0 to 1)
+    const refQNum = parseFloat(refQuantile.replace('Q', ''));
+    const refRingPos = (rings - (refQNum - 1)) / rings;
+    
+    // Add to reference data arrays
+    refData.push(refRingPos);
+    
+    // Get styling based on flag
+    const refStyle = CMPortal.benchmarkRadar.getDataPointStyling(refFlag, true);
+    refBg.push(refStyle.bg);
+    refBorder.push(refStyle.border);
+    refRadius.push(refStyle.radius);});
+  
+  // Return the prepared data
+  return {
+    labels: CMPortal.benchmarkRadar.indicators.map(i => i.label),
+    datasets: [
+      {
+        label: userProtocolName,
+        data: yourData,
+        backgroundColor: 'rgba(54,162,235,0.3)',
+        borderColor: 'rgba(54,162,235,1)',
+        borderWidth: 2,
+        pointBackgroundColor: yourBg,
+        pointBorderColor: yourBorder,
+        pointRadius: yourRadius,
+        pointStyle: 'circle'
+      },
+      {
+        label: referenceProtocolName,
+        data: refData,
+        backgroundColor: 'rgba(255,99,132,0.3)',
+        borderColor: 'rgba(255,99,132,1)',
+        borderWidth: 2,
+        pointBackgroundColor: refBg,
+        pointBorderColor: refBorder,
+        pointRadius: refRadius,
+        pointStyle: 'circle'
+      }
+    ]
+  };
 };
 
 // Get description for flag values
@@ -473,117 +496,91 @@ CMPortal.benchmarkRadar.getFlagDescription = function(flag) {
   }
 };
 
-// Prepare chart data for visualization
-CMPortal.benchmarkRadar.prepareChartData = function() {
-  const indicators = CMPortal.benchmarkRadar.indicators;
-  const benchmarkData = CMPortal.benchmarkRadar.benchmarkData;
+// Initialize the radar chart
+CMPortal.benchmarkRadar.initChart = function() {
+  const ctx = document.getElementById('maturityChart').getContext('2d');
   
-  if (!benchmarkData || benchmarkData.length < 1) {
-    return {
-      labels: indicators.map(i => i.label),
-      datasets: []
-    };
+  // Prepare the chart data
+  const data = CMPortal.benchmarkRadar.prepareChartData();
+  
+  if (!data) {
+    console.error('Failed to prepare chart data');
+    return;
   }
   
-  // Get the user protocol (first entry in benchmark data)
-  const [yourProtocolName, yourProtocolData] = benchmarkData[0];
-  
-  // Get the reference protocol (based on current reference index)
-  let refProtocolName = 'No Reference';
-  let refProtocolData = {};
-  
-  if (benchmarkData.length > 1) {
-    const refIdx = Math.min(CMPortal.benchmarkRadar.currentRefIndex, benchmarkData.length - 2) + 1;
-    [refProtocolName, refProtocolData] = benchmarkData[refIdx];
-    
-    // Update reference label
-    const refLabel = document.getElementById('refLabel');
-    if (refLabel) {
-      refLabel.textContent = `Reference ${CMPortal.benchmarkRadar.currentRefIndex + 1}`;
-    }
-  }
-  
-  // Prepare your protocol data
-  const yourData = [], yourBg = [], yourBorder = [], yourRadius = [];
-  
-  // Process your data
-  indicators.forEach((ind) => {
-    const label = ind.label;
-    if (yourProtocolData[label]) {
-      const [qv, flag] = yourProtocolData[label];
-      // Convert qv to a numeric value for chart
-      const qvNum = parseFloat(String(qv).replace('Q', ''));
-      const ringPos = (ind.rings - (qvNum - 1)) / ind.rings;
-      
-      yourData.push(ringPos);
-      
-      const style = CMPortal.benchmarkRadar.getDataPointStyling(flag, false);
-      yourBg.push(style.bg);
-      yourBorder.push(style.border);
-      yourRadius.push(style.radius);
-    } else {
-      // No data available for this indicator
-      yourData.push(0);
-      yourBg.push('rgba(0,0,0,0)');
-      yourBorder.push('rgba(0,0,0,0)');
-      yourRadius.push(0);
-    }
-  });
-  
-  // Prepare reference protocol data
-  const refData = [], refBg = [], refBorder = [], refRadius = [];
-  
-  // Process reference data
-  indicators.forEach((ind) => {
-    const label = ind.label;
-    if (refProtocolData[label]) {
-      const [qv, flag] = refProtocolData[label];
-      // Convert qv to a numeric value for chart
-      const qvNum = parseFloat(String(qv).replace('Q', ''));
-      const ringPos = (ind.rings - (qvNum - 1)) / ind.rings;
-      
-      refData.push(ringPos);
-      
-      const style = CMPortal.benchmarkRadar.getDataPointStyling(flag, true);
-      refBg.push(style.bg);
-      refBorder.push(style.border);
-      refRadius.push(style.radius);
-    } else {
-      // No data available for this indicator
-      refData.push(0);
-      refBg.push('rgba(0,0,0,0)');
-      refBorder.push('rgba(0,0,0,0)');
-      refRadius.push(0);
-    }
-  });
-  
-  return {
-    labels: indicators.map(i => i.label),
-    datasets: [
-      {
-        label: 'Your Protocol',
-        data: yourData,
-        backgroundColor: 'rgba(54,162,235,0.3)',
-        borderColor: 'rgba(54,162,235,1)',
-        borderWidth: 2,
-        pointBackgroundColor: yourBg,
-        pointBorderColor: yourBorder,
-        pointRadius: yourRadius,
-        pointStyle: 'circle'
+  // Create the chart
+  CMPortal.benchmarkRadar.chart = new Chart(ctx, {
+    type: 'radar',
+    data: data,
+    options: {
+      scales: {
+        r: {
+          min: 0, 
+          max: 1,
+          ticks: { display: false },
+          pointLabels: { font: { size: 11 } },
+          grid: { display: false },
+          angleLines: { display: false }
+        }
       },
-      {
-        label: `Reference ${CMPortal.benchmarkRadar.currentRefIndex + 1}`,
-        data: refData,
-        backgroundColor: 'rgba(255,99,132,0.3)',
-        borderColor: 'rgba(255,99,132,1)',
-        borderWidth: 2,
-        pointBackgroundColor: refBg,
-        pointBorderColor: refBorder,
-        pointRadius: refRadius,
-        pointStyle: 'circle'
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label(ctx) {
+              const idx = ctx.dataIndex;
+              const indicator = CMPortal.benchmarkRadar.indicators[idx];
+              const isRef = ctx.dataset.label !== CMPortal.benchmarkRadar.benchmarkData[0][0];
+              
+              let dataArray;
+              let protocolName;
+              
+              if (isRef) {
+                const refIndex = CMPortal.benchmarkRadar.currentRefIndex + 1;
+                const referenceProtocol = CMPortal.benchmarkRadar.benchmarkData[refIndex];
+                dataArray = referenceProtocol[1][indicator.label] || ['?', 0];
+                protocolName = referenceProtocol[0];
+              } else {
+                const userProtocol = CMPortal.benchmarkRadar.benchmarkData[0];
+                dataArray = userProtocol[1][indicator.label] || ['?', 0];
+                protocolName = userProtocol[0];
+              }
+              
+              const [qv, flag] = dataArray;
+              
+              let kind = CMPortal.benchmarkRadar.getFlagDescription(flag);
+              
+              return `${protocolName}: ${kind}: ${qv} of ${indicator.rings} quantiles`;
+            }
+          }
+        }
+      },
+      elements: { line: { tension: 0.1 } },
+      responsive: true, 
+      maintainAspectRatio: false,
+      animation: {
+        duration: 800,
+        easing: 'easeOutQuart',
+      },
+      transitions: {
+        active: {
+          animation: {
+            duration: 800
+          }
+        }
       }
-    ]
-  };
+    },
+    plugins: [CMPortal.benchmarkRadar.customRadarPlugin()]
+  });
+
+  // Update the protocol labels
+  document.getElementById('userProtocolLabel').textContent = CMPortal.benchmarkRadar.benchmarkData[0][0] || 'Your Protocol';
+  
+  if (CMPortal.benchmarkRadar.benchmarkData.length > 1) {
+    const refIndex = CMPortal.benchmarkRadar.currentRefIndex + 1;
+    const referenceProtocol = CMPortal.benchmarkRadar.benchmarkData[refIndex];
+    document.getElementById('refLabel').textContent = referenceProtocol[0];
+  }
 };
 
 // Move to next reference protocol
@@ -609,21 +606,42 @@ CMPortal.benchmarkRadar.updateChart = function() {
   if (!CMPortal.benchmarkRadar.chart) return;
   
   // Get reference index
-  const refIdx = CMPortal.benchmarkRadar.currentRefIndex;
+  const refIndex = CMPortal.benchmarkRadar.currentRefIndex;
   const benchmarkData = CMPortal.benchmarkRadar.benchmarkData;
   
   // Update the reference label
   const refLabel = document.getElementById('refLabel');
-  if (refLabel) {
-    refLabel.textContent = `Reference ${refIdx + 1}`;
+  if (refLabel && benchmarkData && benchmarkData.length > 1) {
+    const referenceIndex = refIndex + 1;
+    if (referenceIndex < benchmarkData.length) {
+      refLabel.textContent = benchmarkData[referenceIndex][0];
+    }
   }
   
   // Prepare updated chart data
   const chartData = CMPortal.benchmarkRadar.prepareChartData();
   
   // Update chart datasets
-  CMPortal.benchmarkRadar.chart.data.datasets = chartData.datasets;
+  if (chartData && CMPortal.benchmarkRadar.chart) {
+    CMPortal.benchmarkRadar.chart.data.datasets = chartData.datasets;
+    CMPortal.benchmarkRadar.chart.update();
+  }
+};
+
+// Function to be called from tab-benchmark.js to visualize benchmark results
+CMPortal.benchmarkRadar.visualizeResults = function(benchmarkData) {
+  // Check if Chart.js is available
+  if (typeof Chart === 'undefined') {
+    console.error('Chart.js is not available. Cannot create radar chart.');
+    return;
+  }
   
-  // Update chart
-  CMPortal.benchmarkRadar.chart.update();
+  // Check if the benchmark data is valid
+  if (!benchmarkData || !Array.isArray(benchmarkData) || benchmarkData.length === 0) {
+    console.error('Invalid benchmark data. Cannot create radar chart.');
+    return;
+  }
+  
+  // Initialize the radar chart
+  CMPortal.benchmarkRadar.init(benchmarkData);
 };
