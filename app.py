@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 import gc
 import logging
+import csv
+from PyPDF2 import PdfReader
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -18,7 +20,12 @@ from data_manager import (
     get_search_table,
     clear_memory_cache
 )
-from utils import NpEncoder
+from utils import (
+    NpEncoder, 
+    getUserProtocolFeatures, 
+    getUserData, 
+    process_maturity_indicators
+)
 
 app = Flask(__name__)
 app.logger.setLevel('INFO')
@@ -37,6 +44,9 @@ odds_filepath = os.path.join(DATA_DIR, '1_PositiveOddsEnrichments_03May25.csv')
 FeatureCategories_dict, TargetParameters_dict = load_lookup_tables(
     feature_categories_filepath, target_param_filepath
 )
+
+# Cache for benchmark results to avoid reprocessing
+_benchmark_results_cache = {}
 
 # ----- API Routes -----
 @app.route('/api/enrichment_data', methods=['GET'])
@@ -210,6 +220,208 @@ def filter_features():
         'data': {'filtered_features': features}
     })
 
+@app.route('/api/submit_benchmark', methods=['POST'])
+def submit_benchmark():
+    """
+    Process a benchmark submission with protocol, experimental data, and references.
+    """
+    # Call the process_benchmark_submission function with request data and files
+    result = process_benchmark_submission(request.form, request.files)
+    
+    # If the result contains an error status, return it as is
+    if result.get('status') == 'error':
+        return jsonify(result)
+    
+    # Otherwise, return the successful result
+    return jsonify(result)
+
+
+def process_benchmark_submission(request_data, request_files):
+    """
+    Process user's benchmark submission with all components in a single function.
+    
+    Parameters:
+    - request_data: Form data from the request
+    - request_files: File uploads from the request
+    
+    Returns:
+    - Dictionary with processed benchmark results
+    """
+    try:
+        # Initialize variables
+        protocol_features = []
+        user_protocol_name = "Custom Protocol"
+        reference_results = []
+        db_protocol_results = []
+        
+        # Retrieve causal candidates (all possible features)
+        causal_candidates = [
+            "hiPSC Matrix Coating - EBs (18)", "hiPSC Matrix Coating - Geltrex (33)", 
+            "hiPSC Matrix Coating - Matrigel (163)", "hiPSC Matrix Coating - MEF feeder cells (8)",
+            # ... add all the other candidates here ... 
+            "3D Endothelial Cell Source - Cardiac Microvascular EndothelialC (5)"
+        ]
+        
+        # 1. PROCESS USER'S PROTOCOL (either uploaded file or selected features)
+        if 'protocol_file' in request_files and request_files['protocol_file'].filename:
+            # Extract features from uploaded protocol PDF
+            protocol_file = request_files['protocol_file']
+            protocol_features = getUserProtocolFeatures(protocol_file, causal_candidates)
+        else:
+            # Use manually selected features from form
+            protocol_features = request_data.getlist('selected_features[]')
+        
+        # 2. PROCESS USER'S EXPERIMENTAL DATA (required)
+        if 'experimental_file' not in request_files or not request_files['experimental_file'].filename:
+            return {
+                'status': 'error',
+                'message': 'Experimental data file is required.'
+            }
+        
+        experimental_file = request_files['experimental_file']
+        user_data = getUserData(experimental_file)
+        
+        # 3. GET SELECTED PURPOSE (required)
+        selected_purpose = request_data.get('selected_purpose', '')
+        if not selected_purpose:
+            return {
+                'status': 'error',
+                'message': 'Protocol purpose selection is required.'
+            }
+        
+        # 4. PROCESS MATURITY INDICATORS FOR USER'S PROTOCOL
+        protocol_name, results_dict = process_maturity_indicators(user_data, protocol_features)
+        if protocol_name and protocol_name != "Unnamed Protocol":
+            user_protocol_name = protocol_name
+        
+        # 5. PROCESS PURPOSE-BASED REFERENCE
+        # Create empty template for all indicators
+        purpose_data = {'ProtocolName': f'{selected_purpose} Protocols'}
+        for indicator in [
+            'Sarcomere Length (um)', 'Cell Area (um2)', 'T-tubule Structure (Found)',
+            'Contractile Force (mN)', 'Contractile Stress (mN/mm2)', 
+            'Contraction Upstroke Velocity (um/s)', 'Calcium Flux Amplitude (F/F0)',
+            'Time to Calcium Flux Peak (ms)', 'Time from Calcium Peak to Relaxation (ms)',
+            'Conduction Velocity from Calcium Imaging (cm/s)', 
+            'Action Potential Conduction Velocity (cm/s)', 'Action Potential Amplitude (mV)',
+            'Resting Membrane Potential (mV)', 'Beat Rate (bpm)', 
+            'Max Capture Rate of Paced CMs (Hz)', 'MYH7 Percentage (MYH6)',
+            'MYL2 Percentage (MYL7)', 'TNNI3 Percentage (TTNI1)'
+        ]:
+            purpose_data[indicator] = ''
+        
+        # Get features for the selected purpose
+        target_feature_dict = get_target_feature_dict(odds_filepath)
+        if selected_purpose in target_feature_dict:
+            purpose_features = target_feature_dict[selected_purpose]
+            purpose_name, purpose_results = process_maturity_indicators(purpose_data, purpose_features)
+            
+            # Add to reference results
+            reference_results.append({
+                'id': 'purpose',
+                'name': purpose_name or selected_purpose,
+                'results': purpose_results
+            })
+        
+        # 6. PROCESS USER UPLOADED REFERENCE PAIRS
+        reference_pairs = json.loads(request_data.get('reference_pairs', '[]')) if 'reference_pairs' in request_data else []
+        
+        for i, pair in enumerate(reference_pairs):
+            if 'protocol' in pair and 'data' in pair:
+                ref_protocol_key = f"ref_protocol_{i}"
+                ref_data_key = f"ref_data_{i}"
+                
+                if ref_protocol_key in request_files and ref_data_key in request_files:
+                    ref_protocol_file = request_files[ref_protocol_key]
+                    ref_data_file = request_files[ref_data_key]
+                    
+                    # Process reference protocol and data
+                    ref_features = getUserProtocolFeatures(ref_protocol_file, causal_candidates)
+                    ref_data = getUserData(ref_data_file)
+                    ref_name, ref_results = process_maturity_indicators(ref_data, ref_features)
+                    
+                    # Add to reference results
+                    reference_results.append({
+                        'id': f"ref_{i}",
+                        'name': ref_name or f"Reference {i+1}",
+                        'results': ref_results
+                    })
+        
+        # 7. PROCESS DATABASE PROTOCOL IDS
+        selected_protocol_ids = request_data.getlist('selected_protocol_ids[]')
+        if selected_protocol_ids:
+            # Load necessary dataframes
+            binary_df = get_binary_df(binary_filepath)
+            cleaned_df = get_cleaned_df(cleaned_database_filepath)
+            
+            for protocol_id in selected_protocol_ids:
+                # Convert ID to indices (accounting for 0-based indexing)
+                try:
+                    binary_index = int(protocol_id) - 1
+                    cleaned_index = binary_index + 1  # Adjust as needed based on your data structure
+                    
+                    # Get protocol features from binary dataframe
+                    binary_row = binary_df.iloc[binary_index]
+                    db_features = [col for col in causal_candidates if binary_row.get(col, False)]
+                    
+                    # Get protocol name from cleaned dataframe
+                    title = cleaned_df.iloc[cleaned_index]['Title'] if 'Title' in cleaned_df.columns else f"Protocol ID: {protocol_id}"
+                    
+                    # Create empty indicator data
+                    db_data = {'ProtocolName': title}
+                    
+                    # Check for experimental values in the cleaned dataframe
+                    indicators = [
+                        'Sarcomere Length (um)', 'Cell Area (um2)', 'T-tubule Structure (Found)',
+                        'Contractile Force (mN)', 'Contractile Stress (mN/mm2)', 
+                        'Contraction Upstroke Velocity (um/s)', 'Calcium Flux Amplitude (F/F0)',
+                        'Time to Calcium Flux Peak (ms)', 'Time from Calcium Peak to Relaxation (ms)',
+                        'Conduction Velocity from Calcium Imaging (cm/s)', 
+                        'Action Potential Conduction Velocity (cm/s)', 'Action Potential Amplitude (mV)',
+                        'Resting Membrane Potential (mV)', 'Beat Rate (bpm)', 
+                        'Max Capture Rate of Paced CMs (Hz)', 'MYH7 Percentage (MYH6)',
+                        'MYL2 Percentage (MYL7)', 'TNNI3 Percentage (TTNI1)'
+                    ]
+                    
+                    for indicator in indicators:
+                        if indicator in cleaned_df.columns:
+                            value = cleaned_df.iloc[cleaned_index][indicator]
+                            # Only add non-NaN experimental values
+                            db_data[indicator] = str(value) if pd.notna(value) else ''
+                        else:
+                            db_data[indicator] = ''
+                    
+                    # Process the database protocol
+                    db_name, db_results = process_maturity_indicators(db_data, db_features)
+                    
+                    # Add to database results
+                    db_protocol_results.append({
+                        'id': protocol_id,
+                        'name': db_name or title,
+                        'results': db_results
+                    })
+                except Exception as e:
+                    app.logger.error(f"Error processing protocol ID {protocol_id}: {str(e)}")
+        
+        # 8. PREPARE FINAL RESPONSE
+        response_data = {
+            'status': 'success',
+            'protocol_name': user_protocol_name,
+            'selected_purpose': selected_purpose,
+            'results': results_dict,
+            'reference_results': reference_results,
+            'db_protocol_results': db_protocol_results
+        }
+        
+        return response_data
+        
+    except Exception as e:
+        app.logger.error(f"Error in process_benchmark_submission: {str(e)}")
+        return {
+            'status': 'error',
+            'message': f'Error processing benchmark: {str(e)}'
+        }
+
 # ----- Web Routes -----
 @app.route('/')
 def home():
@@ -236,6 +448,8 @@ def test():
 # Register a function to clear memory cache on application shutdown
 @app.teardown_appcontext
 def teardown_app(exception=None):
+    global _benchmark_results_cache
+    _benchmark_results_cache.clear()
     clear_memory_cache()
 
 if __name__ == '__main__':

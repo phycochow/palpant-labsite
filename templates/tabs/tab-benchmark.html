@@ -127,3 +127,33 @@
   <h3>Submission Data:</h3>
   <pre id="benchmark-submission-result" class="search-ui-pre"></pre>
 </div>
+
+
+<!-- Add this after the submit button in templates/tabs/tab-benchmark.html -->
+<div id="benchmark-results-container" class="well" style="display: none; margin-top: 20px;">
+  <h3>Benchmark Results</h3>
+  
+  <div class="benchmark-status" id="benchmark-status-message"></div>
+  
+  <div id="user-protocol-section">
+    <h4>Your Protocol: <span id="user-protocol-name"></span></h4>
+    <p>Purpose: <span id="selected-purpose"></span></p>
+    <div id="user-results-table" class="table-responsive">
+      <!-- User results will be displayed here -->
+    </div>
+  </div>
+  
+  <div id="reference-section" style="margin-top: 20px;">
+    <h4>Reference Protocols</h4>
+    <div id="reference-results-container">
+      <!-- Reference results will be displayed here -->
+    </div>
+  </div>
+  
+  <div id="database-section" style="margin-top: 20px;">
+    <h4>Database Protocols</h4>
+    <div id="database-results-container">
+      <!-- Database results will be displayed here -->
+    </div>
+  </div>
+</div>

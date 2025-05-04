@@ -122,16 +122,20 @@ def get_categories_dict(feature_categories_filepath):
     
     return _categories_dict
 
-def get_target_feature_dict(odds_filepath):
+def get_target_feature_dict(odds_filepath=None):
     """Lazy loader for enrichments dictionary"""
     global _target_feature_dict, _odds_enrichments_df
     
     if _target_feature_dict is None:
         logger.info('Loading enrichments dictionary')
-        _odds_enrichments_df = pd.read_csv(odds_filepath, low_memory=False)
-        _target_feature_dict = {col: _odds_enrichments_df[col].dropna().tolist() for col in _odds_enrichments_df.columns}
+        
+        if _odds_enrichments_df is None and odds_filepath:
+            _odds_enrichments_df = pd.read_csv(odds_filepath, low_memory=False)
+            
+        if _odds_enrichments_df is not None:
+            _target_feature_dict = {col: _odds_enrichments_df[col].dropna().tolist() for col in _odds_enrichments_df.columns}
     
-    return _target_feature_dict
+    return _target_feature_dict or {}
 
 # Free up memory when not in use
 def clear_memory_cache():
@@ -167,6 +171,13 @@ def clear_memory_cache():
         enrichment_data = None
         enrichment_columns = None
         
+    # Clear any benchmark-specific caches from utils.py
+    try:
+        from utils import _protocol_features_cache
+        _protocol_features_cache.clear()
+    except ImportError:
+        pass
+        
     gc.collect()
     logger.info('Memory cache cleared')
 
@@ -191,6 +202,8 @@ def get_search_table(FeaturesOfInterest, binary_filepath, cleaned_database_filep
     # Load required dataframes if not already in memory
     binary_df = get_binary_df(binary_filepath)
     cleaned_df = get_cleaned_df(cleaned_database_filepath)
+    
+    # Use parameter to load target_feature_dict
     target_feature_dict = get_target_feature_dict(odds_filepath)
     categories_dict = get_categories_dict(feature_categories_filepath)
     

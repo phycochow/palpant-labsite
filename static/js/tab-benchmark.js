@@ -751,3 +751,223 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
+
+// Add this to the existing tab-benchmark.js file
+
+// New function to handle form submission and display results
+CMPortal.benchmark.submitAndDisplayResults = function() {
+  // Get the form element
+  const form = document.getElementById('benchmark-form');
+  if (!form) {
+    console.error('Benchmark form not found');
+    return;
+  }
+  
+  // Create a FormData object
+  const formData = new FormData();
+  
+  // Add protocol file or selected features
+  const protocolFile = document.getElementById('protocol-file');
+  if (protocolFile && protocolFile.files && protocolFile.files.length > 0) {
+    formData.append('protocol_file', protocolFile.files[0]);
+  } else {
+    // Add selected features
+    CMPortal.benchmark.selectedFeatures.forEach(feature => {
+      formData.append('selected_features[]', feature);
+    });
+  }
+  
+  // Add experimental file (required)
+  const experimentalFile = document.getElementById('experimental-file');
+  if (experimentalFile && experimentalFile.files && experimentalFile.files.length > 0) {
+    formData.append('experimental_file', experimentalFile.files[0]);
+  } else {
+    alert('Experimental data file is required');
+    return;
+  }
+  
+  // Add selected purpose (required)
+  const selectedRadio = document.querySelector('#benchmark-checkbox-container-purpose input[type="radio"]:checked');
+  if (selectedRadio) {
+    formData.append('selected_purpose', selectedRadio.value);
+  } else {
+    alert('Protocol purpose selection is required');
+    return;
+  }
+  
+  // Add reference pairs
+  const referencePairs = CMPortal.benchmark.referencePairs.filter(pair => pair.protocolFile && pair.dataFile);
+  for (let i = 0; i < referencePairs.length; i++) {
+    const pair = referencePairs[i];
+    formData.append(`ref_protocol_${i}`, pair.protocolFile);
+    formData.append(`ref_data_${i}`, pair.dataFile);
+  }
+  
+  // Add selected protocol IDs
+  CMPortal.benchmark.selectedProtocolIds.forEach(id => {
+    formData.append('selected_protocol_ids[]', id);
+  });
+  
+  // Display loading state
+  document.getElementById('benchmark-submit-button').disabled = true;
+  document.getElementById('benchmark-submit-button').textContent = 'Processing...';
+  
+  // Send the request
+  fetch('/api/submit_benchmark', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    // Re-enable submit button
+    document.getElementById('benchmark-submit-button').disabled = false;
+    document.getElementById('benchmark-submit-button').textContent = 'Benchmark Protocol';
+    
+    // Handle response
+    if (data.status === 'error') {
+      // Display error
+      const statusMessage = document.getElementById('benchmark-status-message');
+      statusMessage.className = 'benchmark-status benchmark-status-error';
+      statusMessage.textContent = '❌ ' + data.message;
+      return;
+    }
+    
+    // Show the results container
+    document.getElementById('benchmark-results-container').style.display = 'block';
+    
+    // Set status message
+    const statusMessage = document.getElementById('benchmark-status-message');
+    statusMessage.className = 'benchmark-status benchmark-status-success';
+    statusMessage.textContent = '✅ Protocol benchmarking completed successfully';
+    
+    // Update user protocol info
+    document.getElementById('user-protocol-name').textContent = data.protocol_name;
+    document.getElementById('selected-purpose').textContent = data.selected_purpose;
+    
+    // Display user results
+    document.getElementById('user-results-table').innerHTML = CMPortal.benchmark.generateResultsTable(data.results, 'user');
+    
+    // Display reference results
+    const referenceContainer = document.getElementById('reference-results-container');
+    referenceContainer.innerHTML = '';
+    
+    if (data.reference_results && data.reference_results.length > 0) {
+      data.reference_results.forEach((reference, index) => {
+        const refDiv = document.createElement('div');
+        refDiv.className = 'reference-protocol';
+        refDiv.style.marginBottom = '20px';
+        
+        const refTitle = document.createElement('h5');
+        refTitle.textContent = reference.name || `Reference ${index + 1}`;
+        refDiv.appendChild(refTitle);
+        
+        const refTable = CMPortal.benchmark.generateResultsTable(reference.results, `ref-${index}`);
+        refDiv.innerHTML += refTable;
+        
+        referenceContainer.appendChild(refDiv);
+      });
+    } else {
+      referenceContainer.innerHTML = '<p>No reference protocols provided</p>';
+    }
+    
+    // Display database results
+    const databaseContainer = document.getElementById('database-results-container');
+    databaseContainer.innerHTML = '';
+    
+    if (data.db_protocol_results && data.db_protocol_results.length > 0) {
+      data.db_protocol_results.forEach((dbProtocol, index) => {
+        const dbDiv = document.createElement('div');
+        dbDiv.className = 'database-protocol';
+        dbDiv.style.marginBottom = '20px';
+        
+        const dbTitle = document.createElement('h5');
+        dbTitle.textContent = `${dbProtocol.name || `Protocol ID: ${dbProtocol.id}`}`;
+        dbDiv.appendChild(dbTitle);
+        
+        const dbTable = CMPortal.benchmark.generateResultsTable(dbProtocol.results, `db-${index}`);
+        dbDiv.innerHTML += dbTable;
+        
+        databaseContainer.appendChild(dbDiv);
+      });
+    } else {
+      databaseContainer.innerHTML = '<p>No database protocols selected</p>';
+    }
+    
+    // Scroll to results
+    document.getElementById('benchmark-results-container').scrollIntoView({ behavior: 'smooth' });
+  })
+  .catch(error => {
+    console.error('Error submitting benchmark:', error);
+    document.getElementById('benchmark-submit-button').disabled = false;
+    document.getElementById('benchmark-submit-button').textContent = 'Benchmark Protocol';
+    
+    // Display error
+    const statusMessage = document.getElementById('benchmark-status-message');
+    statusMessage.className = 'benchmark-status benchmark-status-error';
+    statusMessage.textContent = '❌ Error processing benchmark: ' + error.message;
+  });
+};
+
+// Helper function to generate results table
+CMPortal.benchmark.generateResultsTable = function(results, tableId) {
+  let html = `<table class="table table-striped table-bordered" id="${tableId}-results">
+    <thead>
+      <tr>
+        <th>Indicator</th>
+        <th>Quantile</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>`;
+  
+  for (const [indicator, [quantile, flag]] of Object.entries(results)) {
+    // Skip protocol name entry
+    if (indicator === 'ProtocolName') continue;
+    
+    // Determine status text and class based on flag
+    let statusText, statusClass;
+    switch(flag) {
+      case 0:
+        statusText = 'Predicted';
+        statusClass = 'text-secondary';
+        break;
+      case 1:
+        statusText = 'Within Range';
+        statusClass = 'text-success';
+        break;
+      case 3:
+        statusText = 'Exceeds Best Bounds';
+        statusClass = 'text-primary font-weight-bold';
+        break;
+      case 4:
+        statusText = 'Below Worst Bounds';
+        statusClass = 'text-warning';
+        break;
+      default:
+        statusText = 'Unknown';
+        statusClass = '';
+    }
+    
+    html += `<tr>
+      <td>${indicator}</td>
+      <td>${quantile}</td>
+      <td class="${statusClass}">${statusText}</td>
+    </tr>`;
+  }
+  
+  html += `</tbody></table>`;
+  return html;
+};
+
+// Update the submit button event handler
+CMPortal.benchmark.initializeSubmitButton = function() {
+  const submitBtn = document.getElementById('benchmark-submit-button');
+  if (!submitBtn) return;
+
+  submitBtn.disabled = true;
+  submitBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    CMPortal.benchmark.submitAndDisplayResults();
+  });
+};
