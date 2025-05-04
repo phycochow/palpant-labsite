@@ -25,6 +25,7 @@ DATA_DIR = os.path.join(app.static_folder, 'datasets')
 DATASET_PATHS = {
     'target_param_filepath': os.path.join(DATA_DIR, '0_TargetParameters_12Apr25.csv'),
     'feature_categories_filepath': os.path.join(DATA_DIR, '0_FeatureCategories_01Mar25.csv'),
+    'causal_feature_categories_filepath': os.path.join(DATA_DIR, '0_CausalFeatureCategories_04Mar25.csv'),  # Added new path
     'enrich_filepath': os.path.join(DATA_DIR, '1_PermutatedImportancesTRUE_02May25.csv'),
     'cleaned_database_filepath': os.path.join(DATA_DIR, '0_CleanedDatabase_25Feb25.csv'),
     'binary_filepath': os.path.join(DATA_DIR, '1_BinaryFeatures_25Feb25.csv'),
@@ -46,8 +47,10 @@ from data_manager import (
     get_cleaned_df,
     get_target_feature_dict,
     get_categories_dict,
+    get_causal_categories_dict,  # Import the new function
     get_candidates
 )
+
 from utils import (
     NpEncoder, 
     getUserProtocolFeatures, 
@@ -56,10 +59,12 @@ from utils import (
 )
 
 # Load lookup tables at startup
-FeatureCategories_dict, TargetParameters_dict = load_lookup_tables(
+FeatureCategories_dict, TargetParameters_dict, CausalFeatureCategories_dict = load_lookup_tables(
     DATASET_PATHS['feature_categories_filepath'], 
-    DATASET_PATHS['target_param_filepath']
+    DATASET_PATHS['target_param_filepath'],
+    DATASET_PATHS['causal_feature_categories_filepath']  # Add the new file path
 )
+
 
 # Cache for benchmark results to avoid reprocessing
 _benchmark_results_cache = {}
@@ -112,6 +117,11 @@ def get_ProtocolFeatures():
 def get_TargetParameters():
     key = request.form.get('selected_key','')
     return jsonify(values=TargetParameters_dict.get(key, []))
+
+@app.route('/api/get_CausalFeatures', methods=['POST'])
+def get_CausalFeatures():
+    key = request.form.get('selected_key','')
+    return jsonify(values=CausalFeatureCategories_dict.get(key, []))
 
 @app.route('/api/submit_features', methods=['POST'])
 def submit_features():
@@ -375,7 +385,7 @@ def process_benchmark_data(protocol_data, experimental_data, selected_features, 
         reference_data: List of dictionaries with reference protocol and data info
         
     Returns:
-        List with benchmark results
+        Dictionary with benchmark results formatted for visualization
     """
     # Get all feature candidates
     c_candidates = get_candidates()
@@ -398,16 +408,17 @@ def process_benchmark_data(protocol_data, experimental_data, selected_features, 
     # 3. Process main protocol data
     main_protocol_name, main_results_by_indicator = process_maturity_indicators(main_data, main_features, target_feature_dict)
     
-    # 4. Initialize results structure
-    main_results = (main_protocol_name, main_results_by_indicator)
-    
-    print('-------------- MAIN IS DONE\n\n\n')
+    # Create the main results structure
+    results = {
+        'status': 'success',
+        'protocol_name': main_protocol_name,
+        'selected_purpose': selected_purpose,
+        'results': main_results_by_indicator,
+        'reference_results': [],
+        'db_protocol_results': []
+    }
 
-
-    # Reference data
-    reference_results = []
-
-    # 5. Process purpose-based reference data
+    # Process purpose-based reference data
     indicators = ['Sarcomere Length (um)', 'Cell Area (um2)', 'T-tubule Structure (Found)', 
                  'Contractile Force (mN)', 'Contractile Stress (mN/mm2)', 
                  'Contraction Upstroke Velocity (um/s)', 'Calcium Flux Amplitude (F/F0)', 
@@ -423,9 +434,6 @@ def process_benchmark_data(protocol_data, experimental_data, selected_features, 
     for indicator in indicators:
         PurposeData[indicator] = ''
         
-    # Get target feature dictionary to retrieve purpose features
-    target_feature_dict = get_target_feature_dict(DATASET_PATHS['odds_filepath'])
-    
     # Get features associated with selected purpose
     if selected_purpose in target_feature_dict:
         PurposeFeatures = target_feature_dict[selected_purpose]
@@ -435,21 +443,25 @@ def process_benchmark_data(protocol_data, experimental_data, selected_features, 
     PurposeProtocolName, PurposeQResultsByIndicator = process_maturity_indicators(PurposeData, PurposeFeatures, target_feature_dict)
 
     # Add purpose reference to results
-    reference_results.append((PurposeProtocolName, PurposeQResultsByIndicator))
-    
+    results['reference_results'].append({
+        'name': PurposeProtocolName,
+        'results': PurposeQResultsByIndicator
+    })
 
-    print('-------------- PURPOSE IS DONE\n\n\n')
-
-    # 6. Process user-uploaded reference pairs
+    # Process user-uploaded reference pairs
     for ref_data in reference_data:
         ProtocolPath, DataPath = ref_data['protocol_path'], ref_data['data_path']
         RefData = getUserData(DataPath)
         RefFeatures = getUserProtocolFeatures(ProtocolPath, c_candidates)
 
         RefProtocolName, RefQResultsByIndicator = process_maturity_indicators(RefData, RefFeatures, target_feature_dict)
-        reference_results.append((RefProtocolName, RefQResultsByIndicator))
+        
+        results['reference_results'].append({
+            'name': RefProtocolName,
+            'results': RefQResultsByIndicator
+        })
     
-    # 7. Process database protocol comparisons
+    # Process database protocol comparisons
     cleaned_df = get_cleaned_df(DATASET_PATHS['cleaned_database_filepath'])
     
     for protocol_id in selected_protocol_ids:
@@ -476,15 +488,17 @@ def process_benchmark_data(protocol_data, experimental_data, selected_features, 
                     IDRefData[indicator] = ""
 
             IDRefProtocolName, IDRefQResultsByIndicator = process_maturity_indicators(IDRefData, IDRefFeatures, target_feature_dict)
-            reference_results.append((IDRefProtocolName, IDRefQResultsByIndicator))
+            
+            results['db_protocol_results'].append({
+                'id': protocol_id,
+                'name': IDRefProtocolName,
+                'results': IDRefQResultsByIndicator
+            })
         except Exception as e:
             app.logger.error(f"Error processing protocol ID {protocol_id}: {str(e)}")
             continue
     
-    # Return all results as a list, starting with the main results, followed by reference results
-    all_results = [(main_protocol_name, main_results_by_indicator)] + reference_results
-    
-    return all_results
+    return results
 
 # ----- Web Routes -----
 @app.route('/')
@@ -495,6 +509,7 @@ def home():
 def cmportal():
     return render_template('cmportal.html',
         FeatureCategories=FeatureCategories_dict.keys(),
+        CausalFeatureCategories=CausalFeatureCategories_dict.keys(),  # Add this line
         TargetParameters=TargetParameters_dict.keys()
     )
 

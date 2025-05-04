@@ -23,12 +23,14 @@ viewer_data = None
 viewer_columns = None
 enrichment_data = None
 enrichment_columns = None
+_causal_categories_dict = None
 
 # ----- Load small lookup tables into memory at startup -----
-def load_lookup_tables(feature_categories_filepath, target_param_filepath):
+def load_lookup_tables(feature_categories_filepath, target_param_filepath, causal_feature_categories_filepath=None):
     """Load lookup tables from CSV files into dictionaries"""
     FeatureCategories_dict = defaultdict(list)
     TargetParameters_dict = defaultdict(list)
+    CausalFeatureCategories_dict = defaultdict(list)
 
     try:
         with open(feature_categories_filepath, newline='', encoding='utf-8') as f:
@@ -46,10 +48,20 @@ def load_lookup_tables(feature_categories_filepath, target_param_filepath):
                     if val and val.strip():  # Only add non-empty values
                         TargetParameters_dict[key].append(val)
         logger.info('Successfully loaded target parameter findings')
+        
+        # Load causal feature categories if file path is provided
+        if causal_feature_categories_filepath:
+            with open(causal_feature_categories_filepath, newline='', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    for key, val in row.items():
+                        if val and val.strip():  # Only add non-empty values
+                            CausalFeatureCategories_dict[key].append(val)
+            logger.info('Successfully loaded causal feature categories')
     except Exception as e:
         logger.error(f'Error loading lookup tables: {e}')
         
-    return FeatureCategories_dict, TargetParameters_dict
+    return FeatureCategories_dict, TargetParameters_dict, CausalFeatureCategories_dict
 
 # ----- Lazy Loading Helper Functions -----
 def load_viewer_data(cleaned_database_filepath):
@@ -139,7 +151,19 @@ def get_target_feature_dict(odds_filepath):
             _target_feature_dict = {col: _odds_enrichments_df[col].dropna().tolist() for col in _odds_enrichments_df.columns}
     
     return _target_feature_dict
-
+    
+def get_causal_categories_dict(causal_feature_categories_filepath):
+    """Lazy loader for causal categories dictionary"""
+    global _causal_categories_dict
+    
+    if _causal_categories_dict is None and causal_feature_categories_filepath:
+        logger.info('Loading causal categories dictionary')
+        causal_categories_df = pd.read_csv(causal_feature_categories_filepath, low_memory=False)
+        _causal_categories_dict = {col: causal_categories_df[col].dropna().tolist() for col in causal_categories_df.columns}
+        del causal_categories_df
+        gc.collect()
+    
+    return _causal_categories_dict
 # Free up memory when not in use
 def clear_memory_cache():
     """Clear memory cache of large dataframes when not in use"""

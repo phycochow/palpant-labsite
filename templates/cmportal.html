@@ -12,6 +12,8 @@
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.2/js/dataTables.buttons.min.js"></script>
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.html5.min.js"></script>
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.colVis.min.js"></script>
+<!-- Add Chart.js library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 {% extends "dashboard.html" %}
 
@@ -87,4 +89,5 @@
     <script src="{{ url_for('static', filename='js/tab-enrichment.js') }}"></script>
     <script src="{{ url_for('static', filename='js/tab-viewer.js') }}"></script>
     <script src="{{ url_for('static', filename='js/tab-benchmark.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/tab-benchmark-radar.js') }}"></script>
 {% endblock %}

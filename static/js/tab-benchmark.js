@@ -51,7 +51,8 @@ CMPortal.benchmark.initializeFeatureForm = function() {
         const payload = new URLSearchParams();
         payload.append('selected_key', selectedKey);
 
-        fetch('/api/get_ProtocolFeatures', {
+        // Update the endpoint to use the causal feature categories API
+        fetch('/api/get_CausalFeatures', {
             method: 'POST',
             headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
             body: payload.toString()
@@ -528,63 +529,35 @@ CMPortal.benchmark.resetProtocolIdSelections = function() {
     CMPortal.benchmark.updateSelectionSummary('protocols');
 };
 
-// Helper function to generate results table
-CMPortal.benchmark.generateResultsTable = function(results, tableId) {
-    if (!results) return '<p>No results data available</p>';
-    
-    let html = `<table class="table table-striped table-bordered" id="${tableId}-results">
-      <thead>
-        <tr>
-          <th>Indicator</th>
-          <th>Quantile</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>`;
-    
-    for (const [indicator, data] of Object.entries(results)) {
-        // Skip protocol name entry
-        if (indicator === 'ProtocolName') continue;
-        
-        // Ensure data is correctly formatted (should be [quantile, flag])
-        if (!Array.isArray(data) || data.length < 2) continue;
-        
-        const [quantile, flag] = data;
-        
-        // Determine status text and class based on flag
-        let statusText, statusClass;
-        switch(Number(flag)) {
-            case 0:
-                statusText = 'Predicted';
-                statusClass = 'text-secondary';
-                break;
-            case 1:
-                statusText = 'Within Range';
-                statusClass = 'text-success';
-                break;
-            case 3:
-                statusText = 'Exceeds Best Bounds';
-                statusClass = 'text-primary font-weight-bold';
-                break;
-            case 4:
-                statusText = 'Below Worst Bounds';
-                statusClass = 'text-warning';
-                break;
-            default:
-                statusText = 'Unknown';
-                statusClass = '';
-        }
-        
-        html += `<tr>
-          <td>${indicator}</td>
-          <td>${quantile}</td>
-          <td class="${statusClass}">${statusText}</td>
-        </tr>`;
-    }
-    
-    html += `</tbody></table>`;
-    return html;
-};
+// Helper function to convert benchmark data for radar chart
+function createRadarDataFromResponse(data) {
+  const benchmarkData = [];
+  
+  // This array will contain all the results in the format expected by the radar chart
+  // Each element is: [protocol_name, {indicator_name: [quantile, flag], ...}]
+  
+  // First entry should be the user's protocol (the one being benchmarked)
+  let yourProtocolName = "Your Protocol";
+  let yourProtocolResults = {};
+  
+  // Process the main results - this is the first entry in the all_results array
+  if (data.length > 0) {
+    const [protocolName, resultsByIndicator] = data[0];
+    yourProtocolName = protocolName;
+    yourProtocolResults = resultsByIndicator;
+  }
+  
+  // Add the user's protocol as the first entry
+  benchmarkData.push([yourProtocolName, yourProtocolResults]);
+  
+  // Add the reference and database protocols (all other entries in the array)
+  for (let i = 1; i < data.length; i++) {
+    const [protocolName, resultsByIndicator] = data[i];
+    benchmarkData.push([protocolName, resultsByIndicator]);
+  }
+  
+  return benchmarkData;
+}
 
 // New function to handle form submission and display results
 CMPortal.benchmark.submitAndDisplayResults = function() {
@@ -736,59 +709,14 @@ CMPortal.benchmark.submitAndDisplayResults = function() {
         // Show the results container
         if (resultsContainer) {
             resultsContainer.style.display = 'block';
-        }
-        
-        // Update user protocol info
-        document.getElementById('user-protocol-name').textContent = data.protocol_name || 'Custom Protocol';
-        document.getElementById('selected-purpose').textContent = data.selected_purpose || '';
-        
-        // Display user results
-        document.getElementById('user-results-table').innerHTML = CMPortal.benchmark.generateResultsTable(data.results, 'user');
-        
-        // Display reference results
-        const referenceContainer = document.getElementById('reference-results-container');
-        referenceContainer.innerHTML = '';
-        
-        if (data.reference_results && data.reference_results.length > 0) {
-            data.reference_results.forEach((reference, index) => {
-                const refDiv = document.createElement('div');
-                refDiv.className = 'reference-protocol';
-                refDiv.style.marginBottom = '20px';
-                
-                const refTitle = document.createElement('h5');
-                refTitle.textContent = reference.name || `Reference ${index + 1}`;
-                refDiv.appendChild(refTitle);
-                
-                const refTable = CMPortal.benchmark.generateResultsTable(reference.results, `ref-${index}`);
-                refDiv.innerHTML += refTable;
-                
-                referenceContainer.appendChild(refDiv);
-            });
-        } else {
-            referenceContainer.innerHTML = '<p>No reference protocols provided</p>';
-        }
-        
-        // Display database results
-        const databaseContainer = document.getElementById('database-results-container');
-        databaseContainer.innerHTML = '';
-        
-        if (data.db_protocol_results && data.db_protocol_results.length > 0) {
-            data.db_protocol_results.forEach((dbProtocol, index) => {
-                const dbDiv = document.createElement('div');
-                dbDiv.className = 'database-protocol';
-                dbDiv.style.marginBottom = '20px';
-                
-                const dbTitle = document.createElement('h5');
-                dbTitle.textContent = `${dbProtocol.name || `Protocol ID: ${dbProtocol.id}`}`;
-                dbDiv.appendChild(dbTitle);
-                
-                const dbTable = CMPortal.benchmark.generateResultsTable(dbProtocol.results, `db-${index}`);
-                dbDiv.innerHTML += dbTable;
-                
-                databaseContainer.appendChild(dbDiv);
-            });
-        } else {
-            databaseContainer.innerHTML = '<p>No database protocols selected</p>';
+            
+            // Process the data for the radar chart
+            const benchmarkData = createRadarDataFromResponse(data);
+            
+            // Initialize the radar chart with the benchmark data
+            if (typeof CMPortal.benchmarkRadar !== 'undefined' && CMPortal.benchmarkRadar) {
+                CMPortal.benchmarkRadar.init(benchmarkData);
+            }
         }
         
         // Scroll to results
@@ -808,13 +736,6 @@ CMPortal.benchmark.submitAndDisplayResults = function() {
         }
     });
 };
-
-// Tab activation handler (for lazy init)
-$(document).on('tab-activated', function(event, tabId) {
-    if (tabId === 'tab-benchmark') {
-        CMPortal.benchmark.init();
-    }
-});
 
 // DOM loaded setup
 document.addEventListener('DOMContentLoaded', function() {
@@ -913,5 +834,12 @@ document.addEventListener('DOMContentLoaded', function() {
             originalInit.call(this);
             this.initializeCombinedUI();
         };
+    }
+});
+
+// Tab activation handler (for lazy init)
+$(document).on('tab-activated', function(event, tabId) {
+    if (tabId === 'tab-benchmark') {
+        CMPortal.benchmark.init();
     }
 });

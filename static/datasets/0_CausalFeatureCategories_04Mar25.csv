@@ -1,273 +1,196 @@
-hiPSC Matrix Coating - Matrigel (163)
-hiPSC Matrix Coating - Geltrex (33)
-hiPSC Matrix Coating - EBs (18)
-hiPSC Matrix Coating - Vitronectin (10)
-hiPSC Matrix Coating - MEF feeder cells (8)
-hiPSC Backbone Media - Embryonic Stem Cell (127)
-hiPSC Backbone Media - mTeSR (106)
-hiPSC Backbone Media - Essential 8 (82)
-hiPSC Backbone Media - Conditioned (12)
-hiPSC Backbone Media - DMEM/F12 (10)
-hiPSC Backbone Media - StemFit (5)
-hiPSC Backbone Media - StemFlex (5)
-hiPSC-CM Backbone Media - RPMI-1640 (167)
-hiPSC-CM Backbone Media - iCell Maintenance (86)
-hiPSC-CM Backbone Media - DMEM (18)
-hiPSC-CM Backbone Media - StemPro-34 (14)
-hiPSC-CM Backbone Media - Commercial CM Kit (12)
-hiPSC-CM Backbone Media - Cor.4U Complete (6)
-hiPSC-CM Media Supplement - B27 (180)
-hiPSC-CM Media Supplement - Ascorbic Acid (41)
-hiPSC-CM Media Supplement - iCell Maintenance Medium (41)
-hiPSC-CM Media Supplement - Albumin (28)
-hiPSC-CM Media Supplement - L-glutamine (19)
-hiPSC-CM Media Supplement - HEPES (16)
-hiPSC-CM Media Supplement - FBS (16)
-hiPSC-CM Media Supplement - 1-thioglycerol (14)
-hiPSC-CM Media Supplement - Transferrin (11)
-hiPSC-CM Media Supplement - Mercaptoethanol (10)
-hiPSC-CM Media Supplement - Lipids (9)
-hiPSC-CM Media Supplement - GlutaMax (8)
-hiPSC-CM Media Supplement - Nonessential Amino Acids (8)
-hiPSC-CM Media Supplement - Selenium (7)
-hiPSC-CM Media Supplement - Polyvinylalchohol (6)
-hiPSC-CM Media Supplement - Lipid Mix (5)
-hiPSC-CM Media Supplement - VEGF (4)
-hiPSC-CM Media Supplement - bFGF (3)
-Wnt Induction - CHIR99021 (184)
-Wnt Induction - Activin A (80)
-Wnt Induction - BMP4 (74)
-Wnt Induction - bFGF (45)
-Wnt Induction - StemCell Diff Kit (4)
-Wnt Induction - Wnt3a (3)
-Seeding Confluency (%) - 85 to 89 (43)
-Seeding Confluency (%) - 90 to 94 (26)
-Seeding Confluency (%) - 95 to 100 (23)
-Seeding Confluency (%) - 80 to 84 (12)
-Seeding Confluency (%) - 70 to 79 (11)
-Seeding Confluency 2D (%) - 70 to 79 (6)
-Seeding Confluency 3D (%) - 70 to 79 (3)
-Seeding Confluency 2D (%) - 80 to 84 (5)
-Seeding Confluency 3D (%) - 80 to 84 (5)
-Seeding Confluency 2D (%) - 85 to 89 (26)
-Seeding Confluency 3D (%) - 85 to 89 (12)
-Seeding Confluency 2D (%) - 90 to 94 (12)
-Seeding Confluency 3D (%) - 90 to 94 (13)
-Seeding Confluency 2D (%) - 95 to 100 (6)
-Seeding Confluency 3D (%) - 95 to 100 (13)
-Wnt Induction Duration (days) - 3 days (38)
-Wnt Induction Duration (days) - 4 days (15)
-Wnt Induction Duration (days) - 5 days (8)
-Wnt Induction Duration (days) Quantiles - Q3 (>1 and ≤1) (186)
-Wnt Induction Duration (days) Quantiles - Q2 (>1 and ≤2) (75)
-Wnt Induction Duration (days) Quantiles - Q1 (>2 and ≤5) (61)
-Wnt Inhibitor - IWP (112)
-Wnt Inhibitor - IWR (56)
-Wnt Inhibitor - Wnt-C59 (30)
-Wnt Inhibitor - XAV939 (24)
-Wnt Inhibitor - DS-I-7 (9)
-Wnt Inhibitor - bFGF (8)
-Wnt Inhibitor - KY02111 (7)
-Wnt Inhibitor - BMP4 (7)
-Wnt Inhibitor - VEGF (3)
-Wnt Inhibitor Duration (days) - 4 days (19)
-Wnt Inhibitor Duration (days) - 3 days (17)
-Wnt Inhibitor Duration (days) - >6 days (12)
-Wnt Inhibitor Duration (days) - 5 days (6)
-Wnt Inhibitor Duration (days) - 6 days (4)
-Wnt Inhibitor Duration (days) Quantiles - Q2 (>1 and ≤2) (156)
-Wnt Inhibitor Duration (days) Quantiles - Q3 (>1 and ≤1) (108)
-Wnt Inhibitor Duration (days) Quantiles - Q1 (>2 and ≤9) (58)
-Insulin Start Day - 7 (85)
-Insulin Start Day - 6 (20)
-Insulin Start Day - 1 (19)
-Insulin Start Day - 8 (15)
-Insulin Start Day - 5 (14)
-Insulin Start Day - 4 (11)
-Insulin Start Day - 9 (10)
-Insulin Start Day - 0 (7)
-Insulin Start Day - After 11 (7)
-Insulin Start Day - 10 (6)
-Insulin Start Day - 3 (5)
-Insulin Start Day - 2 (4)
-Insulin Start Day - 11 (3)
-Insulin Withdrawal Duration (days) Quantiles - Q2 (>2 and ≤4) (25)
-Insulin Withdrawal Duration (days) Quantiles - Q1 (>4 and ≤10) (11)
-Insulin Withdrawal Duration (days) - 4 days (18)
-Insulin Withdrawal Duration (days) - 3 days (6)
-Insulin Withdrawal Duration (days) - 6 days (3)
-Insulin Withdrawal Duration (days) - 8 days (3)
-Purification Protocol - Glucose and Lactate (85)
-Purification Protocol - Metabolic (8)
-Purification Protocol - Cell Sorting (7)
-Purification Protocol - Antibiotic (4)
-hiPSC-CM Purification Duration (days) - <3 days (31)
-hiPSC-CM Purification Duration (days) - 4 days (29)
-hiPSC-CM Purification Duration (days) - 3 days (13)
-hiPSC-CM Purification Duration (days) - 6 days (10)
-hiPSC-CM Purification Duration (days) - 5 days (6)
-hiPSC-CM Purification Duration (days) - 7 days (6)
-hiPSC-CM Purification Duration (days) - >9 days (5)
-hiPSC-CM Purification Duration (days) - 8 days (4)
-hiPSC-CM Purification Duration (days) Quantiles - Q2 (>1 and ≤4) (61)
-hiPSC-CM Purification Duration (days) Quantiles - Q1 (>4 and ≤20) (31)
-Differentiation Purity (%) Quantiles - Q4 (>79 and ≤85) (40)
-Differentiation Purity (%) Quantiles - Q3 (>85 and ≤90) (34)
-Differentiation Purity (%) Quantiles - Q5 (>30 and ≤79) (32)
-Differentiation Purity (%) Quantiles - Q2 (>90 and ≤95) (27)
-Differentiation Purity (%) Quantiles - Q1 (>95 and ≤99) (22)
-New Media for Maturation - RPMI-1640 (30)
-New Media for Maturation - DMEM (21)
-New Media for Maturation - F12 (7)
-New Media for Maturation - Commercial Kit (5)
-hiPSC-CM Maturation Media - RPMI-1640 (153)
-hiPSC-CM Maturation Media - iCell Maintenance (83)
-hiPSC-CM Maturation Media - DMEM (35)
-hiPSC-CM Maturation Media - Commercial Kit (27)
-hiPSC-CM Maturation Media - StemPro-34 (14)
-hiPSC-CM Maturation Media - F12 (10)
-hiPSC-CM Maturation Media - Cor.4U Complete (6)
-Coating for Replating - Matrigel (65)
-Coating for Replating - Gelatin (43)
-Coating for Replating - Fibronectin (32)
-Coating for Replating - Geltrex (10)
-Coating for Replating - Laminin (5)
-Coating for Replating - Synthemax (3)
-Coating for Replating - Vitronectin (3)
-Maturation Strategy - Metabolic (33)
-Maturation Strategy - Electrical (39)
-Maturation Strategy - Tension (64)
-Maturation Strategy - Other Cells (80)
-Maturation Strategy - Mechanical (36)
-Maturation Strategy - Cell Alignment (59)
-Maturation Strategy - Elastomeric (33)
-Maturation Strategy - ECM (21)
-Metabolic Component - T3 (14)
-Metabolic Component - Fatty Acid (13)
-Metabolic Component - Palmitic Acid (11)
-Metabolic Component - Creatine (7)
-Metabolic Component - Taurine (7)
-Metabolic Component - Dexamethasone (7)
-Metabolic Component - L-carnitine (6)
-Metabolic Component - Nonessential Amino Acids (6)
-Metabolic Component - Galactose (4)
-Metabolic Component - Lactate (4)
-Metabolic Component - Insulin-Transferrin-Selenium (3)
-Metabolic Component - Vitamin B12 (3)
-Metabolic Component - Biotin (3)
-Metabolic Component - Ascorbic Acid (3)
-Metabolic Component - Albumax (3)
-Metabolic Component - B27 (3)
-Metabolic Component - KOSR (3)
-Metabolic Component - IGF-1 (3)
-Metabolic Component Category - Fatty Acids and Lipids (21)
-Metabolic Component Category - Metabolic Modulation (20)
-Metabolic Component Category - Hormonal Stimulation (14)
-Metabolic Component Category - Sugars and Carbohydrates (9)
-Metabolic Component Category - Amino Acids and Derivatives (9)
-Metabolic Component Category - Signaling Pathway Regulators (6)
-Metabolic Component Category - Kinase Inhibitors (3)
-2D Surface - ECM-coated (115)
-2D Surface - Micropatterned (27)
-2D Surface - Hydrogel (17)
-2D Surface - Electrospun (13)
-2D Surface - Microelectrode Array (9)
-2D Surface - Nanotopography (6)
-2D Surface - Decellularized ECM (3)
-2D Surface - Microparticle/fluid (3)
-3D Platform - Fibrin (50)
-3D Platform - Scaffold Free (43)
-3D Platform - Collagen (38)
-3D Platform - Matrigel (33)
-3D Platform - Extracellular Scaffold (18)
-3D Platform - 3D printed (9)
-3D Platform - Polyethylene Glycol (8)
-3D Platform - Gelatin (6)
-3D Platform - Fibronectin (3)
-3D Platform - Nanotechnology (3)
-3D Tissue Media - RPMI-1640 (72)
-3D Tissue Media - MEM-α (60)
-3D Tissue Media - DMEM (53)
-3D Tissue Media - Commercial Kit (21)
-3D Tissue Media - Growth Factor (12)
-3D Tissue Media - iCell Maintenance (12)
-3D Tissue Media - High-glucose DMEM (9)
-3D Tissue Media - Iscove (5)
-Cell Line - iCell (47)
-Cell Line - WTC11 (30)
-Cell Line - IMR90 (19)
-Cell Line - Cor.4U (16)
-Cell Line - DF19-9-11T.H (16)
-Cell Line - PGP1 (11)
-Cell Line - 253G1 (10)
-Cell Line - Gibco episomal (10)
-Cell Line - 201B7 (9)
-Cell Line - iCell2 (8)
-Cell Line - SCVI-273 (8)
-Cell Line - BJ1 (7)
-Cell Line - C25 (6)
-Cell Line - ATCC (5)
-Cell Line - Cellapy (4)
-Cell Line - BJ RiPS (4)
-Cell Line - 201B6 (3)
-Number of Cell Lines - 1 (225)
-Number of Cell Lines - 2 (50)
-Number of Cell Lines - 3 (29)
-Number of Cell Lines - 4 (11)
-Number of Cell Lines - >5 (9)
-Cell Line Sex - Both (118)
-Cell Line Sex - Male (64)
-Cell Line Sex - Female (40)
-Cell Line Ancestry - Caucasian (41)
-Cell Line Ancestry - Asian (28)
-Cell Coculture - Cardiomyocyte (157)
-Cell Coculture - Stromal Cell (78)
-Cell Coculture - Endothelial Cell (35)
-3D CM Ratio (CM-EC-SC) Quantiles - Q1 (>91 and ≤100) (74)
-3D CM Ratio (CM-EC-SC) Quantiles - Q3 (>9 and ≤75) (48)
-3D CM Ratio (CM-EC-SC) Quantiles - Q2 (>75 and ≤91) (28)
-3D EC Ratio (CM-EC-SC) Quantiles - Q2 (>0 and ≤0) (119)
-3D EC Ratio (CM-EC-SC) Quantiles - Q1 (>0 and ≤91) (31)
-3D SC Ratio (CM-EC-SC) Quantiles - Q3 (>0 and ≤0) (74)
-3D SC Ratio (CM-EC-SC) Quantiles - Q1 (>10 and ≤50) (47)
-3D SC Ratio (CM-EC-SC) Quantiles - Q2 (>0 and ≤10) (29)
-3D Stromal Cell Source - Human Fibroblast (38)
-3D Stromal Cell Source - Stromal Cell (35)
-3D Stromal Cell Source - Cardiac Fibroblast (32)
-3D Stromal Cell Source - Mesenchymal Stem Cell (12)
-3D Stromal Cell Source - hiPSC-CardiacF (8)
-3D Stromal Cell Source - Dermal Fibroblast (7)
-3D Stromal Cell Source - hiPSC-MuralC (3)
-3D Stromal Cell Source - hiPSC-SmoothMC (3)
-3D Endothelial Cell Source - hiPSC-EndothelialC (16)
-3D Endothelial Cell Source - Umbilical Vein EndothelialC (10)
-3D Endothelial Cell Source - Cardiac Microvascular EndothelialC (5)
-Differentiation Purity Assessment - Flow Cytometry cTnT+ (135)
-Differentiation Purity Assessment - Flow Cytometry a-actinin+ (9)
-Differentiation Purity Assessment - IHC a-actinin (8)
-Differentiation Purity Assessment - IHC cTnT (7)
-Differentiation Purity Assessment - Visual Inspection (6)
-Differentiation Purity Assessment - Flow Cytometry SIRPA+ (4)
-Differentiation Purity Assessment - Flow Cytometry VCAM1+ (4)
-Differentiation Purity Assessment - Flow Cytometry cTnI+ (3)
-Immunofluorescent Imaging - Yes (268)
-Electron Imaging - Transmission (62)
-Electron Imaging - Scanning (22)
-Sacromere or Cellular Alignment Analysis - Yes (72)
-Contractile Analysis Method - Motion Tracking (93)
-Contractile Analysis Method - Deflection (39)
-Contractile Analysis Method - Force Transducer (27)
-Contractile Analysis Method - Traction Force Microscopy (9)
-Calcium Handling Analysis Method - Visual (104)
-Calcium Handling Analysis Method - Genetic (23)
-Electrophysiology Analysis Method - Patch Clamp (59)
-Electrophysiology Analysis Method - Optical Mapping (39)
-Electrophysiology Analysis Method - Microelectrode (31)
-Electrophysiology Analysis Method - Motion-Contrast Reconstruction (5)
-Electrophysiology Analysis Method - Genetic (3)
-Metabolic Analysis Method - Seahorse (35)
-Metabolic Analysis Method - Flux Rates (13)
-Metabolic Analysis Method - Mitochondrial (4)
-Metabolic Analysis Method - Genetic (3)
-Fatty Acid Metabolism Assessed - Yes (20)
-Gene Analysis Method - RNA (169)
+Protocol Variable,Analysis Method,Cell Profile
+hiPSC Matrix Coating - Matrigel (163),Cell Line - iCell (47),Differentiation Purity Assessment - Flow Cytometry cTnT+ (135)
+hiPSC Matrix Coating - Geltrex (33),Cell Line - WTC11 (30),Differentiation Purity Assessment - Flow Cytometry a-actinin+ (9)
+hiPSC Matrix Coating - EBs (18),Cell Line - IMR90 (19),Differentiation Purity Assessment - IHC a-actinin (8)
+hiPSC Matrix Coating - Vitronectin (10),Cell Line - Cor.4U (16),Differentiation Purity Assessment - IHC cTnT (7)
+hiPSC Matrix Coating - MEF feeder cells (8),Cell Line - DF19-9-11T.H (16),Differentiation Purity Assessment - Visual Inspection (6)
+hiPSC Backbone Media - Embryonic Stem Cell (127),Cell Line - PGP1 (11),Differentiation Purity Assessment - Flow Cytometry SIRPA+ (4)
+hiPSC Backbone Media - mTeSR (106),Cell Line - 253G1 (10),Differentiation Purity Assessment - Flow Cytometry VCAM1+ (4)
+hiPSC Backbone Media - Essential 8 (82),Cell Line - Gibco episomal (10),Differentiation Purity Assessment - Flow Cytometry cTnI+ (3)
+hiPSC Backbone Media - Conditioned (12),Cell Line - 201B7 (9),Immunofluorescent Imaging - Yes (268)
+hiPSC Backbone Media - DMEM/F12 (10),Cell Line - iCell2 (8),Electron Imaging - Transmission (62)
+hiPSC Backbone Media - StemFit (5),Cell Line - SCVI-273 (8),Electron Imaging - Scanning (22)
+hiPSC Backbone Media - StemFlex (5),Cell Line - BJ1 (7),Sacromere or Cellular Alignment Analysis - Yes (72)
+hiPSC-CM Backbone Media - RPMI-1640 (167),Cell Line - C25 (6),Contractile Analysis Method - Motion Tracking (93)
+hiPSC-CM Backbone Media - iCell Maintenance (86),Cell Line - ATCC (5),Contractile Analysis Method - Deflection (39)
+hiPSC-CM Backbone Media - DMEM (18),Cell Line - Cellapy (4),Contractile Analysis Method - Force Transducer (27)
+hiPSC-CM Backbone Media - StemPro-34 (14),Cell Line - BJ RiPS (4),Contractile Analysis Method - Traction Force Microscopy (9)
+hiPSC-CM Backbone Media - Commercial CM Kit (12),Cell Line - 201B6 (3),Calcium Handling Analysis Method - Visual (104)
+hiPSC-CM Backbone Media - Cor.4U Complete (6),Number of Cell Lines - 1 (225),Calcium Handling Analysis Method - Genetic (23)
+hiPSC-CM Media Supplement - B27 (180),Number of Cell Lines - 2 (50),Electrophysiology Analysis Method - Patch Clamp (59)
+hiPSC-CM Media Supplement - Ascorbic Acid (41),Number of Cell Lines - 3 (29),Electrophysiology Analysis Method - Optical Mapping (39)
+hiPSC-CM Media Supplement - iCell Maintenance Medium (41),Number of Cell Lines - 4 (11),Electrophysiology Analysis Method - Microelectrode (31)
+hiPSC-CM Media Supplement - Albumin (28),Number of Cell Lines - >5 (9),Electrophysiology Analysis Method - Motion-Contrast Reconstruction (5)
+hiPSC-CM Media Supplement - L-glutamine (19),Cell Line Sex - Both (118),Electrophysiology Analysis Method - Genetic (3)
+hiPSC-CM Media Supplement - HEPES (16),Cell Line Sex - Male (64),Metabolic Analysis Method - Seahorse (35)
+hiPSC-CM Media Supplement - FBS (16),Cell Line Sex - Female (40),Metabolic Analysis Method - Flux Rates (13)
+hiPSC-CM Media Supplement - 1-thioglycerol (14),Cell Line Ancestry - Caucasian (41),Metabolic Analysis Method - Mitochondrial (4)
+hiPSC-CM Media Supplement - Transferrin (11),Cell Line Ancestry - Asian (28),Metabolic Analysis Method - Genetic (3)
+hiPSC-CM Media Supplement - Mercaptoethanol (10),Cell Coculture - Cardiomyocyte (157),Fatty Acid Metabolism Assessed - Yes (20)
+hiPSC-CM Media Supplement - Lipids (9),Cell Coculture - Stromal Cell (78),Gene Analysis Method - RNA (169)
+hiPSC-CM Media Supplement - GlutaMax (8),Cell Coculture - Endothelial Cell (35),
+hiPSC-CM Media Supplement - Nonessential Amino Acids (8),3D CM Ratio (CM-EC-SC) Quantiles - Q1 (>91 and ≤100) (74),
+hiPSC-CM Media Supplement - Selenium (7),3D CM Ratio (CM-EC-SC) Quantiles - Q3 (>9 and ≤75) (48),
+hiPSC-CM Media Supplement - Polyvinylalchohol (6),3D CM Ratio (CM-EC-SC) Quantiles - Q2 (>75 and ≤91) (28),
+hiPSC-CM Media Supplement - Lipid Mix (5),3D EC Ratio (CM-EC-SC) Quantiles - Q2 (>0 and ≤0) (119),
+hiPSC-CM Media Supplement - VEGF (4),3D EC Ratio (CM-EC-SC) Quantiles - Q1 (>0 and ≤91) (31),
+hiPSC-CM Media Supplement - bFGF (3),3D SC Ratio (CM-EC-SC) Quantiles - Q3 (>0 and ≤0) (74),
+Wnt Induction - CHIR99021 (184),3D SC Ratio (CM-EC-SC) Quantiles - Q1 (>10 and ≤50) (47),
+Wnt Induction - Activin A (80),3D SC Ratio (CM-EC-SC) Quantiles - Q2 (>0 and ≤10) (29),
+Wnt Induction - BMP4 (74),3D Stromal Cell Source - Human Fibroblast (38),
+Wnt Induction - bFGF (45),3D Stromal Cell Source - Stromal Cell (35),
+Wnt Induction - StemCell Diff Kit (4),3D Stromal Cell Source - Cardiac Fibroblast (32),
+Wnt Induction - Wnt3a (3),3D Stromal Cell Source - Mesenchymal Stem Cell (12),
+Seeding Confluency (%) - 85 to 89 (43),3D Stromal Cell Source - hiPSC-CardiacF (8),
+Seeding Confluency (%) - 90 to 94 (26),3D Stromal Cell Source - Dermal Fibroblast (7),
+Seeding Confluency (%) - 95 to 100 (23),3D Stromal Cell Source - hiPSC-MuralC (3),
+Seeding Confluency (%) - 80 to 84 (12),3D Stromal Cell Source - hiPSC-SmoothMC (3),
+Seeding Confluency (%) - 70 to 79 (11),3D Endothelial Cell Source - hiPSC-EndothelialC (16),
+Seeding Confluency 2D (%) - 70 to 79 (6),3D Endothelial Cell Source - Umbilical Vein EndothelialC (10),
+Seeding Confluency 3D (%) - 70 to 79 (3),3D Endothelial Cell Source - Cardiac Microvascular EndothelialC (5),
+Seeding Confluency 2D (%) - 80 to 84 (5),,
+Seeding Confluency 3D (%) - 80 to 84 (5),,
+Seeding Confluency 2D (%) - 85 to 89 (26),,
+Seeding Confluency 3D (%) - 85 to 89 (12),,
+Seeding Confluency 2D (%) - 90 to 94 (12),,
+Seeding Confluency 3D (%) - 90 to 94 (13),,
+Seeding Confluency 2D (%) - 95 to 100 (6),,
+Seeding Confluency 3D (%) - 95 to 100 (13),,
+Wnt Induction Duration (days) - 3 days (38),,
+Wnt Induction Duration (days) - 4 days (15),,
+Wnt Induction Duration (days) - 5 days (8),,
+Wnt Induction Duration (days) Quantiles - Q3 (>1 and ≤1) (186),,
+Wnt Induction Duration (days) Quantiles - Q2 (>1 and ≤2) (75),,
+Wnt Induction Duration (days) Quantiles - Q1 (>2 and ≤5) (61),,
+Wnt Inhibitor - IWP (112),,
+Wnt Inhibitor - IWR (56),,
+Wnt Inhibitor - Wnt-C59 (30),,
+Wnt Inhibitor - XAV939 (24),,
+Wnt Inhibitor - DS-I-7 (9),,
+Wnt Inhibitor - bFGF (8),,
+Wnt Inhibitor - KY02111 (7),,
+Wnt Inhibitor - BMP4 (7),,
+Wnt Inhibitor - VEGF (3),,
+Wnt Inhibitor Duration (days) - 4 days (19),,
+Wnt Inhibitor Duration (days) - 3 days (17),,
+Wnt Inhibitor Duration (days) - >6 days (12),,
+Wnt Inhibitor Duration (days) - 5 days (6),,
+Wnt Inhibitor Duration (days) - 6 days (4),,
+Wnt Inhibitor Duration (days) Quantiles - Q2 (>1 and ≤2) (156),,
+Wnt Inhibitor Duration (days) Quantiles - Q3 (>1 and ≤1) (108),,
+Wnt Inhibitor Duration (days) Quantiles - Q1 (>2 and ≤9) (58),,
+Insulin Start Day - 7 (85),,
+Insulin Start Day - 6 (20),,
+Insulin Start Day - 1 (19),,
+Insulin Start Day - 8 (15),,
+Insulin Start Day - 5 (14),,
+Insulin Start Day - 4 (11),,
+Insulin Start Day - 9 (10),,
+Insulin Start Day - 0 (7),,
+Insulin Start Day - After 11 (7),,
+Insulin Start Day - 10 (6),,
+Insulin Start Day - 3 (5),,
+Insulin Start Day - 2 (4),,
+Insulin Start Day - 11 (3),,
+Insulin Withdrawal Duration (days) Quantiles - Q2 (>2 and ≤4) (25),,
+Insulin Withdrawal Duration (days) Quantiles - Q1 (>4 and ≤10) (11),,
+Insulin Withdrawal Duration (days) - 4 days (18),,
+Insulin Withdrawal Duration (days) - 3 days (6),,
+Insulin Withdrawal Duration (days) - 6 days (3),,
+Insulin Withdrawal Duration (days) - 8 days (3),,
+Purification Protocol - Glucose and Lactate (85),,
+Purification Protocol - Metabolic (8),,
+Purification Protocol - Cell Sorting (7),,
+Purification Protocol - Antibiotic (4),,
+hiPSC-CM Purification Duration (days) - <3 days (31),,
+hiPSC-CM Purification Duration (days) - 4 days (29),,
+hiPSC-CM Purification Duration (days) - 3 days (13),,
+hiPSC-CM Purification Duration (days) - 6 days (10),,
+hiPSC-CM Purification Duration (days) - 5 days (6),,
+hiPSC-CM Purification Duration (days) - 7 days (6),,
+hiPSC-CM Purification Duration (days) - >9 days (5),,
+hiPSC-CM Purification Duration (days) - 8 days (4),,
+hiPSC-CM Purification Duration (days) Quantiles - Q2 (>1 and ≤4) (61),,
+hiPSC-CM Purification Duration (days) Quantiles - Q1 (>4 and ≤20) (31),,
+Differentiation Purity (%) Quantiles - Q4 (>79 and ≤85) (40),,
+Differentiation Purity (%) Quantiles - Q3 (>85 and ≤90) (34),,
+Differentiation Purity (%) Quantiles - Q5 (>30 and ≤79) (32),,
+Differentiation Purity (%) Quantiles - Q2 (>90 and ≤95) (27),,
+Differentiation Purity (%) Quantiles - Q1 (>95 and ≤99) (22),,
+New Media for Maturation - RPMI-1640 (30),,
+New Media for Maturation - DMEM (21),,
+New Media for Maturation - F12 (7),,
+New Media for Maturation - Commercial Kit (5),,
+hiPSC-CM Maturation Media - RPMI-1640 (153),,
+hiPSC-CM Maturation Media - iCell Maintenance (83),,
+hiPSC-CM Maturation Media - DMEM (35),,
+hiPSC-CM Maturation Media - Commercial Kit (27),,
+hiPSC-CM Maturation Media - StemPro-34 (14),,
+hiPSC-CM Maturation Media - F12 (10),,
+hiPSC-CM Maturation Media - Cor.4U Complete (6),,
+Coating for Replating - Matrigel (65),,
+Coating for Replating - Gelatin (43),,
+Coating for Replating - Fibronectin (32),,
+Coating for Replating - Geltrex (10),,
+Coating for Replating - Laminin (5),,
+Coating for Replating - Synthemax (3),,
+Coating for Replating - Vitronectin (3),,
+Maturation Strategy - Metabolic (33),,
+Maturation Strategy - Electrical (39),,
+Maturation Strategy - Tension (64),,
+Maturation Strategy - Other Cells (80),,
+Maturation Strategy - Mechanical (36),,
+Maturation Strategy - Cell Alignment (59),,
+Maturation Strategy - Elastomeric (33),,
+Maturation Strategy - ECM (21),,
+Metabolic Component - T3 (14),,
+Metabolic Component - Fatty Acid (13),,
+Metabolic Component - Palmitic Acid (11),,
+Metabolic Component - Creatine (7),,
+Metabolic Component - Taurine (7),,
+Metabolic Component - Dexamethasone (7),,
+Metabolic Component - L-carnitine (6),,
+Metabolic Component - Nonessential Amino Acids (6),,
+Metabolic Component - Galactose (4),,
+Metabolic Component - Lactate (4),,
+Metabolic Component - Insulin-Transferrin-Selenium (3),,
+Metabolic Component - Vitamin B12 (3),,
+Metabolic Component - Biotin (3),,
+Metabolic Component - Ascorbic Acid (3),,
+Metabolic Component - Albumax (3),,
+Metabolic Component - B27 (3),,
+Metabolic Component - KOSR (3),,
+Metabolic Component - IGF-1 (3),,
+Metabolic Component Category - Fatty Acids and Lipids (21),,
+Metabolic Component Category - Metabolic Modulation (20),,
+Metabolic Component Category - Hormonal Stimulation (14),,
+Metabolic Component Category - Sugars and Carbohydrates (9),,
+Metabolic Component Category - Amino Acids and Derivatives (9),,
+Metabolic Component Category - Signaling Pathway Regulators (6),,
+Metabolic Component Category - Kinase Inhibitors (3),,
+2D Surface - ECM-coated (115),,
+2D Surface - Micropatterned (27),,
+2D Surface - Hydrogel (17),,
+2D Surface - Electrospun (13),,
+2D Surface - Microelectrode Array (9),,
+2D Surface - Nanotopography (6),,
+2D Surface - Decellularized ECM (3),,
+2D Surface - Microparticle/fluid (3),,
+3D Platform - Fibrin (50),,
+3D Platform - Scaffold Free (43),,
+3D Platform - Collagen (38),,
+3D Platform - Matrigel (33),,
+3D Platform - Extracellular Scaffold (18),,
+3D Platform - 3D printed (9),,
+3D Platform - Polyethylene Glycol (8),,
+3D Platform - Gelatin (6),,
+3D Platform - Fibronectin (3),,
+3D Platform - Nanotechnology (3),,
+3D Tissue Media - RPMI-1640 (72),,
+3D Tissue Media - MEM-α (60),,
+3D Tissue Media - DMEM (53),,
+3D Tissue Media - Commercial Kit (21),,
+3D Tissue Media - Growth Factor (12),,
+3D Tissue Media - iCell Maintenance (12),,
+3D Tissue Media - High-glucose DMEM (9),,
+3D Tissue Media - Iscove (5),,

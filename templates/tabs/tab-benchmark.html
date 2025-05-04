@@ -38,7 +38,7 @@
         <label for="benchmark-key-dropdown-features" class="search-ui-label">Feature Category</label>
         <select id="benchmark-key-dropdown-features" name="category" class="search-ui-select">
           <option value="">-- Select Feature Category --</option>
-          {% for category in FeatureCategories %}
+          {% for category in CausalFeatureCategories %}
             <option value="{{ category }}">{{ category }}</option>
           {% endfor %}
         </select>
@@ -157,3 +157,6 @@
     </div>
   </div>
 </div>
+
+<!-- Include Chart.js for radar chart visualization -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
