@@ -6,19 +6,47 @@ import pandas as pd
 import gc
 import logging
 import csv
+import tempfile
+import shutil
+import traceback
 from PyPDF2 import PdfReader
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
                    format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s')
 
-# Import from local modules
+# Initialize Flask app
+app = Flask(__name__)
+app.logger.setLevel('INFO')
+app.logger.info('Flask application startup')
+
+# ----- Centralized dataset paths -----
+DATA_DIR = os.path.join(app.static_folder, 'datasets')
+DATASET_PATHS = {
+    'target_param_filepath': os.path.join(DATA_DIR, '0_TargetParameters_12Apr25.csv'),
+    'feature_categories_filepath': os.path.join(DATA_DIR, '0_FeatureCategories_01Mar25.csv'),
+    'enrich_filepath': os.path.join(DATA_DIR, '1_PermutatedImportancesTRUE_02May25.csv'),
+    'cleaned_database_filepath': os.path.join(DATA_DIR, '0_CleanedDatabase_25Feb25.csv'),
+    'binary_filepath': os.path.join(DATA_DIR, '1_BinaryFeatures_25Feb25.csv'),
+    'odds_filepath': os.path.join(DATA_DIR, '1_PositiveOddsEnrichments_03May25.csv')
+}
+
+# Make paths available to other modules
+import config
+config.DATASET_PATHS = DATASET_PATHS
+
+# Import from local modules - after setting paths in config
 from data_manager import (
     load_lookup_tables,
     load_viewer_data,
     load_enrichment_data,
     get_search_table,
-    clear_memory_cache
+    clear_memory_cache,
+    get_binary_df,
+    get_cleaned_df,
+    get_target_feature_dict,
+    get_categories_dict,
+    get_candidates
 )
 from utils import (
     NpEncoder, 
@@ -27,22 +55,10 @@ from utils import (
     process_maturity_indicators
 )
 
-app = Flask(__name__)
-app.logger.setLevel('INFO')
-app.logger.info('Flask application startup')
-
-# ----- Preset databases -----
-DATA_DIR = os.path.join(app.static_folder, 'datasets')
-target_param_filepath = os.path.join(DATA_DIR, '0_TargetParameters_12Apr25.csv')
-feature_categories_filepath = os.path.join(DATA_DIR, '0_FeatureCategories_01Mar25.csv')
-enrich_filepath = os.path.join(DATA_DIR, '1_PermutatedImportancesTRUE_02May25.csv')
-cleaned_database_filepath = os.path.join(DATA_DIR, '0_CleanedDatabase_25Feb25.csv')
-binary_filepath = os.path.join(DATA_DIR, '1_BinaryFeatures_25Feb25.csv')
-odds_filepath = os.path.join(DATA_DIR, '1_PositiveOddsEnrichments_03May25.csv')
-
 # Load lookup tables at startup
 FeatureCategories_dict, TargetParameters_dict = load_lookup_tables(
-    feature_categories_filepath, target_param_filepath
+    DATASET_PATHS['feature_categories_filepath'], 
+    DATASET_PATHS['target_param_filepath']
 )
 
 # Cache for benchmark results to avoid reprocessing
@@ -55,7 +71,7 @@ def get_enrichment_data():
     Serve the enrichment records, optionally filtered by ?parameter=...
     """
     # Lazy load the enrichment data
-    enrichment_data, enrichment_columns = load_enrichment_data(enrich_filepath)
+    enrichment_data, enrichment_columns = load_enrichment_data(DATASET_PATHS['enrich_filepath'])
     
     if not enrichment_data:
         return jsonify({'error': 'Enrichment data not available'}), 404
@@ -77,7 +93,7 @@ def api_viewer():
     Serve the entire cleaned database as JSON
     """
     # Lazy load the viewer data
-    viewer_data, viewer_columns = load_viewer_data(cleaned_database_filepath)
+    viewer_data, viewer_columns = load_viewer_data(DATASET_PATHS['cleaned_database_filepath'])
     
     if not viewer_data:
         return jsonify({'error': 'Viewer data not available'}), 404
@@ -153,10 +169,10 @@ def submit_features():
         # Get the search results table
         result_table = get_search_table(
             FeaturesOfInterest=features,
-            binary_filepath=binary_filepath,
-            cleaned_database_filepath=cleaned_database_filepath,
-            odds_filepath=odds_filepath,
-            feature_categories_filepath=feature_categories_filepath,
+            binary_filepath=DATASET_PATHS['binary_filepath'],
+            cleaned_database_filepath=DATASET_PATHS['cleaned_database_filepath'],
+            odds_filepath=DATASET_PATHS['odds_filepath'],
+            feature_categories_filepath=DATASET_PATHS['feature_categories_filepath'],
             LabelOfInterest=parameter, 
             CategoriesOfInterest=toggle_states,
             SearchMode=mode
@@ -223,197 +239,252 @@ def filter_features():
 @app.route('/api/submit_benchmark', methods=['POST'])
 def submit_benchmark():
     """
-    Process a benchmark submission with protocol, experimental data, and references.
+    Handle the benchmark form submission, preprocess all inputs into Python data structures,
+    then pass them to process_benchmark_data for actual processing.
     """
-    # Call the process_benchmark_submission function with request data and files
-    result = process_benchmark_submission(request.form, request.files)
+    # Create temporary directory for file processing
+    temp_dir = tempfile.mkdtemp(prefix="benchmark_")
     
-    # If the result contains an error status, return it as is
-    if result.get('status') == 'error':
-        return jsonify(result)
-    
-    # Otherwise, return the successful result
-    return jsonify(result)
-
-
-def process_benchmark_submission(request_data, request_files):
-    """
-    Process user's benchmark submission with all components in a single function.
-    
-    Parameters:
-    - request_data: Form data from the request
-    - request_files: File uploads from the request
-    
-    Returns:
-    - Dictionary with processed benchmark results
-    """
     try:
-        # Initialize variables
-        reference_results = []
-        db_protocol_results = []
+        # Access files uploaded in the request
+        protocol_file = request.files.get('protocol_file')
+        experimental_file = request.files.get('experimental_file')
         
-        # Retrieve causal candidates (all possible features)
-        causal_candidates = ["hiPSC Matrix Coating - EBs (18)", "hiPSC Matrix Coating - Geltrex (33)", "hiPSC Matrix Coating - Matrigel (163)", "hiPSC Matrix Coating - MEF feeder cells (8)", "hiPSC Matrix Coating - Vitronectin (10)", "hiPSC Backbone Media - Conditioned (12)", "hiPSC Backbone Media - DMEM/F12 (10)", "hiPSC Backbone Media - Embryonic Stem Cell (127)", "hiPSC Backbone Media - Essential 8 (82)", "hiPSC Backbone Media - mTeSR (106)", "hiPSC Backbone Media - StemFit (5)", "hiPSC Backbone Media - StemFlex (5)", "hiPSC-CM Backbone Media - Commercial CM Kit (12)", "hiPSC-CM Backbone Media - Cor.4U Complete (6)", "hiPSC-CM Backbone Media - DMEM (18)", "hiPSC-CM Backbone Media - iCell Maintenance (86)", "hiPSC-CM Backbone Media - RPMI-1640 (167)", "hiPSC-CM Backbone Media - StemPro-34 (14)", "hiPSC-CM Media Supplement - 1-thioglycerol (14)", "hiPSC-CM Media Supplement - Albumin (28)", "hiPSC-CM Media Supplement - B27 (180)", "hiPSC-CM Media Supplement - Ascorbic Acid (41)", "hiPSC-CM Media Supplement - iCell Maintenance Medium (41)", "hiPSC-CM Media Supplement - L-glutamine (19)", "hiPSC-CM Media Supplement - HEPES (16)", "hiPSC-CM Media Supplement - FBS (16)", "hiPSC-CM Media Supplement - Transferrin (11)", "hiPSC-CM Media Supplement - Mercaptoethanol (10)", "hiPSC-CM Media Supplement - Lipids (9)", "hiPSC-CM Media Supplement - GlutaMax (8)", "hiPSC-CM Media Supplement - Nonessential Amino Acids (8)", "hiPSC-CM Media Supplement - Selenium (7)", "hiPSC-CM Media Supplement - Polyvinylalchohol (6)", "hiPSC-CM Media Supplement - Lipid Mix (5)", "hiPSC-CM Media Supplement - VEGF (4)", "hiPSC-CM Media Supplement - bFGF (3)", "Wnt Induction - CHIR99021 (184)", "Wnt Induction - Activin A (80)", "Wnt Induction - BMP4 (74)", "Wnt Induction - bFGF (45)", "Wnt Induction - StemCell Diff Kit (4)", "Wnt Induction - Wnt3a (3)", "Seeding Confluency Regardless of 2D or 3D (%) - 85 to 89 (43)", "Seeding Confluency Regardless of 2D or 3D (%) - 90 to 94 (26)", "Seeding Confluency Regardless of 2D or 3D (%) - 95 to 100 (23)", "Seeding Confluency Regardless of 2D or 3D (%) - 80 to 84 (12)", "Seeding Confluency Regardless of 2D or 3D (%) - 70 to 79 (11)", "Seeding Confluency Specifically for 2D Protocols (%) - 70 to 79 (6)", "Seeding Confluency Specifically for 3D Protocols (%) - 70 to 79 (3)", "Seeding Confluency Specifically for 2D Protocols (%) - 80 to 84 (5)", "Seeding Confluency Specifically for 3D Protocols (%) - 80 to 84 (5)", "Seeding Confluency Specifically for 2D Protocols (%) - 85 to 89 (26)", "Seeding Confluency Specifically for 3D Protocols (%) - 85 to 89 (12)", "Seeding Confluency Specifically for 2D Protocols (%) - 90 to 94 (12)", "Seeding Confluency Specifically for 3D Protocols (%) - 90 to 94 (13)", "Seeding Confluency Specifically for 2D Protocols (%) - 95 to 100 (6)", "Seeding Confluency Specifically for 3D Protocols (%) - 95 to 100 (13)", "Wnt Induction Duration (days) - 3 days (38)", "Wnt Induction Duration (days) - 4 days (15)", "Wnt Induction Duration (days) - 5 days (8)", "Wnt Induction Duration (days) Quantiles - Q3 (>0 and ≤1) (186)", "Wnt Induction Duration (days) Quantiles - Q2 (>1 and ≤2) (75)", "Wnt Induction Duration (days) Quantiles - Q1 (>2 and ≤5) (61)", "Wnt Inhibitor - IWP (112)", "Wnt Inhibitor - IWR (56)", "Wnt Inhibitor - Wnt-C59 (30)", "Wnt Inhibitor - XAV939 (24)", "Wnt Inhibitor - DS-I-7 (9)", "Wnt Inhibitor - bFGF (8)", "Wnt Inhibitor - KY02111 (7)", "Wnt Inhibitor - BMP4 (7)", "Wnt Inhibitor - VEGF (3)", "Wnt Inhibitor Duration (days) - 4 days (19)", "Wnt Inhibitor Duration (days) - 3 days (17)", "Wnt Inhibitor Duration (days) - >6 days (12)", "Wnt Inhibitor Duration (days) - 5 days (6)", "Wnt Inhibitor Duration (days) - 6 days (4)", "Wnt Inhibitor Duration (days) Quantiles - Q2 (>1 and ≤2) (156)", "Wnt Inhibitor Duration (days) Quantiles - Q3 (>1 and ≤1) (108)", "Wnt Inhibitor Duration (days) Quantiles - Q1 (>2 and ≤9) (58)", "Insulin Start Day - 7 (85)", "Insulin Start Day - 6 (20)", "Insulin Start Day - 1 (19)", "Insulin Start Day - 8 (15)", "Insulin Start Day - 5 (14)", "Insulin Start Day - 4 (11)", "Insulin Start Day - 9 (10)", "Insulin Start Day - 0 (7)", "Insulin Start Day - After 11 (7)", "Insulin Start Day - 10 (6)", "Insulin Start Day - 3 (5)", "Insulin Start Day - 2 (4)", "Insulin Start Day - 11 (3)", "Insulin Withdrawal Duration (days) Quantiles - Q2 (>2 and ≤4) (25)", "Insulin Withdrawal Duration (days) Quantiles - Q1 (>4 and ≤10) (11)", "Insulin Withdrawal Duration (days) - 4 days (18)", "Insulin Withdrawal Duration (days) - 3 days (6)", "Insulin Withdrawal Duration (days) - 6 days (3)", "Insulin Withdrawal Duration (days) - 8 days (3)", "Purification Protocol - Glucose and Lactate (85)", "Purification Protocol - Metabolic (8)", "Purification Protocol - Cell Sorting (7)", "Purification Protocol - Antibiotic (4)", "hiPSC-CM Purification Duration (days) - <3 days (31)", "hiPSC-CM Purification Duration (days) - 4 days (29)", "hiPSC-CM Purification Duration (days) - 3 days (13)", "hiPSC-CM Purification Duration (days) - 6 days (10)", "hiPSC-CM Purification Duration (days) - 5 days (6)", "hiPSC-CM Purification Duration (days) - 7 days (6)", "hiPSC-CM Purification Duration (days) - >9 days (5)", "hiPSC-CM Purification Duration (days) - 8 days (4)", "hiPSC-CM Purification Duration (days) Quantiles - Q2 (>1 and ≤4) (61)", "hiPSC-CM Purification Duration (days) Quantiles - Q1 (>4 and ≤20) (31)", "Differentiation Purity (%) Quantiles - Q4 (>79 and ≤85) (40)", "Differentiation Purity (%) Quantiles - Q3 (>85 and ≤90) (34)", "Differentiation Purity (%) Quantiles - Q5 (>30 and ≤79) (32)", "Differentiation Purity (%) Quantiles - Q2 (>90 and ≤95) (27)", "Differentiation Purity (%) Quantiles - Q1 (>95 and ≤99) (22)", "New Media for Maturation - RPMI-1640 (30)", "New Media for Maturation - DMEM (21)", "New Media for Maturation - F12 (7)", "New Media for Maturation - Commercial Kit (5)", "hiPSC-CM Maturation Media - RPMI-1640 (153)", "hiPSC-CM Maturation Media - iCell Maintenance (83)", "hiPSC-CM Maturation Media - DMEM (35)", "hiPSC-CM Maturation Media - Commercial Kit (27)", "hiPSC-CM Maturation Media - StemPro-34 (14)", "hiPSC-CM Maturation Media - F12 (10)", "hiPSC-CM Maturation Media - Cor.4U Complete (6)", "Coating for Replating - Matrigel (65)", "Coating for Replating - Gelatin (43)", "Coating for Replating - Fibronectin (32)", "Coating for Replating - Geltrex (10)", "Coating for Replating - Laminin (5)", "Coating for Replating - Synthemax (3)", "Coating for Replating - Vitronectin (3)", "Maturation Strategy - Metabolic (33)", "Maturation Strategy - Electrical (39)", "Maturation Strategy - Tension (64)", "Maturation Strategy - Other Cells (80)", "Maturation Strategy - Mechanical (36)", "Maturation Strategy - Cell Alignment (59)", "Maturation Strategy - Elastomeric (33)", "Maturation Strategy - ECM (21)", "Metabolic Maturation Component - T3 (14)", "Metabolic Maturation Component - Fatty Acid (13)", "Metabolic Maturation Component - Palmitic Acid (11)", "Metabolic Maturation Component - Creatine (7)", "Metabolic Maturation Component - Taurine (7)", "Metabolic Maturation Component - Dexamethasone (7)", "Metabolic Maturation Component - L-carnitine (6)", "Metabolic Maturation Component - Nonessential Amino Acids (6)", "Metabolic Maturation Component - Galactose (4)", "Metabolic Maturation Component - Lactate (4)", "Metabolic Maturation Component - Insulin-Transferrin-Selenium (3)", "Metabolic Maturation Component - Vitamin B12 (3)", "Metabolic Maturation Component - Biotin (3)", "Metabolic Maturation Component - Ascorbic Acid (3)", "Metabolic Maturation Component - Albumax (3)", "Metabolic Maturation Component - B27 (3)", "Metabolic Maturation Component - KOSR (3)", "Metabolic Maturation Component - IGF-1 (3)", "Metabolic Maturation Component Category - Fatty Acids and Lipids (21)", "Metabolic Maturation Component Category - Metabolic Modulation (20)", "Metabolic Maturation Component Category - Hormonal Stimulation (14)", "Metabolic Maturation Component Category - Sugars and Carbohydrates (9)", "Metabolic Maturation Component Category - Amino Acids and Derivatives (9)", "Metabolic Maturation Component Category - Signaling Pathway Regulators (6)", "Metabolic Maturation Component Category - Kinase Inhibitors (3)", "2D Surface - ECM-coated (115)", "2D Surface - Micropatterned (27)", "2D Surface - Hydrogel (17)", "2D Surface - Electrospun (13)", "2D Surface - Microelectrode Array (9)", "2D Surface - Nanotopography (6)", "2D Surface - Decellularized ECM (3)", "2D Surface - Microparticle/fluid (3)", "3D Platform - Fibrin (50)", "3D Platform - Scaffold Free (43)", "3D Platform - Collagen (38)", "3D Platform - Matrigel (33)", "3D Platform - Extracellular Scaffold (18)", "3D Platform - 3D printed (9)", "3D Platform - Polyethylene Glycol (8)", "3D Platform - Gelatin (6)", "3D Platform - Fibronectin (3)", "3D Platform - Nanotechnology (3)", "3D Tissue Media - RPMI-1640 (72)", "3D Tissue Media - MEM-α (60)", "3D Tissue Media - DMEM (53)", "3D Tissue Media - Commercial Kit (21)", "3D Tissue Media - Growth Factor (12)", "3D Tissue Media - iCell Maintenance (12)", "3D Tissue Media - High-glucose DMEM (9)", "3D Tissue Media - Iscove (5)", "Differentiation Purity Assessment - Flow Cytometry cTnT+ (135)", "Differentiation Purity Assessment - Flow Cytometry a-actinin+ (9)", "Differentiation Purity Assessment - IHC a-actinin (8)", "Differentiation Purity Assessment - IHC cTnT (7)", "Differentiation Purity Assessment - Visual Inspection (6)", "Differentiation Purity Assessment - Flow Cytometry SIRPA+ (4)", "Differentiation Purity Assessment - Flow Cytometry VCAM1+ (4)", "Differentiation Purity Assessment - Flow Cytometry cTnI+ (3)", "Immunofluorescent Imaging - Yes (268)", "Electron Imaging - Transmission (62)", "Electron Imaging - Scanning (22)", "Sacromere or Cellular Alignment Analysis - Yes (72)", "Contractile Analysis Method - Motion Tracking (93)", "Contractile Analysis Method - Deflection (39)", "Contractile Analysis Method - Force Transducer (27)", "Contractile Analysis Method - Traction Force Microscopy (9)", "Calcium Handling Analysis Method - Visual (104)", "Calcium Handling Analysis Method - Genetical (23)", "Electrophysiology Analysis Method - Patch Clamp (59)", "Electrophysiology Analysis Method - Optical Mapping (39)", "Electrophysiology Analysis Method - Microelectrode (31)", "Electrophysiology Analysis Method - Motion-Contrast Reconstruction (5)", "Electrophysiology Analysis Method - Genetical (3)", "Metabolic Analysis Method - Seahorse (35)", "Metabolic Analysis Method - Flux Rates (13)", "Metabolic Analysis Method - Mitochondrial (4)", "Metabolic Analysis Method - Genetic (3)", "Fatty Acid Metabolism Assessed - Yes (20)", "Gene Analysis Method - RNA (169)", "Cell Line - iCell (47)", "Cell Line - WTC11 (30)", "Cell Line - IMR90 (19)", "Cell Line - Cor.4U (16)", "Cell Line - DF19-9-11T.H (16)", "Cell Line - PGP1 (11)", "Cell Line - 253G1 (10)", "Cell Line - Gibco episomal (10)", "Cell Line - 201B7 (9)", "Cell Line - iCell2 (8)", "Cell Line - SCVI-273 (8)", "Cell Line - BJ1 (7)", "Cell Line - C25 (6)", "Cell Line - ATCC (5)", "Cell Line - Cellapy (4)", "Cell Line - BJ RiPS (4)", "Cell Line - 201B6 (3)", "Number of Cell Lines - 1 (225)", "Number of Cell Lines - 2 (50)", "Number of Cell Lines - 3 (29)", "Number of Cell Lines - 4 (11)", "Number of Cell Lines - >5 (9)", "Cell Line Sex - Both (118)", "Cell Line Sex - Male (64)", "Cell Line Sex - Female (40)", "Cell Line Ancestry - Caucasian (41)", "Cell Line Ancestry - Asian (28)", "Cell Coculture - Cardiomyocyte (157)", "Cell Coculture - Stromal Cell (78)", "Cell Coculture - Endothelial Cell (35)", "3D CM Ratio (CM-EC-SC) Quantiles - Q1 (>91 and ≤100) (74)", "3D CM Ratio (CM-EC-SC) Quantiles - Q3 (>9 and ≤75) (48)", "3D CM Ratio (CM-EC-SC) Quantiles - Q2 (>75 and ≤91) (28)", "3D EC Ratio (CM-EC-SC) Quantiles - Q2 (>0 and ≤0) (119)", "3D EC Ratio (CM-EC-SC) Quantiles - Q1 (>0 and ≤91) (31)", "3D SC Ratio (CM-EC-SC) Quantiles - Q3 (>0 and ≤0) (74)", "3D SC Ratio (CM-EC-SC) Quantiles - Q1 (>10 and ≤50) (47)", "3D SC Ratio (CM-EC-SC) Quantiles - Q2 (>0 and ≤10) (29)", "3D Stromal Cell Source - Human Fibroblast (38)", "3D Stromal Cell Source - Stromal Cell (35)", "3D Stromal Cell Source - Cardiac Fibroblast (32)", "3D Stromal Cell Source - Mesenchymal Stem Cell (12)", "3D Stromal Cell Source - hiPSC-CardiacF (8)", "3D Stromal Cell Source - Dermal Fibroblast (7)", "3D Stromal Cell Source - hiPSC-MuralC (3)", "3D Stromal Cell Source - hiPSC-SmoothMC (3)", "3D Endothelial Cell Source - hiPSC-EndothelialC (16)", "3D Endothelial Cell Source - Umbilical Vein EndothelialC (10)", "3D Endothelial Cell Source - Cardiac Microvascular EndothelialC (5)"]
-
-        # 1. PROCESS USER'S PROTOCOL (either uploaded file or selected features)
-        if 'protocol_file' in request_files and request_files['protocol_file'].filename:
-            # Extract features from uploaded protocol PDF
-            protocol_file = request_files['protocol_file']
-            protocol_features = getUserProtocolFeatures(protocol_file, causal_candidates)
-        else:
-            # Use manually selected features from form
-            protocol_features = request_data.getlist('selected_features[]')
+        # Access selected features (as a list)
+        selected_features = request.form.getlist('selected_features[]')
         
-        print('Step 1 done')
-
-        # 2. PROCESS USER'S EXPERIMENTAL DATA (required)
-        if 'experimental_file' not in request_files or not request_files['experimental_file'].filename:
-            return {
-                'status': 'error',
-                'message': 'Experimental data file is required.'
-            }
+        # Access the purpose selection (single value)
+        selected_purpose = request.form.get('selected_purpose')
         
-        experimental_file = request_files['experimental_file']
-        user_data = getUserData(experimental_file)
+        # Access protocol IDs (as a list)
+        selected_protocol_ids = request.form.getlist('selected_protocol_ids[]')
         
-        print('Step 2 done')
-
-        # 3. PROCESS MATURITY INDICATORS FOR USER'S PROTOCOL
-        protocol_name, results_dict = process_maturity_indicators(user_data, protocol_features)
-        user_protocol_name = protocol_name
-
-        reference_results.append((protocol_name, results_dict))
-
-        # 4. GET SELECTED PURPOSE (required)
-        selected_purpose = request_data.get('selected_purpose', '')
-        if not selected_purpose:
-            return {
-                'status': 'error',
-                'message': 'Protocol purpose selection is required.'
-            }
-
-        # 5. PROCESS PURPOSE-BASED REFERENCE
-        # Create empty template for all indicators
-        purpose_data = {'ProtocolName': f'{selected_purpose} Protocols'}
-        for indicator in [
-            'Sarcomere Length (um)', 'Cell Area (um2)', 'T-tubule Structure (Found)',
-            'Contractile Force (mN)', 'Contractile Stress (mN/mm2)', 
-            'Contraction Upstroke Velocity (um/s)', 'Calcium Flux Amplitude (F/F0)',
-            'Time to Calcium Flux Peak (ms)', 'Time from Calcium Peak to Relaxation (ms)',
-            'Conduction Velocity from Calcium Imaging (cm/s)', 
-            'Action Potential Conduction Velocity (cm/s)', 'Action Potential Amplitude (mV)',
-            'Resting Membrane Potential (mV)', 'Beat Rate (bpm)', 
-            'Max Capture Rate of Paced CMs (Hz)', 'MYH7 Percentage (MYH6)',
-            'MYL2 Percentage (MYL7)', 'TNNI3 Percentage (TTNI1)'
-        ]:
-            purpose_data[indicator] = ''
+        # Access reference pairs data (JSON string that needs to be parsed)
+        reference_pairs_json = request.form.get('reference_pairs')
+        reference_pairs = []
+        if reference_pairs_json:
+            try:
+                reference_pairs = json.loads(reference_pairs_json)
+            except json.JSONDecodeError:
+                return jsonify({'status': 'error', 'message': 'Invalid reference pairs data'})
         
-        # Get features for the selected purpose
-        target_feature_dict = get_target_feature_dict(odds_filepath)
-        purpose_features = [feature for feature in target_feature_dict[selected_purpose] if feature in causal_candidates]
-        purpose_name, purpose_results = process_maturity_indicators(purpose_data, purpose_features)
-        
-        # Add to reference results
-        reference_results.append((purpose_name, purpose_results))
-        
-        # 6. PROCESS USER UPLOADED REFERENCE PAIRS
-        reference_pairs = json.loads(request_data.get('reference_pairs', '[]')) if 'reference_pairs' in request_data else []
-        
-        for i, pair in enumerate(reference_pairs):
-            if 'protocol' in pair and 'data' in pair:
-                ref_protocol_key = f"ref_protocol_{i}"
-                ref_data_key = f"ref_data_{i}"
+        # Access reference pair files and save them to temp directory
+        reference_data = []
+        for i in range(len(reference_pairs)):
+            ref_protocol = request.files.get(f'ref_protocol_{i}')
+            ref_data = request.files.get(f'ref_data_{i}')
+            if ref_protocol and ref_data:
+                # Save files to temp directory
+                ref_protocol_path = os.path.join(temp_dir, f"ref_protocol_{i}_{ref_protocol.filename}")
+                ref_data_path = os.path.join(temp_dir, f"ref_data_{i}_{ref_data.filename}")
                 
-                if ref_protocol_key in request_files and ref_data_key in request_files:
-                    ref_protocol_file = request_files[ref_protocol_key]
-                    ref_data_file = request_files[ref_data_key]
-                    
-                    # Process reference protocol and data
-                    ref_features = getUserProtocolFeatures(ref_protocol_file, causal_candidates)
-                    ref_data = getUserData(ref_data_file)
-                    ref_name, ref_results = process_maturity_indicators(ref_data, ref_features)
-                    
-                    # Add to reference results
-                    reference_results.append({
-                        'id': f"ref_{i}",
-                        'name': ref_name or f"Reference {i+1}",
-                        'results': ref_results
-                    })
+                ref_protocol.save(ref_protocol_path)
+                ref_data.save(ref_data_path)
+                
+                reference_data.append({
+                    'protocol_path': ref_protocol_path,
+                    'protocol_name': ref_protocol.filename,
+                    'data_path': ref_data_path,
+                    'data_name': ref_data.filename
+                })
         
-        # 7. PROCESS DATABASE PROTOCOL IDS
-        selected_protocol_ids = request_data.getlist('selected_protocol_ids[]')
-        if selected_protocol_ids:
-            # Load necessary dataframes
-            binary_df = get_binary_df(binary_filepath)
-            cleaned_df = get_cleaned_df(cleaned_database_filepath)
-            
-            for protocol_id in selected_protocol_ids:
-                # Convert ID to indices (accounting for 0-based indexing)
-                try:
-                    binary_index = int(protocol_id) - 1
-                    cleaned_index = binary_index + 1  # Adjust as needed based on your data structure
-                    
-                    # Get protocol features from binary dataframe
-                    binary_row = binary_df.iloc[binary_index]
-                    db_features = [col for col in causal_candidates if binary_row.get(col, False)]
-                    
-                    # Get protocol name from cleaned dataframe
-                    title = cleaned_df.iloc[cleaned_index]['Title'] if 'Title' in cleaned_df.columns else f"Protocol ID: {protocol_id}"
-                    
-                    # Create empty indicator data
-                    db_data = {'ProtocolName': title}
-                    
-                    # Check for experimental values in the cleaned dataframe
-                    indicators = [
-                        'Sarcomere Length (um)', 'Cell Area (um2)', 'T-tubule Structure (Found)',
-                        'Contractile Force (mN)', 'Contractile Stress (mN/mm2)', 
-                        'Contraction Upstroke Velocity (um/s)', 'Calcium Flux Amplitude (F/F0)',
-                        'Time to Calcium Flux Peak (ms)', 'Time from Calcium Peak to Relaxation (ms)',
-                        'Conduction Velocity from Calcium Imaging (cm/s)', 
-                        'Action Potential Conduction Velocity (cm/s)', 'Action Potential Amplitude (mV)',
-                        'Resting Membrane Potential (mV)', 'Beat Rate (bpm)', 
-                        'Max Capture Rate of Paced CMs (Hz)', 'MYH7 Percentage (MYH6)',
-                        'MYL2 Percentage (MYL7)', 'TNNI3 Percentage (TTNI1)'
-                    ]
-                    
-                    for indicator in indicators:
-                        if indicator in cleaned_df.columns:
-                            value = cleaned_df.iloc[cleaned_index][indicator]
-                            # Only add non-NaN experimental values
-                            db_data[indicator] = str(value) if pd.notna(value) else ''
-                        else:
-                            db_data[indicator] = ''
-                    
-                    # Process the database protocol
-                    db_name, db_results = process_maturity_indicators(db_data, db_features)
-                    
-                    # Add to database results
-                    db_protocol_results.append({
-                        'id': protocol_id,
-                        'name': db_name or title,
-                        'results': db_results
-                    })
-                except Exception as e:
-                    app.logger.error(f"Error processing protocol ID {protocol_id}: {str(e)}")
+        # Print for debugging (keep your existing debug code)
+        print(f"Protocol file: {protocol_file.filename if protocol_file else 'None'}")
+        print(f"Experimental file: {experimental_file.filename if experimental_file else 'None'}")
+        print(f"Selected features: {selected_features}")
+        print(f"Selected purpose: {selected_purpose}")
+        print(f"Selected protocol IDs: {selected_protocol_ids}")
+        print(f"Reference pairs: {reference_pairs}")
+        print(f"Reference files: {[{k: v for k, v in pair.items() if k.endswith('_name')} for pair in reference_data]}")
         
-        # 8. PREPARE FINAL RESPONSE
-        response_data = {
-            'status': 'success',
-            'protocol_name': user_protocol_name,
-            'selected_purpose': selected_purpose,
-            'results': results_dict,
-            'reference_results': reference_results,
-            'db_protocol_results': db_protocol_results
+        # Validate required inputs
+        if not experimental_file:
+            return jsonify({'status': 'error', 'message': 'Experimental data file is required'})
+        
+        if not selected_purpose:
+            return jsonify({'status': 'error', 'message': 'Protocol purpose selection is required'})
+        
+        if not protocol_file and not selected_features:
+            return jsonify({'status': 'error', 'message': 'Either protocol file or feature selection is required'})
+        
+        # Preprocess main files
+        protocol_data = None
+        if protocol_file:
+            protocol_path = os.path.join(temp_dir, protocol_file.filename)
+            protocol_file.save(protocol_path)
+            protocol_data = {
+                'path': protocol_path,
+                'name': protocol_file.filename
+            }
+        
+        experimental_path = os.path.join(temp_dir, experimental_file.filename)
+        experimental_file.save(experimental_path)
+        experimental_data = {
+            'path': experimental_path,
+            'name': experimental_file.filename
         }
         
-        return response_data
+        # Process the data and generate results
+        try:
+            results = process_benchmark_data(
+                protocol_data=protocol_data,
+                experimental_data=experimental_data,
+                selected_features=selected_features,
+                selected_purpose=selected_purpose,
+                selected_protocol_ids=selected_protocol_ids,
+                reference_data=reference_data
+            )
+            return jsonify(results)
+        except Exception as e:
+            app.logger.error(f"Error processing benchmark: {str(e)}")
+            import traceback
+            app.logger.error(traceback.format_exc())
+            return jsonify({
+                'status': 'error',
+                'message': f'Error processing benchmark: {str(e)}'
+            })
         
     except Exception as e:
-        app.logger.error(f"Error in process_benchmark_submission: {str(e)}")
-        return {
+        app.logger.error(f"Error in submit_benchmark: {str(e)}")
+        import traceback
+        app.logger.error(traceback.format_exc())
+        return jsonify({
             'status': 'error',
-            'message': f'Error processing benchmark: {str(e)}'
-        }
+            'message': f'Error processing request: {str(e)}'
+        })
+        
+    finally:
+        # Clean up temporary files
+        try:
+            shutil.rmtree(temp_dir)
+        except Exception as e:
+            app.logger.error(f"Error cleaning up temporary files: {e}")
+
+
+def process_benchmark_data(protocol_data, experimental_data, selected_features, selected_purpose, 
+                         selected_protocol_ids, reference_data):
+    """
+    Process the benchmark data and return results.
+    
+    Args:
+        protocol_data: Dictionary with protocol file path and name, or None if features selected
+        experimental_data: Dictionary with experimental file path and name
+        selected_features: List of selected features (used if protocol_data is None)
+        selected_purpose: The selected protocol purpose
+        selected_protocol_ids: List of database protocol IDs to compare against
+        reference_data: List of dictionaries with reference protocol and data info
+        
+    Returns:
+        List with benchmark results
+    """
+    # Get all feature candidates
+    c_candidates = get_candidates()
+    target_feature_dict = get_target_feature_dict(DATASET_PATHS['odds_filepath'])
+    
+    # Load binary features dataframe
+    binary_df = get_binary_df(DATASET_PATHS['binary_filepath'])
+    
+    # 1. Process User's experimental data
+    main_data = getUserData(experimental_data['path'])
+    
+    # 2. Process User's protocol - either from file or selected features        
+    if protocol_data:
+        # User uploaded a protocol file
+        main_features = getUserProtocolFeatures(protocol_data['path'], c_candidates)
+    else:
+        # User selected features from dropdown
+        main_features = selected_features
+
+    # 3. Process main protocol data
+    main_protocol_name, main_results_by_indicator = process_maturity_indicators(main_data, main_features, target_feature_dict)
+    
+    # 4. Initialize results structure
+    main_results = (main_protocol_name, main_results_by_indicator)
+    
+    print('-------------- MAIN IS DONE\n\n\n')
+
+
+    # Reference data
+    reference_results = []
+
+    # 5. Process purpose-based reference data
+    indicators = ['Sarcomere Length (um)', 'Cell Area (um2)', 'T-tubule Structure (Found)', 
+                 'Contractile Force (mN)', 'Contractile Stress (mN/mm2)', 
+                 'Contraction Upstroke Velocity (um/s)', 'Calcium Flux Amplitude (F/F0)', 
+                 'Time to Calcium Flux Peak (ms)', 'Time from Calcium Peak to Relaxation (ms)', 
+                 'Conduction Velocity from Calcium Imaging (cm/s)', 
+                 'Action Potential Conduction Velocity (cm/s)', 'Action Potential Amplitude (mV)', 
+                 'Resting Membrane Potential (mV)', 'Beat Rate (bpm)', 
+                 'Max Capture Rate of Paced CMs (Hz)', 'MYH7 Percentage (MYH6)', 
+                 'MYL2 Percentage (MYL7)', 'TNNI3 Percentage (TNNI1)']
+    
+    PurposeData = {'ProtocolName': f'{selected_purpose} Protocols'}
+    # Add empty values for all indicators
+    for indicator in indicators:
+        PurposeData[indicator] = ''
+        
+    # Get target feature dictionary to retrieve purpose features
+    target_feature_dict = get_target_feature_dict(DATASET_PATHS['odds_filepath'])
+    
+    # Get features associated with selected purpose
+    if selected_purpose in target_feature_dict:
+        PurposeFeatures = target_feature_dict[selected_purpose]
+    else:
+        PurposeFeatures = []  # Default to empty list if purpose not found
+        
+    PurposeProtocolName, PurposeQResultsByIndicator = process_maturity_indicators(PurposeData, PurposeFeatures, target_feature_dict)
+
+    # Add purpose reference to results
+    reference_results.append((PurposeProtocolName, PurposeQResultsByIndicator))
+    
+
+    print('-------------- PURPOSE IS DONE\n\n\n')
+
+    # 6. Process user-uploaded reference pairs
+    for ref_data in reference_data:
+        ProtocolPath, DataPath = ref_data['protocol_path'], ref_data['data_path']
+        RefData = getUserData(DataPath)
+        RefFeatures = getUserProtocolFeatures(ProtocolPath, c_candidates)
+
+        RefProtocolName, RefQResultsByIndicator = process_maturity_indicators(RefData, RefFeatures, target_feature_dict)
+        reference_results.append((RefProtocolName, RefQResultsByIndicator))
+    
+    # 7. Process database protocol comparisons
+    cleaned_df = get_cleaned_df(DATASET_PATHS['cleaned_database_filepath'])
+    
+    for protocol_id in selected_protocol_ids:
+        # Adjust indices as needed (binary df is 0-indexed, cleaned might be 1-indexed)
+        try:
+            index_for_binary = int(protocol_id) - 1
+            index_for_cleaned = int(protocol_id)
+            
+            # Get features from binary dataframe
+            filtered_b_row = binary_df.loc[index_for_binary, c_candidates]
+            IDRefFeatures = [col for col, val in filtered_b_row.items() if val]
+            
+            # Get experimental data from cleaned dataframe
+            filtered_c_row = cleaned_df.loc[index_for_cleaned, indicators]
+            IDRefData = {'ProtocolName': f'Protocol {protocol_id}'}
+            
+            for indicator in indicators:
+                if indicator in filtered_c_row and not pd.isna(filtered_c_row[indicator]) and str(filtered_c_row[indicator]) != "nan":
+                    if indicator == 'T-tubule Structure (Found)':
+                        IDRefData[indicator] = '1'
+                    else:
+                        IDRefData[indicator] = str(filtered_c_row[indicator])
+                else:
+                    IDRefData[indicator] = ""
+
+            IDRefProtocolName, IDRefQResultsByIndicator = process_maturity_indicators(IDRefData, IDRefFeatures, target_feature_dict)
+            reference_results.append((IDRefProtocolName, IDRefQResultsByIndicator))
+        except Exception as e:
+            app.logger.error(f"Error processing protocol ID {protocol_id}: {str(e)}")
+            continue
+    
+    # Return all results as a list, starting with the main results, followed by reference results
+    all_results = [(main_protocol_name, main_results_by_indicator)] + reference_results
+    
+    return all_results
 
 # ----- Web Routes -----
 @app.route('/')

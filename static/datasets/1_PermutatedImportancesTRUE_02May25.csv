@@ -7,7 +7,7 @@ Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),Electrophysiology A
 Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),Metabolic Analysis Method - Seahorse (35),0.01498,0.00470047,0.01072,0.01560156,Best Maturity,0.00470047,TRUE,TRUE
 Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),Journal - Tissue Eng Part C Methods (6),0.01243,0.01350135,0.01248,0.01490149,Best Maturity,0.01350135,TRUE,TRUE
 Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),Electron Imaging - Transmission (62),0.01089,0.03110311,0.00714,0.104610461,Best Maturity,0.03110311,TRUE,FALSE
-Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.01059,0.01210121,0.00747,0.055905591,Best Maturity,0.01210121,TRUE,TRUE
+Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.01059,0.01210121,0.00747,0.055905591,Best Maturity,0.01210121,TRUE,TRUE
 Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),hiPSC-CM Media Supplement - Rare (5),0.01052,0.01280128,0.0157,0.00590059,Best Maturity,0.00590059,TRUE,TRUE
 Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),Journal - Biosens Bioelectron (4),0.01042,0.01060106,0.0124,0.010001,Best Maturity,0.010001,TRUE,TRUE
 Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),Wnt Inhibitor - IWP (112),0.0102,0.04680468,0.0056,0.330933093,Best Maturity,0.04680468,TRUE,FALSE
@@ -33,13 +33,13 @@ Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),Resting Membrane Po
 Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),3D SC Ratio (CM-EC-SC) Quantiles - Q1 (>10 and ≤50) (47),0.00647,0.127312731,0.00872,0.04710471,Best Maturity,0.04710471,TRUE,FALSE
 Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),Pharmacological Intervention - Blebbistatin (5),0.00639,0.03610361,0.00369,0.130213021,Best Maturity,0.03610361,TRUE,FALSE
 Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),Insulin Start Day - 3 (5),0.00546,0.104010401,0.00812,0.04360436,Best Maturity,0.04360436,TRUE,FALSE
-Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.00398,0.119711971,0.01174,0.01020102,Best Maturity,0.01020102,TRUE,TRUE
+Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.00398,0.119711971,0.01174,0.01020102,Best Maturity,0.01020102,TRUE,TRUE
 Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),Action Potential Amplitude (mV) Quantiles - Q1 (>110 and ≤170) (10),0.03136,0.00020002,0.02608,0.00040004,Best Maturity,0.00020002,TRUE,TRUE
 Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),Number of Cell Lines - 2 (50),0.01937,0.00560056,0.01292,0.01620162,Best Maturity,0.00560056,TRUE,TRUE
 Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),Contraction Upstroke Velocity (um/s) Quantiles - Q3 (>10 and ≤31.5) (7),0.0187,0.00170017,0.01207,0.0130013,Best Maturity,0.00170017,TRUE,TRUE
 Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),Differentiation Purity (%) Quantiles - Q1 (>95 and ≤99) (22),0.01612,0.00440044,0.01316,0.00670067,Best Maturity,0.00440044,TRUE,TRUE
 Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),Coating for Replating - Rare (6),0.01578,0.00450045,0.01653,0.00380038,Best Maturity,0.00380038,TRUE,TRUE
-Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.01487,0.00560056,0.01748,0.00440044,Best Maturity,0.00440044,TRUE,TRUE
+Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.01487,0.00560056,0.01748,0.00440044,Best Maturity,0.00440044,TRUE,TRUE
 Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),Journal - Acta Biomater (10),0.01462,0.01120112,0.01184,0.01750175,Best Maturity,0.01120112,TRUE,TRUE
 Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),Resting Membrane Potential (mV) Quantiles - Q1 (<-78 and ≥-85) (12),0.01415,0.01040104,0.01326,0.00910091,Best Maturity,0.00910091,TRUE,TRUE
 Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),Differentiation Purity Assessment - Flow Cytometry cTnT+ (135),0.01343,0.01010101,0.00794,0.082908291,Best Maturity,0.01010101,TRUE,TRUE
@@ -59,7 +59,7 @@ Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),hiPSC-CM Media Supplemen
 Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),2D Surface - Nanotopography (6),0.00725,0.053405341,0.00817,0.04250425,Best Maturity,0.04250425,TRUE,FALSE
 Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),Sarcomere Length (um) Quantiles - Q3 (>1.75 and ≤1.88) (13),0.00682,0.058605861,0.01053,0.01810181,Best Maturity,0.01810181,TRUE,TRUE
 Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),Contractile Analysis Method - Rare (7),0.00602,0.078707871,0.00875,0.03250325,Best Maturity,0.03250325,TRUE,FALSE
-Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.0046,0.106110611,0.00918,0.03170317,Best Maturity,0.03170317,TRUE,FALSE
+Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.0046,0.106110611,0.00918,0.03170317,Best Maturity,0.03170317,TRUE,FALSE
 Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),Seeding Confluency (%) - 80 to 84 (12),0.00457,0.143514351,0.00826,0.04530453,Best Maturity,0.04530453,TRUE,FALSE
 Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),hiPSC Matrix Coating - EBs (18),0.00371,0.184918492,0.00875,0.0350035,Best Maturity,0.0350035,TRUE,FALSE
 Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),Wnt Inhibitor Duration (days) Quantiles - Q3 (>1 and ≤1) (108),0.00351,0.896489649,0.01084,0.01990199,Best Maturity,0.01990199,TRUE,TRUE
@@ -425,15 +425,15 @@ Max Capture Rate of Paced CMs (Hz) Quantiles - Q1 (>2.9 and ≤6.9) (7),Cell Lin
 Max Capture Rate of Paced CMs (Hz) Quantiles - Q1 (>2.9 and ≤6.9) (7),Calcium Flux Amplitude (F/F0) Quantiles - Q4 (>0.25 and ≤0.9) (10),0.00952,0.04170417,0.00735,0.078607861,Best Maturity,0.04170417,TRUE,FALSE
 Max Capture Rate of Paced CMs (Hz) Quantiles - Q1 (>2.9 and ≤6.9) (7),Beat Rate (bpm) Quantiles - Q2 (<38.8 and ≥27.6) (10),0.00769,0.078207821,0.00984,0.04350435,Best Maturity,0.04350435,TRUE,FALSE
 Max Capture Rate of Paced CMs (Hz) Quantiles - Q1 (>2.9 and ≤6.9) (7),Wnt Inhibitor - Rare (3),0.00286,0.062706271,0.01063,0.03290329,Best Maturity,0.03290329,TRUE,FALSE
-MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.08254,0,0.09271,0,Best Maturity,0,TRUE,TRUE
-MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.04243,0.00110011,0.05259,0.00090009,Best Maturity,0.00090009,TRUE,TRUE
-MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),0.03962,0.00020002,0.04629,0.00010001,Best Maturity,0.00010001,TRUE,TRUE
+MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.08254,0,0.09271,0,Best Maturity,0,TRUE,TRUE
+MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.04243,0.00110011,0.05259,0.00090009,Best Maturity,0.00090009,TRUE,TRUE
+MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),0.03962,0.00020002,0.04629,0.00010001,Best Maturity,0.00010001,TRUE,TRUE
 MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),Contractile Analysis Method - Rare (7),0.03785,0.00110011,0.02793,0.00710071,Best Maturity,0.00110011,TRUE,TRUE
 MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),Journal - Stem Cell Reports (23),0.02746,0.00510051,0.0176,0.0240024,Best Maturity,0.00510051,TRUE,TRUE
 MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),Calcium Flux Amplitude (F/F0) Quantiles - Q5 (>0.03 and ≤0.25) (11),0.02081,0.00880088,0.02091,0.00860086,Best Maturity,0.00860086,TRUE,TRUE
 MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),Disease Modelling - Arrhythmic (15),0.02077,0.01320132,0.01651,0.02120212,Best Maturity,0.01320132,TRUE,TRUE
 MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),Contractile Force (mN) Quantiles - Q5 (>0 and ≤0.04) (10),0.01871,0.01890189,0.01752,0.0260026,Best Maturity,0.01890189,TRUE,TRUE
-MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),0.01776,0.0180018,0.01636,0.02640264,Best Maturity,0.0180018,TRUE,TRUE
+MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),0.01776,0.0180018,0.01636,0.02640264,Best Maturity,0.0180018,TRUE,TRUE
 MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),Publication Year - 2019 (57),0.01723,0.02590259,0.00707,0.195419542,Best Maturity,0.02590259,TRUE,FALSE
 MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),Resting Membrane Potential (mV) Quantiles - Q5 (>-35 and ≤-60) (9),0.01418,0.04040404,0.01455,0.03490349,Best Maturity,0.03490349,TRUE,FALSE
 MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),Disease Modelling - Genetic Disorders (18),0.01392,0.03790379,0.00864,0.106510651,Best Maturity,0.03790379,TRUE,FALSE
@@ -444,51 +444,51 @@ MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),2D Surface - Micr
 MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),Maturation Strategy - Tension (64),0.00915,0.084808481,0.01256,0.04120412,Best Maturity,0.04120412,TRUE,FALSE
 MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),Seeding Confluency 2D (%) - 70 to 79 (6),0.00775,0.071307131,0.01426,0.04690469,Best Maturity,0.04690469,TRUE,FALSE
 MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),Metabolic Component - B27 (3),0.00142,0.03750375,0.00348,0.03730373,Best Maturity,0.03730373,TRUE,FALSE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),0.05602,0,0.06421,0,Best Maturity,0,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),0.05159,0.00020002,0.05495,0.00040004,Best Maturity,0.00020002,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),0.05138,0.00010001,0.0597,0.00010001,Best Maturity,0.00010001,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Journal - Stem Cell Reports (23),0.03471,0.00120012,0.02342,0.00630063,Best Maturity,0.00120012,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.02941,0.00250025,0.03007,0.00290029,Best Maturity,0.00250025,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Number of Cell Lines - 3 (29),0.02046,0.01940194,0.01695,0.02210221,Best Maturity,0.01940194,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),hiPSC-CM Media Supplement - Rare (5),0.01613,0.04270427,0.01516,0.04080408,Best Maturity,0.04080408,TRUE,FALSE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Calcium Handling Analysis Method - Visual (104),0.01612,0.01240124,0.00598,0.234123412,Best Maturity,0.01240124,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Calcium Handling Analysis Method - Rare (4),0.01569,0.01790179,0.0147,0.02250225,Best Maturity,0.01790179,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),0.01545,0.02390239,0.00969,0.081608161,Best Maturity,0.02390239,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),hiPSC-CM Purification Duration (days) - 4 days (29),0.01494,0.03070307,0.01763,0.01120112,Best Maturity,0.01120112,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Number of Cell Lines - 1 (225),0.01424,0.02060206,0.00571,0.325132513,Best Maturity,0.02060206,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),0.01399,0.03860386,0.01478,0.03550355,Best Maturity,0.03550355,TRUE,FALSE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Time to Calcium Flux Peak (ms) Quantiles - Q1 (<154 and ≥0.06) (10),0.01393,0.04050405,0.01017,0.059705971,Best Maturity,0.04050405,TRUE,FALSE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Maturation Strategy - Elastomeric (33),0.01254,0.064006401,0.01637,0.02770277,Best Maturity,0.02770277,TRUE,FALSE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Pharmacological Intervention - T3 (3),0.01231,0.02870287,0.01153,0.03030303,Best Maturity,0.02870287,TRUE,FALSE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Contraction Upstroke Velocity (um/s) Quantiles - Q4 (>1.2 and ≤10) (11),0.01054,0.0370037,0.00734,0.078107811,Best Maturity,0.0370037,TRUE,FALSE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Maturation Strategy - ECM (21),0.01035,0.079907991,0.01719,0.02050205,Best Maturity,0.02050205,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Publication Year - 2019 (57),0.00936,0.105110511,0.01313,0.04620462,Best Maturity,0.04620462,TRUE,FALSE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Publication Year - 2022 (20),0.00846,0.132713271,0.01864,0.01620162,Best Maturity,0.01620162,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Metabolic Component Category - Kinase Inhibitors (3),0.00179,0.03810381,0.00303,0.03870387,Best Maturity,0.03810381,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),0.06784,0,0.06789,0,Best Maturity,0,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.06271,0,0.05478,0,Best Maturity,0,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Journal - Stem Cell Reports (23),0.03143,0.00210021,0.02417,0.00470047,Best Maturity,0.00210021,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),0.02728,0.00340034,0.0264,0.0050005,Best Maturity,0.00340034,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Journal - Tissue Eng Part A (4),0.02367,0.01650165,0.02037,0.02550255,Best Maturity,0.01650165,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),0.02234,0.02010201,0.02481,0.01520152,Best Maturity,0.01520152,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Insulin Withdrawal Duration (days) Quantiles - Q2 (>2 and ≤4) (25),0.0188,0.01970197,0.01002,0.092209221,Best Maturity,0.01970197,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Insulin Withdrawal Duration (days) - 4 days (18),0.01872,0.01390139,0.01485,0.03920392,Best Maturity,0.01390139,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),3D Stromal Cell Source - Cardiac Fibroblast (32),0.01741,0.02050205,0.0069,0.152715272,Best Maturity,0.02050205,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Calcium Flux Amplitude (F/F0) Quantiles - Q4 (>0.25 and ≤0.9) (10),0.01557,0.03540354,0.00379,0.112011201,Best Maturity,0.03540354,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Journal - Nat Biomed Eng (5),0.01451,0.0440044,0.01049,0.051405141,Best Maturity,0.0440044,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Contractile Force (mN) Quantiles - Q3 (>0.16 and ≤0.43) (9),0.01427,0.02680268,0.01172,0.051905191,Best Maturity,0.02680268,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),0.01403,0.04250425,0.00919,0.094309431,Best Maturity,0.04250425,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),3D Stromal Cell Source - Human Fibroblast (38),0.0131,0.03610361,0.01269,0.03750375,Best Maturity,0.03610361,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),hiPSC-CM Purification Duration (days) - 3 days (13),0.01286,0.03970397,0.01404,0.03460346,Best Maturity,0.03460346,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),3D Stromal Cell Source - Dermal Fibroblast (7),0.01262,0.056305631,0.01701,0.02430243,Best Maturity,0.02430243,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Calcium Handling Analysis Method - Visual (104),0.0122,0.04040404,0.00518,0.329532953,Best Maturity,0.04040404,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Contraction Upstroke Velocity (um/s) Quantiles - Q4 (>1.2 and ≤10) (11),0.01131,0.03670367,0.00371,0.113611361,Best Maturity,0.03670367,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Publication Year - 2019 (57),0.01012,0.086208621,0.01285,0.04930493,Best Maturity,0.04930493,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),3D Estimated Cell Density (mil cells/mL) Quantiles - Q3 (>5 and ≤10) (30),0.00929,0.085108511,0.01451,0.02950295,Best Maturity,0.02950295,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),3D Tissue Media - RPMI-1640 (72),0.00908,0.121212121,0.01427,0.03750375,Best Maturity,0.03750375,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Maturation Strategy - Elastomeric (33),0.00864,0.135913591,0.01988,0.01610161,Best Maturity,0.01610161,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),3D Stromal Cell Source - hiPSC-CardiacF (8),0.00584,0.091109111,0.01357,0.03910391,Best Maturity,0.03910391,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Journal - ACS Biomater Sci Eng (3),0.00113,0.03910391,0.00234,0.03890389,Best Maturity,0.03890389,TRUE,FALSE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),0.05602,0,0.06421,0,Best Maturity,0,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),0.05159,0.00020002,0.05495,0.00040004,Best Maturity,0.00020002,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),0.05138,0.00010001,0.0597,0.00010001,Best Maturity,0.00010001,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Journal - Stem Cell Reports (23),0.03471,0.00120012,0.02342,0.00630063,Best Maturity,0.00120012,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.02941,0.00250025,0.03007,0.00290029,Best Maturity,0.00250025,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Number of Cell Lines - 3 (29),0.02046,0.01940194,0.01695,0.02210221,Best Maturity,0.01940194,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),hiPSC-CM Media Supplement - Rare (5),0.01613,0.04270427,0.01516,0.04080408,Best Maturity,0.04080408,TRUE,FALSE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Calcium Handling Analysis Method - Visual (104),0.01612,0.01240124,0.00598,0.234123412,Best Maturity,0.01240124,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Calcium Handling Analysis Method - Rare (4),0.01569,0.01790179,0.0147,0.02250225,Best Maturity,0.01790179,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),0.01545,0.02390239,0.00969,0.081608161,Best Maturity,0.02390239,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),hiPSC-CM Purification Duration (days) - 4 days (29),0.01494,0.03070307,0.01763,0.01120112,Best Maturity,0.01120112,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Number of Cell Lines - 1 (225),0.01424,0.02060206,0.00571,0.325132513,Best Maturity,0.02060206,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),0.01399,0.03860386,0.01478,0.03550355,Best Maturity,0.03550355,TRUE,FALSE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Time to Calcium Flux Peak (ms) Quantiles - Q1 (<154 and ≥0.06) (10),0.01393,0.04050405,0.01017,0.059705971,Best Maturity,0.04050405,TRUE,FALSE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Maturation Strategy - Elastomeric (33),0.01254,0.064006401,0.01637,0.02770277,Best Maturity,0.02770277,TRUE,FALSE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Pharmacological Intervention - T3 (3),0.01231,0.02870287,0.01153,0.03030303,Best Maturity,0.02870287,TRUE,FALSE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Contraction Upstroke Velocity (um/s) Quantiles - Q4 (>1.2 and ≤10) (11),0.01054,0.0370037,0.00734,0.078107811,Best Maturity,0.0370037,TRUE,FALSE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Maturation Strategy - ECM (21),0.01035,0.079907991,0.01719,0.02050205,Best Maturity,0.02050205,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Publication Year - 2019 (57),0.00936,0.105110511,0.01313,0.04620462,Best Maturity,0.04620462,TRUE,FALSE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Publication Year - 2022 (20),0.00846,0.132713271,0.01864,0.01620162,Best Maturity,0.01620162,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),Metabolic Component Category - Kinase Inhibitors (3),0.00179,0.03810381,0.00303,0.03870387,Best Maturity,0.03810381,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),0.06784,0,0.06789,0,Best Maturity,0,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.06271,0,0.05478,0,Best Maturity,0,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Journal - Stem Cell Reports (23),0.03143,0.00210021,0.02417,0.00470047,Best Maturity,0.00210021,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),0.02728,0.00340034,0.0264,0.0050005,Best Maturity,0.00340034,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Journal - Tissue Eng Part A (4),0.02367,0.01650165,0.02037,0.02550255,Best Maturity,0.01650165,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),0.02234,0.02010201,0.02481,0.01520152,Best Maturity,0.01520152,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Insulin Withdrawal Duration (days) Quantiles - Q2 (>2 and ≤4) (25),0.0188,0.01970197,0.01002,0.092209221,Best Maturity,0.01970197,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Insulin Withdrawal Duration (days) - 4 days (18),0.01872,0.01390139,0.01485,0.03920392,Best Maturity,0.01390139,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),3D Stromal Cell Source - Cardiac Fibroblast (32),0.01741,0.02050205,0.0069,0.152715272,Best Maturity,0.02050205,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Calcium Flux Amplitude (F/F0) Quantiles - Q4 (>0.25 and ≤0.9) (10),0.01557,0.03540354,0.00379,0.112011201,Best Maturity,0.03540354,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Journal - Nat Biomed Eng (5),0.01451,0.0440044,0.01049,0.051405141,Best Maturity,0.0440044,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Contractile Force (mN) Quantiles - Q3 (>0.16 and ≤0.43) (9),0.01427,0.02680268,0.01172,0.051905191,Best Maturity,0.02680268,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),0.01403,0.04250425,0.00919,0.094309431,Best Maturity,0.04250425,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),3D Stromal Cell Source - Human Fibroblast (38),0.0131,0.03610361,0.01269,0.03750375,Best Maturity,0.03610361,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),hiPSC-CM Purification Duration (days) - 3 days (13),0.01286,0.03970397,0.01404,0.03460346,Best Maturity,0.03460346,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),3D Stromal Cell Source - Dermal Fibroblast (7),0.01262,0.056305631,0.01701,0.02430243,Best Maturity,0.02430243,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Calcium Handling Analysis Method - Visual (104),0.0122,0.04040404,0.00518,0.329532953,Best Maturity,0.04040404,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Contraction Upstroke Velocity (um/s) Quantiles - Q4 (>1.2 and ≤10) (11),0.01131,0.03670367,0.00371,0.113611361,Best Maturity,0.03670367,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Publication Year - 2019 (57),0.01012,0.086208621,0.01285,0.04930493,Best Maturity,0.04930493,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),3D Estimated Cell Density (mil cells/mL) Quantiles - Q3 (>5 and ≤10) (30),0.00929,0.085108511,0.01451,0.02950295,Best Maturity,0.02950295,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),3D Tissue Media - RPMI-1640 (72),0.00908,0.121212121,0.01427,0.03750375,Best Maturity,0.03750375,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Maturation Strategy - Elastomeric (33),0.00864,0.135913591,0.01988,0.01610161,Best Maturity,0.01610161,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),3D Stromal Cell Source - hiPSC-CardiacF (8),0.00584,0.091109111,0.01357,0.03910391,Best Maturity,0.03910391,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),Journal - ACS Biomater Sci Eng (3),0.00113,0.03910391,0.00234,0.03890389,Best Maturity,0.03890389,TRUE,FALSE
 T-tubule Structure (Found) Quantiles - Q1 (Yes) (18),Electron Imaging - Transmission (62),0.03962,0,0.02826,0,Best Maturity,0,TRUE,TRUE
 T-tubule Structure (Found) Quantiles - Q1 (Yes) (18),Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),0.01812,0.00210021,0.01489,0.0030003,Best Maturity,0.00210021,TRUE,TRUE
 T-tubule Structure (Found) Quantiles - Q1 (Yes) (18),Differentiation Purity Assessment - Flow Cytometry cTnT+ (135),0.01693,0.00230023,0.00773,0.04580458,Best Maturity,0.00230023,TRUE,TRUE
@@ -697,7 +697,7 @@ Contractile Force (mN) Quantiles - Q5 (>0 and ≤0.04) (10),hiPSC-CM Backbone Me
 Contractile Force (mN) Quantiles - Q5 (>0 and ≤0.04) (10),Metabolic Component - Palmitic Acid (11),0.00794,0.04280428,0.00644,0.074307431,Least Maturity,0.04280428,TRUE,FALSE
 Contractile Force (mN) Quantiles - Q5 (>0 and ≤0.04) (10),hiPSC-CM Purification Duration (days) - 6 days (10),0.0076,0.04540454,0.00755,0.054105411,Least Maturity,0.04540454,TRUE,FALSE
 Contractile Force (mN) Quantiles - Q5 (>0 and ≤0.04) (10),Wnt Inhibitor - Wnt-C59 (30),0.00618,0.119211921,0.00935,0.04320432,Least Maturity,0.04320432,TRUE,FALSE
-Contractile Force (mN) Quantiles - Q5 (>0 and ≤0.04) (10),TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.00563,0.082008201,0.00884,0.04380438,Least Maturity,0.04380438,TRUE,FALSE
+Contractile Force (mN) Quantiles - Q5 (>0 and ≤0.04) (10),TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.00563,0.082008201,0.00884,0.04380438,Least Maturity,0.04380438,TRUE,FALSE
 Contractile Force (mN) Quantiles - Q5 (>0 and ≤0.04) (10),Journal - PLoS One (9),0.00472,0.124512451,0.00965,0.02540254,Least Maturity,0.02540254,TRUE,FALSE
 Contractile Stress (mN/mm2) Quantiles - Q4 (>0.07 and ≤0.51) (10),3D SC Ratio (CM-EC-SC) Quantiles - Q2 (>0 and ≤10) (29),0.02388,0.00210021,0.0172,0.00260026,Least Maturity,0.00210021,TRUE,TRUE
 Contractile Stress (mN/mm2) Quantiles - Q4 (>0.07 and ≤0.51) (10),hiPSC Matrix Coating - Matrigel (163),0.01681,0.00780078,0.00629,0.281728173,Least Maturity,0.00780078,TRUE,TRUE
@@ -763,9 +763,9 @@ Contraction Upstroke Velocity (um/s) Quantiles - Q4 (>1.2 and ≤10) (11),Journa
 Contraction Upstroke Velocity (um/s) Quantiles - Q4 (>1.2 and ≤10) (11),Pharmacological Intervention - Other Antiarrhythmic Agents (13),0.00825,0.04960496,0.00911,0.03460346,Least Maturity,0.03460346,TRUE,FALSE
 Contraction Upstroke Velocity (um/s) Quantiles - Q4 (>1.2 and ≤10) (11),Max Capture Rate of Paced CMs (Hz) Quantiles - Q2 (>1 and ≤2.9) (8),0.00806,0.03410341,0.0076,0.04630463,Least Maturity,0.03410341,TRUE,FALSE
 Contraction Upstroke Velocity (um/s) Quantiles - Q4 (>1.2 and ≤10) (11),Day of Insulin Addition - not 22 (12),0.00802,0.04310431,0.01021,0.02060206,Least Maturity,0.02060206,TRUE,TRUE
-Contraction Upstroke Velocity (um/s) Quantiles - Q4 (>1.2 and ≤10) (11),TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),0.00754,0.053105311,0.0121,0.01420142,Least Maturity,0.01420142,TRUE,TRUE
+Contraction Upstroke Velocity (um/s) Quantiles - Q4 (>1.2 and ≤10) (11),TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),0.00754,0.053105311,0.0121,0.01420142,Least Maturity,0.01420142,TRUE,TRUE
 Contraction Upstroke Velocity (um/s) Quantiles - Q4 (>1.2 and ≤10) (11),Differentiation Purity Assessment - IHC cTnT (7),0.00745,0.04590459,0.00774,0.04980498,Least Maturity,0.04590459,TRUE,FALSE
-Contraction Upstroke Velocity (um/s) Quantiles - Q4 (>1.2 and ≤10) (11),MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.00705,0.053705371,0.00808,0.04360436,Least Maturity,0.04360436,TRUE,FALSE
+Contraction Upstroke Velocity (um/s) Quantiles - Q4 (>1.2 and ≤10) (11),MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.00705,0.053705371,0.00808,0.04360436,Least Maturity,0.04360436,TRUE,FALSE
 Contraction Upstroke Velocity (um/s) Quantiles - Q4 (>1.2 and ≤10) (11),hiPSC-CM Purification Duration (days) - 3 days (13),0.00701,0.065806581,0.01318,0.00950095,Least Maturity,0.00950095,TRUE,TRUE
 Contraction Upstroke Velocity (um/s) Quantiles - Q4 (>1.2 and ≤10) (11),Pharmacological Intervention - Metoprolol (5),0.00695,0.03170317,0.00747,0.03750375,Least Maturity,0.03170317,TRUE,FALSE
 Contraction Upstroke Velocity (um/s) Quantiles - Q4 (>1.2 and ≤10) (11),Insulin Withdrawal Duration (days) Quantiles - Q1 (>4 and ≤10) (11),0.00674,0.071207121,0.009,0.03590359,Least Maturity,0.03590359,TRUE,FALSE
@@ -797,7 +797,7 @@ Calcium Flux Amplitude (F/F0) Quantiles - Q5 (>0.03 and ≤0.25) (11),Contractio
 Calcium Flux Amplitude (F/F0) Quantiles - Q5 (>0.03 and ≤0.25) (11),Contractile Analysis Method - Deflection (39),0.00963,0.04120412,0.00584,0.164016402,Least Maturity,0.04120412,TRUE,FALSE
 Calcium Flux Amplitude (F/F0) Quantiles - Q5 (>0.03 and ≤0.25) (11),Differentiation Purity Assessment - Flow Cytometry cTnT+ (135),0.00951,0.04140414,0.00683,0.142014201,Least Maturity,0.04140414,TRUE,FALSE
 Calcium Flux Amplitude (F/F0) Quantiles - Q5 (>0.03 and ≤0.25) (11),Cell Line Ancestry - Asian (28),0.00944,0.03890389,0.00773,0.054605461,Least Maturity,0.03890389,TRUE,FALSE
-Calcium Flux Amplitude (F/F0) Quantiles - Q5 (>0.03 and ≤0.25) (11),TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.00935,0.0230023,0.00951,0.02840284,Least Maturity,0.0230023,TRUE,TRUE
+Calcium Flux Amplitude (F/F0) Quantiles - Q5 (>0.03 and ≤0.25) (11),TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.00935,0.0230023,0.00951,0.02840284,Least Maturity,0.0230023,TRUE,TRUE
 Calcium Flux Amplitude (F/F0) Quantiles - Q5 (>0.03 and ≤0.25) (11),Publication Year - 2014 (3),0.00929,0.02090209,0.00917,0.03310331,Least Maturity,0.02090209,TRUE,TRUE
 Calcium Flux Amplitude (F/F0) Quantiles - Q5 (>0.03 and ≤0.25) (11),New Media for Maturation - Commercial Kit (5),0.00916,0.02950295,0.00718,0.070607061,Least Maturity,0.02950295,TRUE,FALSE
 Calcium Flux Amplitude (F/F0) Quantiles - Q5 (>0.03 and ≤0.25) (11),Cell Line - WTC11 (30),0.00902,0.04340434,0.00937,0.03040304,Least Maturity,0.03040304,TRUE,FALSE
@@ -833,7 +833,7 @@ Beat Rate (bpm) Quantiles - Q5 (>108 and ≤60) (12),Electrophysiology Analysis 
 Beat Rate (bpm) Quantiles - Q5 (>108 and ≤60) (12),Journal - Biomaterials (16),0.00929,0.02580258,0.00839,0.03450345,Least Maturity,0.02580258,TRUE,FALSE
 Beat Rate (bpm) Quantiles - Q5 (>108 and ≤60) (12),Insulin Start Day - 9 (10),0.00901,0.03330333,0.00782,0.04120412,Least Maturity,0.03330333,TRUE,FALSE
 Beat Rate (bpm) Quantiles - Q5 (>108 and ≤60) (12),Resting Membrane Potential (mV) Quantiles - Q4 (<-60 and ≥-66) (9),0.00851,0.02010201,0.00852,0.02070207,Least Maturity,0.02010201,TRUE,TRUE
-Beat Rate (bpm) Quantiles - Q5 (>108 and ≤60) (12),TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),0.00822,0.03070307,0.00822,0.04430443,Least Maturity,0.03070307,TRUE,FALSE
+Beat Rate (bpm) Quantiles - Q5 (>108 and ≤60) (12),TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),0.00822,0.03070307,0.00822,0.04430443,Least Maturity,0.03070307,TRUE,FALSE
 Beat Rate (bpm) Quantiles - Q5 (>108 and ≤60) (12),3D Stromal Cell Source - Dermal Fibroblast (7),0.00795,0.03970397,0.00914,0.03040304,Least Maturity,0.03040304,TRUE,FALSE
 Beat Rate (bpm) Quantiles - Q5 (>108 and ≤60) (12),Cell Coculture - Endothelial Cell (35),0.00779,0.060006001,0.009,0.03490349,Least Maturity,0.03490349,TRUE,FALSE
 Beat Rate (bpm) Quantiles - Q5 (>108 and ≤60) (12),Pharmacological Intervention - Class III Antiarrhythmics (K+ Channel Blockers - Prolong Repolarization) (10),0.00778,0.04260426,0.00948,0.02350235,Least Maturity,0.02350235,TRUE,TRUE
@@ -873,7 +873,7 @@ Time to Calcium Flux Peak (ms) Quantiles - Q5 (>2000 and ≤365) (10),Insulin Wi
 Time to Calcium Flux Peak (ms) Quantiles - Q5 (>2000 and ≤365) (10),Contractile Stress (mN/mm2) Quantiles - Q1 (>3.95 and ≤50) (10),0.00429,0.153315332,0.00794,0.04670467,Least Maturity,0.04670467,TRUE,FALSE
 Time from Calcium Peak to Relaxation (ms) Quantiles - Q2 (>1000 and ≤310) (6),Journal - Tissue Eng Part A (4),0.02278,0.00350035,0.02051,0.00980098,Least Maturity,0.00350035,TRUE,TRUE
 Time from Calcium Peak to Relaxation (ms) Quantiles - Q2 (>1000 and ≤310) (6),Pharmacological Intervention - Adrenaline (83),0.01991,0.00460046,0.01265,0.0280028,Least Maturity,0.00460046,TRUE,TRUE
-Time from Calcium Peak to Relaxation (ms) Quantiles - Q2 (>1000 and ≤310) (6),MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.01799,0.01060106,0.01296,0.03580358,Least Maturity,0.01060106,TRUE,TRUE
+Time from Calcium Peak to Relaxation (ms) Quantiles - Q2 (>1000 and ≤310) (6),MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.01799,0.01060106,0.01296,0.03580358,Least Maturity,0.01060106,TRUE,TRUE
 Time from Calcium Peak to Relaxation (ms) Quantiles - Q2 (>1000 and ≤310) (6),Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),0.01547,0.01570157,0.01019,0.052405241,Least Maturity,0.01570157,TRUE,TRUE
 Time from Calcium Peak to Relaxation (ms) Quantiles - Q2 (>1000 and ≤310) (6),Contraction Upstroke Velocity (um/s) Quantiles - Q3 (>10 and ≤31.5) (7),0.01499,0.02180218,0.00988,0.063006301,Least Maturity,0.02180218,TRUE,TRUE
 Time from Calcium Peak to Relaxation (ms) Quantiles - Q2 (>1000 and ≤310) (6),Calcium Flux Amplitude (F/F0) Quantiles - Q4 (>0.25 and ≤0.9) (10),0.01466,0.01460146,0.01505,0.01330133,Least Maturity,0.01330133,TRUE,TRUE
@@ -957,7 +957,7 @@ Action Potential Conduction Velocity (cm/s) Quantiles - Q4 (>2.5 and ≤10.75) (
 Action Potential Conduction Velocity (cm/s) Quantiles - Q4 (>2.5 and ≤10.75) (7),Electrophysiology Analysis Method - Microelectrode (31),0.00975,0.053905391,0.01515,0.01420142,Least Maturity,0.01420142,TRUE,TRUE
 Action Potential Conduction Velocity (cm/s) Quantiles - Q4 (>2.5 and ≤10.75) (7),Resting Membrane Potential (mV) Quantiles - Q5 (>-35 and ≤-60) (9),0.00929,0.04510451,0.00655,0.095009501,Least Maturity,0.04510451,TRUE,FALSE
 Action Potential Conduction Velocity (cm/s) Quantiles - Q4 (>2.5 and ≤10.75) (7),Publication Year - 2016 (32),0.00928,0.058705871,0.01164,0.03130313,Least Maturity,0.03130313,TRUE,FALSE
-Action Potential Conduction Velocity (cm/s) Quantiles - Q4 (>2.5 and ≤10.75) (7),TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.0091,0.0490049,0.00765,0.067506751,Least Maturity,0.0490049,TRUE,FALSE
+Action Potential Conduction Velocity (cm/s) Quantiles - Q4 (>2.5 and ≤10.75) (7),TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.0091,0.0490049,0.00765,0.067506751,Least Maturity,0.0490049,TRUE,FALSE
 Action Potential Conduction Velocity (cm/s) Quantiles - Q4 (>2.5 and ≤10.75) (7),Publication Year - 2017 (43),0.00818,0.080608061,0.01236,0.02470247,Least Maturity,0.02470247,TRUE,TRUE
 Action Potential Conduction Velocity (cm/s) Quantiles - Q4 (>2.5 and ≤10.75) (7),Contractile Analysis Method - Motion Tracking (93),0.00814,0.144214421,0.01171,0.02780278,Least Maturity,0.02780278,TRUE,FALSE
 Action Potential Conduction Velocity (cm/s) Quantiles - Q4 (>2.5 and ≤10.75) (7),MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),0.00808,0.04930493,0.0085,0.052205221,Least Maturity,0.04930493,TRUE,FALSE
@@ -1049,9 +1049,9 @@ Max Capture Rate of Paced CMs (Hz) Quantiles - Q2 (>1 and ≤2.9) (8),Journal - 
 Max Capture Rate of Paced CMs (Hz) Quantiles - Q2 (>1 and ≤2.9) (8),Time to Calcium Flux Peak (ms) Quantiles - Q3 (<254 and ≥200) (8),0.00776,0.04810481,0.00634,0.084708471,Least Maturity,0.04810481,TRUE,FALSE
 Max Capture Rate of Paced CMs (Hz) Quantiles - Q2 (>1 and ≤2.9) (8),Journal - Tissue Eng Part A (4),0.00502,0.088708871,0.01176,0.03370337,Least Maturity,0.03370337,TRUE,FALSE
 Max Capture Rate of Paced CMs (Hz) Quantiles - Q2 (>1 and ≤2.9) (8),Journal - Stem Cell Res Ther (3),0.00279,0.072207221,0.01051,0.04580458,Least Maturity,0.04580458,TRUE,FALSE
-MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),0.06121,0,0.07488,0,Least Maturity,0,TRUE,TRUE
-MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.04889,0.00020002,0.05027,0.00020002,Least Maturity,0.00020002,TRUE,TRUE
-MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),0.04086,0.00030003,0.04044,0.00040004,Least Maturity,0.00030003,TRUE,TRUE
+MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),0.06121,0,0.07488,0,Least Maturity,0,TRUE,TRUE
+MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.04889,0.00020002,0.05027,0.00020002,Least Maturity,0.00020002,TRUE,TRUE
+MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),0.04086,0.00030003,0.04044,0.00040004,Least Maturity,0.00030003,TRUE,TRUE
 MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),Journal - Nat Biomed Eng (5),0.02643,0.00950095,0.02012,0.02680268,Least Maturity,0.00950095,TRUE,TRUE
 MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),hiPSC-CM Media Supplement - Rare (5),0.02074,0.02410241,0.01011,0.055305531,Least Maturity,0.02410241,TRUE,TRUE
 MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),Journal - Tissue Eng Part A (4),0.01815,0.03520352,0.02314,0.01910191,Least Maturity,0.01910191,TRUE,TRUE
@@ -1059,7 +1059,7 @@ MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),Sarcomere Length 
 MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),Time to Calcium Flux Peak (ms) Quantiles - Q5 (>2000 and ≤365) (10),0.01706,0.02970297,0.0127,0.04340434,Least Maturity,0.02970297,TRUE,FALSE
 MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),Insulin Start Day - 0 (7),0.01551,0.03980398,0.0185,0.02210221,Least Maturity,0.02210221,TRUE,TRUE
 MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),Calcium Handling Analysis Method - Rare (4),0.01526,0.01970197,0.01885,0.01870187,Least Maturity,0.01870187,TRUE,TRUE
-MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.013,0.04390439,0.01061,0.04670467,Least Maturity,0.04390439,TRUE,FALSE
+MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.013,0.04390439,0.01061,0.04670467,Least Maturity,0.04390439,TRUE,FALSE
 MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),Number of Cell Lines - 3 (29),0.01279,0.052405241,0.01369,0.04260426,Least Maturity,0.04260426,TRUE,FALSE
 MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),Calcium Handling Analysis Method - Visual (104),0.0125,0.02730273,0.00915,0.072907291,Least Maturity,0.02730273,TRUE,FALSE
 MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),Contraction Upstroke Velocity (um/s) Quantiles - Q4 (>1.2 and ≤10) (11),0.0119,0.03230323,0.01063,0.04930493,Least Maturity,0.03230323,TRUE,FALSE
@@ -1070,49 +1070,49 @@ MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),Pharmacological I
 MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),Seeding Confluency (%) - Rare (43),0.01012,0.120112011,0.01464,0.04560456,Least Maturity,0.04560456,TRUE,FALSE
 MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),Calcium Handling Analysis Method - Genetic (23),0.00986,0.096209621,0.01266,0.04650465,Least Maturity,0.04650465,TRUE,FALSE
 MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),Publication Year - 2014 (3),0.0006,0.04450445,0.00115,0.04390439,Least Maturity,0.04390439,TRUE,FALSE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.0584,0,0.05208,0,Least Maturity,0,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Contractile Analysis Method - Rare (7),0.04244,0.00080008,0.03437,0.00230023,Least Maturity,0.00080008,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),0.04174,0.00030003,0.04752,0.00020002,Least Maturity,0.00020002,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),0.03211,0.00130013,0.03579,0.00120012,Least Maturity,0.00120012,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),0.0254,0.00570057,0.02924,0.00490049,Least Maturity,0.00490049,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Publication Year - 2019 (57),0.02337,0.00920092,0.0251,0.00240024,Least Maturity,0.00240024,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Disease Modelling - Arrhythmic (15),0.02077,0.01440144,0.01808,0.01570157,Least Maturity,0.01440144,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Disease Modelling - Ischemic Infarction (9),0.01806,0.02110211,0.01487,0.03580358,Least Maturity,0.02110211,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),3D Stromal Cell Source - Stromal Cell (35),0.01759,0.01620162,0.00939,0.107010701,Least Maturity,0.01620162,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Calcium Flux Amplitude (F/F0) Quantiles - Q3 (>0.9 and ≤1.6) (10),0.0174,0.0210021,0.02411,0.00620062,Least Maturity,0.00620062,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Journal - Tissue Eng Part A (4),0.01651,0.03350335,0.01046,0.04180418,Least Maturity,0.03350335,TRUE,FALSE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Metabolic Analysis Method - Seahorse (35),0.01546,0.03170317,0.01296,0.058405841,Least Maturity,0.03170317,TRUE,FALSE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Resting Membrane Potential (mV) Quantiles - Q5 (>-35 and ≤-60) (9),0.01532,0.03640364,0.01452,0.03630363,Least Maturity,0.03630363,TRUE,FALSE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Beat Rate (bpm) Quantiles - Q3 (<45 and ≥38.8) (13),0.01521,0.02660266,0.01606,0.02520252,Least Maturity,0.02520252,TRUE,FALSE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Differentiation Purity (%) Quantiles - Q4 (>79 and ≤85) (40),0.01482,0.0390039,0.0151,0.02670267,Least Maturity,0.02670267,TRUE,FALSE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Disease Modelling - Genetic Disorders (18),0.01382,0.04470447,0.01388,0.04390439,Least Maturity,0.04390439,TRUE,FALSE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Journal - Nat Biomed Eng (5),0.01307,0.04810481,0.01334,0.0460046,Least Maturity,0.0460046,TRUE,FALSE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Calcium Handling Analysis Method - Visual (104),0.01257,0.0360036,0.01408,0.00980098,Least Maturity,0.00980098,TRUE,TRUE
-MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Pharmacological Intervention - ACE Inhibitors (RAAS Modulators) (3),0.00052,0.04940494,0.00104,0.04680468,Least Maturity,0.04680468,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),0.08087,0,0.09741,0,Least Maturity,0,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),0.05068,0.00030003,0.04667,0.00060006,Least Maturity,0.00030003,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.03308,0.00060006,0.03736,0.00080008,Least Maturity,0.00060006,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Contractile Analysis Method - Rare (7),0.03269,0.00220022,0.03254,0.00250025,Least Maturity,0.00220022,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Contractile Force (mN) Quantiles - Q5 (>0 and ≤0.04) (10),0.02356,0.00740074,0.01649,0.02920292,Least Maturity,0.00740074,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Insulin Start Day - 0 (7),0.02127,0.02150215,0.01633,0.03470347,Least Maturity,0.02150215,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),0.02097,0.00820082,0.02683,0.00290029,Least Maturity,0.00290029,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Disease Modelling - Arrhythmic (15),0.0201,0.01220122,0.01597,0.01950195,Least Maturity,0.01220122,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Maturation Strategy - Mechanical (36),0.01915,0.02820282,0.0136,0.058705871,Least Maturity,0.02820282,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Metabolic Component - Palmitic Acid (11),0.01811,0.01980198,0.01456,0.04010401,Least Maturity,0.01980198,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Calcium Handling Analysis Method - Rare (4),0.01723,0.01320132,0.02076,0.01160116,Least Maturity,0.01160116,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Metabolic Analysis Method - Seahorse (35),0.01706,0.02420242,0.01608,0.04080408,Least Maturity,0.02420242,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),0.01649,0.02490249,0.01003,0.04550455,Least Maturity,0.02490249,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Calcium Flux Amplitude (F/F0) Quantiles - Q5 (>0.03 and ≤0.25) (11),0.01596,0.02620262,0.01131,0.058405841,Least Maturity,0.02620262,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Time to Calcium Flux Peak (ms) Quantiles - Q1 (<154 and ≥0.06) (10),0.01539,0.02460246,0.01344,0.03380338,Least Maturity,0.02460246,TRUE,TRUE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),0.01537,0.0290029,0.00935,0.083308331,Least Maturity,0.0290029,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Maturation Strategy - Cell Alignment (59),0.01497,0.0280028,0.01033,0.098309831,Least Maturity,0.0280028,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),2D Surface - Hydrogel (17),0.01338,0.04370437,0.00954,0.100410041,Least Maturity,0.04370437,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Disease Modelling - Genetic Disorders (18),0.01273,0.056805681,0.01584,0.0360036,Least Maturity,0.0360036,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Electron Imaging - Transmission (62),0.01252,0.04460446,0.00975,0.088008801,Least Maturity,0.04460446,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Pharmacological Intervention - T3 (3),0.01066,0.03560356,0.00994,0.03490349,Least Maturity,0.03490349,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Metabolic Component - IGF-1 (3),0.00077,0.04620462,0,0.086908691,Least Maturity,0.04620462,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Pharmacological Intervention - Phenylephrine (3),0.00066,0.04110411,0.0011,0.04510451,Least Maturity,0.04110411,TRUE,FALSE
-TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Journal - Sci Adv (3),0.0006,0.04980498,0.00114,0.04990499,Least Maturity,0.04980498,TRUE,FALSE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.0584,0,0.05208,0,Least Maturity,0,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Contractile Analysis Method - Rare (7),0.04244,0.00080008,0.03437,0.00230023,Least Maturity,0.00080008,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),0.04174,0.00030003,0.04752,0.00020002,Least Maturity,0.00020002,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),0.03211,0.00130013,0.03579,0.00120012,Least Maturity,0.00120012,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),0.0254,0.00570057,0.02924,0.00490049,Least Maturity,0.00490049,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Publication Year - 2019 (57),0.02337,0.00920092,0.0251,0.00240024,Least Maturity,0.00240024,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Disease Modelling - Arrhythmic (15),0.02077,0.01440144,0.01808,0.01570157,Least Maturity,0.01440144,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Disease Modelling - Ischemic Infarction (9),0.01806,0.02110211,0.01487,0.03580358,Least Maturity,0.02110211,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),3D Stromal Cell Source - Stromal Cell (35),0.01759,0.01620162,0.00939,0.107010701,Least Maturity,0.01620162,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Calcium Flux Amplitude (F/F0) Quantiles - Q3 (>0.9 and ≤1.6) (10),0.0174,0.0210021,0.02411,0.00620062,Least Maturity,0.00620062,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Journal - Tissue Eng Part A (4),0.01651,0.03350335,0.01046,0.04180418,Least Maturity,0.03350335,TRUE,FALSE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Metabolic Analysis Method - Seahorse (35),0.01546,0.03170317,0.01296,0.058405841,Least Maturity,0.03170317,TRUE,FALSE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Resting Membrane Potential (mV) Quantiles - Q5 (>-35 and ≤-60) (9),0.01532,0.03640364,0.01452,0.03630363,Least Maturity,0.03630363,TRUE,FALSE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Beat Rate (bpm) Quantiles - Q3 (<45 and ≥38.8) (13),0.01521,0.02660266,0.01606,0.02520252,Least Maturity,0.02520252,TRUE,FALSE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Differentiation Purity (%) Quantiles - Q4 (>79 and ≤85) (40),0.01482,0.0390039,0.0151,0.02670267,Least Maturity,0.02670267,TRUE,FALSE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Disease Modelling - Genetic Disorders (18),0.01382,0.04470447,0.01388,0.04390439,Least Maturity,0.04390439,TRUE,FALSE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Journal - Nat Biomed Eng (5),0.01307,0.04810481,0.01334,0.0460046,Least Maturity,0.0460046,TRUE,FALSE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Calcium Handling Analysis Method - Visual (104),0.01257,0.0360036,0.01408,0.00980098,Least Maturity,0.00980098,TRUE,TRUE
+MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),Pharmacological Intervention - ACE Inhibitors (RAAS Modulators) (3),0.00052,0.04940494,0.00104,0.04680468,Least Maturity,0.04680468,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),0.08087,0,0.09741,0,Least Maturity,0,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),0.05068,0.00030003,0.04667,0.00060006,Least Maturity,0.00030003,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.03308,0.00060006,0.03736,0.00080008,Least Maturity,0.00060006,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Contractile Analysis Method - Rare (7),0.03269,0.00220022,0.03254,0.00250025,Least Maturity,0.00220022,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Contractile Force (mN) Quantiles - Q5 (>0 and ≤0.04) (10),0.02356,0.00740074,0.01649,0.02920292,Least Maturity,0.00740074,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Insulin Start Day - 0 (7),0.02127,0.02150215,0.01633,0.03470347,Least Maturity,0.02150215,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Cell Area (um2) Quantiles - Q1 (>2850 and ≤9000) (11),0.02097,0.00820082,0.02683,0.00290029,Least Maturity,0.00290029,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Disease Modelling - Arrhythmic (15),0.0201,0.01220122,0.01597,0.01950195,Least Maturity,0.01220122,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Maturation Strategy - Mechanical (36),0.01915,0.02820282,0.0136,0.058705871,Least Maturity,0.02820282,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Metabolic Component - Palmitic Acid (11),0.01811,0.01980198,0.01456,0.04010401,Least Maturity,0.01980198,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Calcium Handling Analysis Method - Rare (4),0.01723,0.01320132,0.02076,0.01160116,Least Maturity,0.01160116,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Metabolic Analysis Method - Seahorse (35),0.01706,0.02420242,0.01608,0.04080408,Least Maturity,0.02420242,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),0.01649,0.02490249,0.01003,0.04550455,Least Maturity,0.02490249,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Calcium Flux Amplitude (F/F0) Quantiles - Q5 (>0.03 and ≤0.25) (11),0.01596,0.02620262,0.01131,0.058405841,Least Maturity,0.02620262,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Time to Calcium Flux Peak (ms) Quantiles - Q1 (<154 and ≥0.06) (10),0.01539,0.02460246,0.01344,0.03380338,Least Maturity,0.02460246,TRUE,TRUE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),0.01537,0.0290029,0.00935,0.083308331,Least Maturity,0.0290029,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Maturation Strategy - Cell Alignment (59),0.01497,0.0280028,0.01033,0.098309831,Least Maturity,0.0280028,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),2D Surface - Hydrogel (17),0.01338,0.04370437,0.00954,0.100410041,Least Maturity,0.04370437,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Disease Modelling - Genetic Disorders (18),0.01273,0.056805681,0.01584,0.0360036,Least Maturity,0.0360036,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Electron Imaging - Transmission (62),0.01252,0.04460446,0.00975,0.088008801,Least Maturity,0.04460446,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Pharmacological Intervention - T3 (3),0.01066,0.03560356,0.00994,0.03490349,Least Maturity,0.03490349,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Metabolic Component - IGF-1 (3),0.00077,0.04620462,0,0.086908691,Least Maturity,0.04620462,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Pharmacological Intervention - Phenylephrine (3),0.00066,0.04110411,0.0011,0.04510451,Least Maturity,0.04110411,TRUE,FALSE
+TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),Journal - Sci Adv (3),0.0006,0.04980498,0.00114,0.04990499,Least Maturity,0.04980498,TRUE,FALSE
 3D Estimated Cell Density (mil cells/mL) Quantiles - Q5 (>0.01 and ≤0.47) (24),3D Platform - Scaffold Free (43),0.05939,0,0.05757,0,Least Maturity,0,TRUE,TRUE
 3D Estimated Cell Density (mil cells/mL) Quantiles - Q5 (>0.01 and ≤0.47) (24),3D Estimated Tissue Size (mm2) Quantiles - Q5 (>0.01 and ≤0.13) (28),0.03304,0,0.02902,0,Least Maturity,0,TRUE,TRUE
 3D Estimated Cell Density (mil cells/mL) Quantiles - Q5 (>0.01 and ≤0.47) (24),Deduced Culture Strategy - 3D Only (157),0.02805,0.00010001,0.00898,0.00830083,Least Maturity,0.00010001,TRUE,TRUE
@@ -1395,13 +1395,13 @@ Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),hiPSC-CM Maturatio
 Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),Coating for Replating - Gelatin (43),0.00862,0.04780478,0.00706,0.078507851,Average Maturation,0.04780478,TRUE,FALSE
 Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),Calcium Flux Amplitude (F/F0) Quantiles - Q4 (>0.25 and ≤0.9) (10),0.0084,0.03090309,0.00699,0.04780478,Average Maturation,0.03090309,TRUE,FALSE
 Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),Calcium Flux Amplitude (F/F0) Quantiles - Q3 (>0.9 and ≤1.6) (10),0.00805,0.03710371,0.01011,0.01860186,Average Maturation,0.01860186,TRUE,TRUE
-Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),0.00801,0.02440244,0.00851,0.02870287,Average Maturation,0.02440244,TRUE,TRUE
+Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),0.00801,0.02440244,0.00851,0.02870287,Average Maturation,0.02440244,TRUE,TRUE
 Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),Day of Insulin Addition - not 21 (14),0.00791,0.04190419,0.00629,0.067306731,Average Maturation,0.04190419,TRUE,FALSE
 Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),Time to Calcium Flux Peak (ms) Quantiles - Q2 (<200 and ≥154) (9),0.00771,0.04090409,0.00549,0.083208321,Average Maturation,0.04090409,TRUE,FALSE
 Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),Seeding Confluency (%) - 85 to 89 (43),0.00761,0.074407441,0.00924,0.03110311,Average Maturation,0.03110311,TRUE,FALSE
 Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),Cell Area (um2) Quantiles - Q3 (>350 and ≤1800) (13),0.00758,0.04940494,0.0064,0.066906691,Average Maturation,0.04940494,TRUE,FALSE
 Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),MYH7 Percentage (MYH6) Quantiles - Q2 (>30.1 and ≤82.35) (4),0.00688,0.03950395,0.00527,0.095509551,Average Maturation,0.03950395,TRUE,FALSE
-Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.00687,0.04420442,0.00592,0.095409541,Average Maturation,0.04420442,TRUE,FALSE
+Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.00687,0.04420442,0.00592,0.095409541,Average Maturation,0.04420442,TRUE,FALSE
 Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),Cell Area (um2) Quantiles - Q2 (>1800 and ≤2850) (10),0.00661,0.053905391,0.00765,0.03810381,Average Maturation,0.03810381,TRUE,FALSE
 Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),Cell Line - BJ1 (7),0.00636,0.04870487,0.00403,0.144714471,Average Maturation,0.04870487,TRUE,FALSE
 Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),Publication Year - 2014 (3),0.0056,0.060406041,0.00882,0.02180218,Average Maturation,0.02180218,TRUE,TRUE
@@ -1458,7 +1458,7 @@ Cell Area (um2) Quantiles - Q2 (>1800 and ≤2850) (10),Seeding Confluency 2D (%
 Cell Area (um2) Quantiles - Q2 (>1800 and ≤2850) (10),Maturation Strategy - Metabolic (33),0.01062,0.04150415,0.00895,0.054905491,Average Maturation,0.04150415,TRUE,FALSE
 Cell Area (um2) Quantiles - Q2 (>1800 and ≤2850) (10),Journal - Circ Res (5),0.01061,0.02260226,0.01144,0.02160216,Average Maturation,0.02160216,TRUE,TRUE
 Cell Area (um2) Quantiles - Q2 (>1800 and ≤2850) (10),hiPSC Backbone Media - Embryonic Stem Cell (127),0.01038,0.03880388,0.00634,0.202920292,Average Maturation,0.03880388,TRUE,FALSE
-Cell Area (um2) Quantiles - Q2 (>1800 and ≤2850) (10),TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.01035,0.02330233,0.00697,0.077907791,Average Maturation,0.02330233,TRUE,TRUE
+Cell Area (um2) Quantiles - Q2 (>1800 and ≤2850) (10),TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.01035,0.02330233,0.00697,0.077907791,Average Maturation,0.02330233,TRUE,TRUE
 Cell Area (um2) Quantiles - Q2 (>1800 and ≤2850) (10),Pharmacological Intervention - Phenylephrine (3),0.01034,0.02590259,0.01216,0.02040204,Average Maturation,0.02040204,TRUE,TRUE
 Cell Area (um2) Quantiles - Q2 (>1800 and ≤2850) (10),Cell Coculture - Cardiomyocyte (157),0.01031,0.04820482,0.0071,0.183118312,Average Maturation,0.04820482,TRUE,FALSE
 Cell Area (um2) Quantiles - Q2 (>1800 and ≤2850) (10),Electrophysiology Analysis Method - Patch Clamp (59),0.01004,0.055005501,0.01598,0.00120012,Average Maturation,0.00120012,TRUE,TRUE
@@ -1573,7 +1573,7 @@ Contractile Force (mN) Quantiles - Q3 (>0.16 and ≤0.43) (9),3D Tissue Media - 
 Contractile Force (mN) Quantiles - Q3 (>0.16 and ≤0.43) (9),3D Estimated Cell Density (mil cells/mL) Quantiles - Q3 (>5 and ≤10) (30),0.01225,0.0220022,0.00894,0.04990499,Average Maturation,0.0220022,TRUE,TRUE
 Contractile Force (mN) Quantiles - Q3 (>0.16 and ≤0.43) (9),Journal - Stem Cell Reports (23),0.01168,0.02620262,0.0164,0.00430043,Average Maturation,0.00430043,TRUE,TRUE
 Contractile Force (mN) Quantiles - Q3 (>0.16 and ≤0.43) (9),Deduced Culture Strategy - 3D Only (157),0.01166,0.03170317,0.00368,0.803180318,Average Maturation,0.03170317,TRUE,FALSE
-Contractile Force (mN) Quantiles - Q3 (>0.16 and ≤0.43) (9),MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.01128,0.0220022,0.00727,0.075807581,Average Maturation,0.0220022,TRUE,TRUE
+Contractile Force (mN) Quantiles - Q3 (>0.16 and ≤0.43) (9),MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.01128,0.0220022,0.00727,0.075807581,Average Maturation,0.0220022,TRUE,TRUE
 Contractile Force (mN) Quantiles - Q3 (>0.16 and ≤0.43) (9),Calcium Flux Amplitude (F/F0) Quantiles - Q1 (>2.3 and ≤8) (10),0.01051,0.0260026,0.01204,0.01890189,Average Maturation,0.01890189,TRUE,TRUE
 Contractile Force (mN) Quantiles - Q3 (>0.16 and ≤0.43) (9),Insulin Start Day - 6 (20),0.01031,0.03620362,0.01103,0.02680268,Average Maturation,0.02680268,TRUE,FALSE
 Contractile Force (mN) Quantiles - Q3 (>0.16 and ≤0.43) (9),Seeding Confluency 3D (%) - Rare (26),0.01009,0.03690369,0.00704,0.094109411,Average Maturation,0.03690369,TRUE,FALSE
@@ -1586,7 +1586,7 @@ Contractile Force (mN) Quantiles - Q3 (>0.16 and ≤0.43) (9),3D Platform - Gela
 Contractile Force (mN) Quantiles - Q3 (>0.16 and ≤0.43) (9),Insulin Withdrawal Duration (days) - 3 days (6),0.00851,0.051905191,0.01255,0.0150015,Average Maturation,0.0150015,TRUE,TRUE
 Contractile Force (mN) Quantiles - Q3 (>0.16 and ≤0.43) (9),Journal - Cell Stem Cell (6),0.00756,0.077807781,0.01149,0.02320232,Average Maturation,0.02320232,TRUE,TRUE
 Contractile Force (mN) Quantiles - Q3 (>0.16 and ≤0.43) (9),Number of Cell Lines - 4 (11),0.00728,0.066206621,0.0106,0.02650265,Average Maturation,0.02650265,TRUE,FALSE
-Contractile Force (mN) Quantiles - Q3 (>0.16 and ≤0.43) (9),TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),0.00549,0.093609361,0.01039,0.03540354,Average Maturation,0.03540354,TRUE,FALSE
+Contractile Force (mN) Quantiles - Q3 (>0.16 and ≤0.43) (9),TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),0.00549,0.093609361,0.01039,0.03540354,Average Maturation,0.03540354,TRUE,FALSE
 Contractile Stress (mN/mm2) Quantiles - Q2 (>1.9 and ≤3.95) (9),3D SC Ratio (CM-EC-SC) Quantiles - Q1 (>10 and ≤50) (47),0.03522,0.00020002,0.02117,0.00060006,Average Maturation,0.00020002,TRUE,TRUE
 Contractile Stress (mN/mm2) Quantiles - Q2 (>1.9 and ≤3.95) (9),3D CM Ratio (CM-EC-SC) Quantiles - Q3 (>9 and ≤75) (48),0.02738,0.00140014,0.01399,0.00820082,Average Maturation,0.00140014,TRUE,TRUE
 Contractile Stress (mN/mm2) Quantiles - Q2 (>1.9 and ≤3.95) (9),Metabolic Component - Dexamethasone (7),0.02337,0.00160016,0.02225,0.00280028,Average Maturation,0.00160016,TRUE,TRUE
@@ -1773,7 +1773,7 @@ Calcium Flux Amplitude (F/F0) Quantiles - Q3 (>0.9 and ≤1.6) (10),Cell Line - 
 Calcium Flux Amplitude (F/F0) Quantiles - Q3 (>0.9 and ≤1.6) (10),3D Tissue Media - iCell Maintenance (12),0.00784,0.04630463,0.00655,0.074507451,Average Maturation,0.04630463,TRUE,FALSE
 Calcium Flux Amplitude (F/F0) Quantiles - Q3 (>0.9 and ≤1.6) (10),2D Surface - Nanotopography (6),0.0068,0.054105411,0.00887,0.0290029,Average Maturation,0.0290029,TRUE,FALSE
 Calcium Flux Amplitude (F/F0) Quantiles - Q3 (>0.9 and ≤1.6) (10),Publication Year - 2018 (45),0.00666,0.119211921,0.01042,0.03120312,Average Maturation,0.03120312,TRUE,FALSE
-Calcium Flux Amplitude (F/F0) Quantiles - Q3 (>0.9 and ≤1.6) (10),MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),0.00665,0.069706971,0.00909,0.04640464,Average Maturation,0.04640464,TRUE,FALSE
+Calcium Flux Amplitude (F/F0) Quantiles - Q3 (>0.9 and ≤1.6) (10),MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),0.00665,0.069706971,0.00909,0.04640464,Average Maturation,0.04640464,TRUE,FALSE
 Calcium Flux Amplitude (F/F0) Quantiles - Q3 (>0.9 and ≤1.6) (10),Disease Modelling - Fibrotic (4),0.00562,0.099709971,0.00968,0.04470447,Average Maturation,0.04470447,TRUE,FALSE
 Calcium Flux Amplitude (F/F0) Quantiles - Q3 (>0.9 and ≤1.6) (10),3D Tissue Media - High-glucose DMEM (9),0.00449,0.135313531,0.00829,0.0440044,Average Maturation,0.0440044,TRUE,FALSE
 Calcium Flux Amplitude (F/F0) Quantiles - Q4 (>0.25 and ≤0.9) (10),Metabolic Component - Dexamethasone (7),0.02741,0.00020002,0.02744,0.00010001,Average Maturation,0.00010001,TRUE,TRUE
@@ -1947,14 +1947,14 @@ Time to Calcium Flux Peak (ms) Quantiles - Q2 (<200 and ≥154) (9),Seeding Conf
 Time to Calcium Flux Peak (ms) Quantiles - Q2 (<200 and ≥154) (9),Sarcomere Length (um) Quantiles - Q4 (>1.64 and ≤1.75) (14),0.00872,0.04340434,0.00974,0.03130313,Average Maturation,0.03130313,TRUE,FALSE
 Time to Calcium Flux Peak (ms) Quantiles - Q2 (<200 and ≥154) (9),Contractile Force (mN) Quantiles - Q1 (>1.04 and ≤20) (10),0.00872,0.040004,0.00536,0.120812081,Average Maturation,0.040004,TRUE,FALSE
 Time to Calcium Flux Peak (ms) Quantiles - Q2 (<200 and ≥154) (9),Resting Membrane Potential (mV) Quantiles - Q1 (<-78 and ≥-85) (12),0.00797,0.04040404,0.01106,0.01630163,Average Maturation,0.01630163,TRUE,TRUE
-Time to Calcium Flux Peak (ms) Quantiles - Q2 (<200 and ≥154) (9),MYL2 Precentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.0079,0.068806881,0.01098,0.03830383,Average Maturation,0.03830383,TRUE,FALSE
+Time to Calcium Flux Peak (ms) Quantiles - Q2 (<200 and ≥154) (9),MYL2 Percentage (MYL7) Quantiles - Q1 (>30.1 and ≤45.7) (4),0.0079,0.068806881,0.01098,0.03830383,Average Maturation,0.03830383,TRUE,FALSE
 Time to Calcium Flux Peak (ms) Quantiles - Q2 (<200 and ≥154) (9),Calcium Flux Amplitude (F/F0) Quantiles - Q3 (>0.9 and ≤1.6) (10),0.00709,0.051305131,0.00841,0.03340334,Average Maturation,0.03340334,TRUE,FALSE
 Time to Calcium Flux Peak (ms) Quantiles - Q2 (<200 and ≥154) (9),Seeding Confluency (%) - 90 to 94 (26),0.00704,0.098209821,0.01401,0.01260126,Average Maturation,0.01260126,TRUE,TRUE
 Time to Calcium Flux Peak (ms) Quantiles - Q2 (<200 and ≥154) (9),Resting Membrane Potential (mV) Quantiles - Q4 (<-60 and ≥-66) (9),0.00696,0.04710471,0.00429,0.144314431,Average Maturation,0.04710471,TRUE,FALSE
 Time to Calcium Flux Peak (ms) Quantiles - Q2 (<200 and ≥154) (9),hiPSC Matrix Coating - Vitronectin (10),0.00681,0.080308031,0.00933,0.04320432,Average Maturation,0.04320432,TRUE,FALSE
 Time to Calcium Flux Peak (ms) Quantiles - Q2 (<200 and ≥154) (9),Publication Year - 2019 (57),0.00623,0.175217522,0.01158,0.02010201,Average Maturation,0.02010201,TRUE,TRUE
 Time to Calcium Flux Peak (ms) Quantiles - Q2 (<200 and ≥154) (9),3D Platform - Matrigel (33),0.00554,0.141514151,0.00978,0.03730373,Average Maturation,0.03730373,TRUE,FALSE
-Time to Calcium Flux Peak (ms) Quantiles - Q2 (<200 and ≥154) (9),TNNI3 Precentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),0.00475,0.090709071,0.01169,0.02010201,Average Maturation,0.02010201,TRUE,TRUE
+Time to Calcium Flux Peak (ms) Quantiles - Q2 (<200 and ≥154) (9),TNNI3 Percentage (TNNI1) Quantiles - Q1 (>16.15 and ≤26) (4),0.00475,0.090709071,0.01169,0.02010201,Average Maturation,0.02010201,TRUE,TRUE
 Time to Calcium Flux Peak (ms) Quantiles - Q3 (<254 and ≥200) (8),Calcium Flux Amplitude (F/F0) Quantiles - Q1 (>2.3 and ≤8) (10),0.04887,0,0.03615,0,Average Maturation,0,TRUE,TRUE
 Time to Calcium Flux Peak (ms) Quantiles - Q3 (<254 and ≥200) (8),Gene Analysis Method - Rare (5),0.02059,0.00280028,0.0184,0.00410041,Average Maturation,0.00280028,TRUE,TRUE
 Time to Calcium Flux Peak (ms) Quantiles - Q3 (<254 and ≥200) (8),Differentiation Purity (%) Quantiles - Q3 (>85 and ≤90) (34),0.01815,0.00610061,0.01767,0.0030003,Average Maturation,0.0030003,TRUE,TRUE
@@ -2393,13 +2393,13 @@ Disease Modelling - Genetic Disorders (18),Resting Membrane Potential (mV) Quant
 Disease Modelling - Genetic Disorders (18),Action Potential Conduction Velocity (cm/s) Quantiles - Q2 (>16 and ≤28.5) (6),0.00872,0.02420242,0.00567,0.059505951,Other Applications,0.02420242,TRUE,TRUE
 Disease Modelling - Genetic Disorders (18),hiPSC Matrix Coating - Geltrex (33),0.00858,0.04150415,0.01097,0.00980098,Other Applications,0.00980098,TRUE,TRUE
 Disease Modelling - Genetic Disorders (18),Journal - Am J Physiol Heart Circ Physiol (4),0.00853,0.01530153,0.00999,0.01390139,Other Applications,0.01390139,TRUE,TRUE
-Disease Modelling - Genetic Disorders (18),MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),0.0085,0.01630163,0.00767,0.02570257,Other Applications,0.01630163,TRUE,TRUE
+Disease Modelling - Genetic Disorders (18),MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),0.0085,0.01630163,0.00767,0.02570257,Other Applications,0.01630163,TRUE,TRUE
 Disease Modelling - Genetic Disorders (18),Journal - Circulation (11),0.0084,0.0180018,0.00451,0.095609561,Other Applications,0.0180018,TRUE,TRUE
 Disease Modelling - Genetic Disorders (18),Journal - Biosens Bioelectron (4),0.00829,0.0150015,0.00578,0.055005501,Other Applications,0.0150015,TRUE,TRUE
 Disease Modelling - Genetic Disorders (18),3D Platform - Matrigel (33),0.00824,0.04750475,0.00675,0.076007601,Other Applications,0.04750475,TRUE,FALSE
 Disease Modelling - Genetic Disorders (18),Number of Cell Lines - 2 (50),0.00808,0.04650465,0.00712,0.065206521,Other Applications,0.04650465,TRUE,FALSE
 Disease Modelling - Genetic Disorders (18),hiPSC-CM Purification Duration (days) - 4 days (29),0.00787,0.04780478,0.0069,0.058705871,Other Applications,0.04780478,TRUE,FALSE
-Disease Modelling - Genetic Disorders (18),TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.00772,0.02010201,0.00815,0.02350235,Other Applications,0.02010201,TRUE,TRUE
+Disease Modelling - Genetic Disorders (18),TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.00772,0.02010201,0.00815,0.02350235,Other Applications,0.02010201,TRUE,TRUE
 Disease Modelling - Genetic Disorders (18),hiPSC-CM Maturation Media - Cor.4U Complete (6),0.00729,0.03490349,0.00637,0.04930493,Other Applications,0.03490349,TRUE,FALSE
 Disease Modelling - Genetic Disorders (18),Number of Cell Lines - 4 (11),0.0069,0.04730473,0.00462,0.112811281,Other Applications,0.04730473,TRUE,FALSE
 Disease Modelling - Genetic Disorders (18),MYH7 Percentage (MYH6) Quantiles - Q1 (>82.35 and ≤94.6) (4),0.00681,0.02490249,0.00945,0.01690169,Other Applications,0.01690169,TRUE,TRUE
@@ -2420,12 +2420,12 @@ Disease Modelling - Arrhythmic (15),MYH7 Percentage (MYH6) Quantiles - Q1 (>82.3
 Disease Modelling - Arrhythmic (15),Pharmacological Intervention - Class Ib Antiarrhythmics (Na+ Channel Blockers - Weak Blockade) (9),0.01072,0.01890189,0.01044,0.02030203,Other Applications,0.01890189,TRUE,TRUE
 Disease Modelling - Arrhythmic (15),hiPSC-CM Purification Duration (days) - 4 days (29),0.01062,0.02110211,0.00936,0.02030203,Other Applications,0.02030203,TRUE,TRUE
 Disease Modelling - Arrhythmic (15),Journal - Circulation (11),0.01034,0.01140114,0.00759,0.03310331,Other Applications,0.01140114,TRUE,TRUE
-Disease Modelling - Arrhythmic (15),MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),0.00976,0.01290129,0.00844,0.02710271,Other Applications,0.01290129,TRUE,TRUE
+Disease Modelling - Arrhythmic (15),MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),0.00976,0.01290129,0.00844,0.02710271,Other Applications,0.01290129,TRUE,TRUE
 Disease Modelling - Arrhythmic (15),Pharmacological Intervention - Class III Antiarrhythmics (K+ Channel Blockers - Prolong Repolarization) (10),0.00941,0.01860186,0.00601,0.060906091,Other Applications,0.01860186,TRUE,TRUE
 Disease Modelling - Arrhythmic (15),Maturation Strategy - ECM (21),0.00883,0.03320332,0.00584,0.098309831,Other Applications,0.03320332,TRUE,FALSE
 Disease Modelling - Arrhythmic (15),Electrophysiology Analysis Method - Patch Clamp (59),0.00877,0.04970497,0.0062,0.140814081,Other Applications,0.04970497,TRUE,FALSE
 Disease Modelling - Arrhythmic (15),Resting Membrane Potential (mV) Quantiles - Q2 (<-74 and ≥-78) (8),0.00873,0.02660266,0.00548,0.080208021,Other Applications,0.02660266,TRUE,FALSE
-Disease Modelling - Arrhythmic (15),TNNI3 Precentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.00841,0.020002,0.00592,0.086508651,Other Applications,0.020002,TRUE,TRUE
+Disease Modelling - Arrhythmic (15),TNNI3 Percentage (TNNI1) Quantiles - Q2 (>6.5 and ≤16.15) (4),0.00841,0.020002,0.00592,0.086508651,Other Applications,0.020002,TRUE,TRUE
 Disease Modelling - Arrhythmic (15),Journal - Sci Transl Med (3),0.00828,0.02650265,0.00608,0.099709971,Other Applications,0.02650265,TRUE,FALSE
 Disease Modelling - Arrhythmic (15),Pharmacological Intervention - Lidocaine (7),0.00795,0.03210321,0.01023,0.01980198,Other Applications,0.01980198,TRUE,TRUE
 Disease Modelling - Arrhythmic (15),hiPSC-CM Backbone Media - Rare (10),0.00773,0.04020402,0.00457,0.110811081,Other Applications,0.04020402,TRUE,FALSE
@@ -2467,7 +2467,7 @@ Disease Modelling - Ischemic Infarction (9),hiPSC-CM Media Supplement - Mercapto
 Disease Modelling - Ischemic Infarction (9),Metabolic Component - Biotin (3),0.0083,0.054605461,0.01374,0.01730173,Other Applications,0.01730173,TRUE,TRUE
 Disease Modelling - Ischemic Infarction (9),Coating for Replating - Vitronectin (3),0.00796,0.04580458,0.01086,0.02810281,Other Applications,0.02810281,TRUE,FALSE
 Disease Modelling - Ischemic Infarction (9),3D Endothelial Cell Source - Umbilical Vein EndothelialC (10),0.00795,0.04610461,0.0056,0.106710671,Other Applications,0.04610461,TRUE,FALSE
-Disease Modelling - Ischemic Infarction (9),MYL2 Precentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),0.00778,0.060606061,0.00974,0.04490449,Other Applications,0.04490449,TRUE,FALSE
+Disease Modelling - Ischemic Infarction (9),MYL2 Percentage (MYL7) Quantiles - Q2 (>1.2 and ≤30.1) (4),0.00778,0.060606061,0.00974,0.04490449,Other Applications,0.04490449,TRUE,FALSE
 Disease Modelling - Ischemic Infarction (9),Journal - Tissue Eng Part A (4),0.00708,0.083308331,0.01228,0.02720272,Other Applications,0.02720272,TRUE,FALSE
 Disease Modelling - Ischemic Infarction (9),Cell Line Sex - Male (64),0.0068,0.160316032,0.00998,0.0410041,Other Applications,0.0410041,TRUE,FALSE
 Disease Modelling - Dilated Cardiomyopathy (6),Differentiation Purity (%) Quantiles - Q3 (>85 and ≤90) (34),0.02756,0.00160016,0.01827,0.00510051,Other Applications,0.00160016,TRUE,TRUE

@@ -7,6 +7,9 @@ from PyPDF2 import PdfReader
 # Precompiled regex pattern for better performance
 _quantile_pattern = re.compile(r'Q[1-6]')
 
+# Cache for protocol features to avoid reprocessing
+_protocol_features_cache = {}
+
 # Centralized constants to avoid redundancy
 MATURITY_QUANTILES = {
     "Sarcomere Length (um)": [(1.95, 2.5), (1.88, 1.95), (1.75, 1.88), (1.64, 1.75), (1.01, 1.64)],
@@ -26,7 +29,7 @@ MATURITY_QUANTILES = {
     "Max Capture Rate of Paced CMs (Hz)": [(2.9, 6.9), (1, 2.9)],
     "MYH7 Percentage (MYH6)": [(82.35, 94.6), (30.1, 82.35)],
     "MYL2 Percentage (MYL7)": [(30.1, 45.7), (1.2, 30.1)],
-    "TNNI3 Percentage (TTNI1)": [(16.15, 26), (6.5, 16.15)],
+    "TNNI3 Percentage (TNNI1)": [(16.15, 26), (6.5, 16.15)],
     "3D Estimated Cell Density (mil cells/mL)": [(21, 150), (10, 21), (5, 10), (0.47, 5), (0.01, 0.47)],
     "3D Estimated Tissue Size (mm2)": [(26.2, 3500), (9.12, 26.2), (0.13, 2), (0.01, 0.13)],
 }
@@ -50,7 +53,7 @@ INDICATOR_CATEGORIES = {
     'Max Capture Rate of Paced CMs (Hz)': 'Max Capture Rate of Paced CMs (Hz) Quantiles',
     'MYH7 Percentage (MYH6)': 'MYH7 Percentage (MYH6) Quantiles',
     'MYL2 Percentage (MYL7)': 'MYL2 Percentage (MYL7) Quantiles',
-    'TNNI3 Percentage (TTNI1)': 'TNNI3 Percentage (TTNI1) Quantiles',
+    'TNNI3 Percentage (TNNI1)': 'TNNI3 Percentage (TNNI1) Quantiles',
     '3D Estimated Cell Density (mil cells/mL)': '3D Estimated Cell Density (mil cells/mL) Quantiles',
     '3D Estimated Tissue Size (mm2)': '3D Estimated Tissue Size (mm2) Quantiles'
 }
@@ -75,7 +78,7 @@ PDF_FIELD_MAP = {
     'Max_Capture_Rate_of_Paced_CMs_Hz': 'Max Capture Rate of Paced CMs (Hz)',
     'MYH7_Percentage_MYH6': 'MYH7 Percentage (MYH6)',
     'MYL2_Percentage_MYL7': 'MYL2 Percentage (MYL7)',
-    'TNNI3_Percentage_TTNI1': 'TNNI3 Percentage (TTNI1)'
+    'TNNI3_Percentage_TNNI1': 'TNNI3 Percentage (TNNI1)'
 }
 
 # Cache for protocol features to avoid reprocessing
@@ -211,8 +214,24 @@ def getUserProtocolFeatures(file_path, causal_candidates):
     """
     Extract features from a protocol PDF file.
     Uses the cache to avoid reprocessing.
+    
+    Args:
+        file_path: String path to the PDF file or file object
+        causal_candidates: List of feature candidates to match against
+    
+    Returns:
+        List of selected feature labels
     """
-    cache_key = f"{file_path.filename}_{hash(tuple(causal_candidates))}"
+    import os
+    
+    # Create a cache key based on path or filename
+    if hasattr(file_path, 'filename'):
+        # For file objects (like those from request.files)
+        cache_key = f"{file_path.filename}_{hash(tuple(causal_candidates))}"
+    else:
+        # For string paths
+        cache_key = f"{os.path.basename(file_path)}_{hash(tuple(causal_candidates))}"
+    
     if cache_key in _protocol_features_cache:
         return _protocol_features_cache[cache_key]
     
@@ -238,18 +257,34 @@ def getUserProtocolFeatures(file_path, causal_candidates):
 def getUserData(pdf_path):
     """
     Extract experimental data from a PDF file.
+    
+    Args:
+        pdf_path: String path to the PDF file or file object
+        
+    Returns:
+        Dictionary with extracted form data
     """
     reader = PdfReader(pdf_path)
     fields = reader.get_fields()
-    return {PDF_FIELD_MAP[key]: val.get('/V', '') for key, val in fields.items()} if fields else {}
+    
+    if not fields:
+        return {}
+        
+    # Process the fields based on whether keys are in the mapping
+    result = {}
+    for key, val in fields.items():
+        if key in PDF_FIELD_MAP:
+            mapped_key = PDF_FIELD_MAP[key]
+            result[mapped_key] = val.get('/V', '')
+        else:
+            # For fields not in the mapping, use the original key
+            result[key] = val.get('/V', '')
+            
+    return result
 
 def GetQuantileFeatures(CategoryLabel, FeaturesByAllLabels, AllQuantileFeatures):
-    """
-    Get features for each quantile in a category.
-    """
     FeaturesByQuantile, IsQuantileFeature = {}, False
     
-    # Filter relevant labels using generator for memory efficiency
     RelevantLabels = [i for i in AllQuantileFeatures if CategoryLabel in i]
 
     for Label in RelevantLabels:
@@ -257,8 +292,8 @@ def GetQuantileFeatures(CategoryLabel, FeaturesByAllLabels, AllQuantileFeatures)
         
         if Label in AllQuantileFeatures:
             try:
-                # Use pre-compiled regex pattern
-                match = _quantile_pattern.search(Label)
+                # Extract quantile (Q1, Q2, Q3, Q4, Q5, 6) using regex
+                match = re.search(r'Q[1-6]', Label)
                 if match:
                     quantile = match.group(0)  # Extract the matched quantile string (e.g., 'Q1')
                     FeaturesByQuantile[quantile] = Features  # Append features to quantile group
@@ -269,6 +304,8 @@ def GetQuantileFeatures(CategoryLabel, FeaturesByAllLabels, AllQuantileFeatures)
             except Exception as e:
                 if IsQuantileFeature:
                     raise RuntimeError(f"Label is a quantile feature but cannot find {Label}: {str(e)}")
+                else:
+                    raise RuntimeError('Check this part')
 
     return FeaturesByQuantile
 
@@ -294,7 +331,7 @@ def ScoreProtocol(protocol_features: list, FeaturesByQuantile: dict) -> pd.Serie
     best_cols = scores_series[scores_series == max_score].index.tolist()
     quantile_ids = [col.split('_')[0] for col in best_cols]
     quantile_nums = [int(q[1:]) for q in quantile_ids if q.startswith('Q') and q[1:].isdigit()]
-    
+
     if len(set(quantile_nums)) == 1:
         predicted_quantile = f"Q{quantile_nums[0]}"
     else:
@@ -307,7 +344,7 @@ def ScoreProtocol(protocol_features: list, FeaturesByQuantile: dict) -> pd.Serie
     
     return result_series
 
-def process_maturity_indicators(user_data, protocol_features):
+def process_maturity_indicators(user_data, protocol_features, target_feature_dict):
     """
     Process maturity indicators by combining experimental data with protocol features.
     
@@ -323,12 +360,11 @@ def process_maturity_indicators(user_data, protocol_features):
     ResultsDict = {}
     
     # Get all quantile features
-    from data_manager import get_target_feature_dict
-    FeaturesByAllLabels = get_target_feature_dict()
-    
+    FeaturesByAllLabels = target_feature_dict
+
     # Get list of all quantile features - use generator for memory efficiency
     AllQuantileFeatures = [label for label in FeaturesByAllLabels.keys() if "Quantiles" in label]
-    
+
     # Process each maturity indicator
     Name = "Unnamed Protocol"
     for indicator_id, value in user_data.items():
@@ -392,10 +428,10 @@ def process_maturity_indicators(user_data, protocol_features):
             
             if not category_label:
                 continue  # Skip if no category found
-                
+
             # Get features for each quantile in this category
             quantile_features = GetQuantileFeatures(category_label, FeaturesByAllLabels, AllQuantileFeatures)
-            
+
             # Score the protocol to predict the quantile
             score_series = ScoreProtocol(protocol_features, quantile_features)
             

@@ -595,6 +595,7 @@ CMPortal.benchmark.submitAndDisplayResults = function() {
     
     // Get the result display areas
     const resultDisplay = document.getElementById('benchmark-result-display');
+    resultDisplay.style.display = 'block'; // Make sure it's visible
     const statusMessage = document.getElementById('benchmark-status-message');
     const submissionResult = document.getElementById('benchmark-submission-result');
     const resultsContainer = document.getElementById('benchmark-results-container');
@@ -666,6 +667,35 @@ CMPortal.benchmark.submitAndDisplayResults = function() {
     CMPortal.benchmark.selectedProtocolIds.forEach(id => {
         formData.append('selected_protocol_ids[]', id);
     });
+
+    // ADDED: Display what's being submitted
+    if (submissionResult) {
+        // Create an object to show what's being submitted
+        const submissionData = {
+            protocol: protocolFile && protocolFile.files && protocolFile.files.length > 0 
+                ? protocolFile.files[0].name 
+                : 'No file (using selected features)',
+            selectedFeatures: CMPortal.benchmark.selectedFeatures,
+            experimentalFile: experimentalFile && experimentalFile.files && experimentalFile.files.length > 0 
+                ? experimentalFile.files[0].name 
+                : 'Missing (required)',
+            selectedPurpose: CMPortal.benchmark.selectedPurpose,
+            selectedProtocolIds: CMPortal.benchmark.selectedProtocolIds,
+            referencePairs: referencePairs.map(pair => ({
+                protocol: pair.protocolFile.name,
+                data: pair.dataFile.name
+            }))
+        };
+
+        submissionResult.textContent = 'SUBMISSION DATA (before server response):\n\n' + 
+                                      JSON.stringify(submissionData, null, 2);
+        
+        // Add status message showing we're displaying pre-submission data
+        if (statusMessage) {
+            statusMessage.className = 'benchmark-status benchmark-status-info';
+            statusMessage.textContent = '🔄 Preparing to submit (data shown below)';
+        }
+    }
     
     // Make the API request
     fetch('/api/submit_benchmark', {
@@ -685,7 +715,7 @@ CMPortal.benchmark.submitAndDisplayResults = function() {
         
         // Display raw JSON response (for debugging)
         if (submissionResult) {
-            submissionResult.textContent = JSON.stringify(data, null, 2);
+            submissionResult.textContent = 'SERVER RESPONSE:\n\n' + JSON.stringify(data, null, 2);
         }
         
         // If there's an error, show it and stop
