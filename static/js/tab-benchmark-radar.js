@@ -1,6 +1,5 @@
 /**
  * Radar chart visualization for benchmark tab
- * Based on the implementation from testcase.html
  */
 
 // Create namespace if it doesn't exist
@@ -87,7 +86,7 @@ CMPortal.benchmarkRadar.createRadarContainer = function() {
   const resultsContainer = document.getElementById('benchmark-results-container');
   if (!resultsContainer) return;
   
-  // Create radar container
+  // Create radar container - position it after the status message
   const radarContainer = document.createElement('div');
   radarContainer.className = 'container';
   radarContainer.innerHTML = `
@@ -135,7 +134,9 @@ CMPortal.benchmarkRadar.createRadarContainer = function() {
       </div>
     </div>
     
-    <button id="regenerateBtn" class="btn">Next Reference</button>
+    <div class="button-container">
+      <button id="regenerateBtn" class="btn">Next Reference</button>
+    </div>
     
     <div class="info-box">
       <strong>Chart Interpretation:</strong>
@@ -144,109 +145,7 @@ CMPortal.benchmarkRadar.createRadarContainer = function() {
     </div>
   `;
   
-  // Add styles for the radar chart
-  const style = document.createElement('style');
-  style.textContent = `
-    .container {
-      max-width: 900px; margin: 0 auto;
-      background: #fff; padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-    .chart-container {
-      position: relative;
-      height: 70vh; width: 80vw; max-width: 800px;
-      margin: 0 auto;
-    }
-    .btn {
-      background: #3498db; color: #fff; border: none;
-      padding: 10px 20px; border-radius: 4px;
-      cursor: pointer; font-size: 14px;
-      margin: 20px auto; display: block;
-      transition: background-color 0.3s;
-    }
-    .btn:hover { background: #2980b9; }
-    .legend, .legend-custom {
-      display: flex; justify-content: center; gap: 20px;
-      margin-top: 10px; font-size: 14px; color: #2c3e50;
-      flex-wrap: wrap;
-    }
-    .legend-item { display: flex; align-items: center; gap: 5px; }
-    .legend-color {
-      width: 20px; height: 20px; border-radius: 50%;
-    }
-    .your-protocol { 
-      background: rgba(54,162,235,0.5); 
-      border: 1px solid rgba(54,162,235,1); 
-    }
-    .reference { 
-      background: rgba(255,99,132,0.5); 
-      border: 1px solid rgba(255,99,132,1); 
-    }
-    .legend-custom {
-      margin-top: 20px;
-      margin-bottom: 20px;
-      padding: 10px;
-      border-radius: 4px;
-      background-color: #f8f9fa;
-      border: 1px solid #e9ecef;
-    }
-    .legend-row {
-      display: flex;
-      align-items: center;
-      margin-bottom: 10px;
-      width: 100%;
-    }
-    .legend-label {
-      flex: 1;
-      margin-left: 10px;
-    }
-    .legend-markers {
-      display: flex;
-      gap: 5px;
-      width: 60px;
-      justify-content: flex-end;
-    }
-    .legend-marker {
-      display: inline-block; width: 12px; height: 12px;
-      border-radius: 50%;
-      vertical-align: middle;
-    }
-    /* Your Protocol Markers */
-    .marker-pred-yours {
-      background-color: #fff; border: 2px solid rgba(54,162,235,1);
-    }
-    .marker-expt-yours {
-      background-color: rgba(30,120,190,1); border: none;
-    }
-    .marker-exceeds-yours {
-      background-color: rgba(10,60,110,1); border: none;
-    }
-    .marker-below-yours {
-      background-color: rgba(100,180,235,1); border: none;
-    }
-    /* Reference Markers */
-    .marker-pred-ref {
-      background-color: #fff; border: 2px solid rgba(255,99,132,1);
-    }
-    .marker-expt-ref {
-      background-color: rgba(255,99,132,1); border: none;
-    }
-    .marker-exceeds-ref {
-      background-color: rgba(180,50,80,1); border: none;
-    }
-    .marker-below-ref {
-      background-color: rgba(255,170,192,1); border: none;
-    }
-    .info-box {
-      background: #f1f8ff; border: 1px solid #cce5ff;
-      border-radius: 4px; padding: 10px 15px;
-      margin-top: 20px; font-size: 14px; color: #0c5460;
-    }
-  `;
-  
   // Append elements to the results container
-  document.head.appendChild(style);
   resultsContainer.appendChild(radarContainer);
   
   // Add event listener for Next Reference button
@@ -508,7 +407,7 @@ CMPortal.benchmarkRadar.initChart = function() {
     return;
   }
   
-  // Create the chart
+  // Create the chart with improved animation configuration
   CMPortal.benchmarkRadar.chart = new Chart(ctx, {
     type: 'radar',
     data: data,
@@ -555,11 +454,11 @@ CMPortal.benchmarkRadar.initChart = function() {
           }
         }
       },
-      elements: { line: { tension: 0.1 } },
+      elements: { line: { tension: 0.2 } }, // Slightly increased tension for smoother lines
       responsive: true, 
       maintainAspectRatio: false,
       animation: {
-        duration: 800,
+        duration: 1000,
         easing: 'easeOutQuart',
       },
       transitions: {
@@ -601,7 +500,61 @@ CMPortal.benchmarkRadar.nextReference = function() {
   }
 };
 
-// Update the chart with new data
+// Get the next reference data for smooth transition
+CMPortal.benchmarkRadar.getNextReferenceData = function() {
+  if (!CMPortal.benchmarkRadar.benchmarkData || CMPortal.benchmarkRadar.benchmarkData.length <= 1) {
+    return null;
+  }
+  
+  // Get next reference index (with wrap-around)
+  const nextRefIndex = (CMPortal.benchmarkRadar.currentRefIndex + 1) % (CMPortal.benchmarkRadar.benchmarkData.length - 1) + 1;
+  
+  // Get reference protocol data
+  const referenceProtocol = CMPortal.benchmarkRadar.benchmarkData[nextRefIndex];
+  const referenceProtocolName = referenceProtocol[0];
+  const referenceProtocolData = referenceProtocol[1];
+  
+  // Prepare data arrays
+  const refData = [], refBg = [], refBorder = [], refRadius = [];
+  
+  // Process reference data
+  CMPortal.benchmarkRadar.indicators.forEach(indicator => {
+    const id = indicator.label;
+    const rings = indicator.rings;
+    
+    // Get the reference data for this indicator
+    const refValue = referenceProtocolData[id] || ['Q1', 0]; // Default to Q1 if not found
+    const refQuantile = refValue[0];
+    const refFlag = refValue[1];
+    
+    // Calculate the ring position (value from 0 to 1)
+    const refQNum = parseFloat(refQuantile.replace('Q', ''));
+    const refRingPos = (rings - (refQNum - 1)) / rings;
+    
+    // Add to reference data arrays
+    refData.push(refRingPos);
+    
+    // Get styling based on flag
+    const refStyle = CMPortal.benchmarkRadar.getDataPointStyling(refFlag, true);
+    refBg.push(refStyle.bg);
+    refBorder.push(refStyle.border);
+    refRadius.push(refStyle.radius);
+  });
+  
+  return {
+    label: referenceProtocolName,
+    data: refData,
+    backgroundColor: 'rgba(255,99,132,0.3)',
+    borderColor: 'rgba(255,99,132,1)',
+    borderWidth: 2,
+    pointBackgroundColor: refBg,
+    pointBorderColor: refBorder,
+    pointRadius: refRadius,
+    pointStyle: 'circle'
+  };
+};
+
+// Update the chart with new data - with smooth transitions
 CMPortal.benchmarkRadar.updateChart = function() {
   if (!CMPortal.benchmarkRadar.chart) return;
   
@@ -614,17 +567,45 @@ CMPortal.benchmarkRadar.updateChart = function() {
   if (refLabel && benchmarkData && benchmarkData.length > 1) {
     const referenceIndex = refIndex + 1;
     if (referenceIndex < benchmarkData.length) {
-      refLabel.textContent = benchmarkData[referenceIndex][0];
+      // Update reference label with smooth fade transition
+      refLabel.style.opacity = '0';
+      setTimeout(() => {
+        refLabel.textContent = benchmarkData[referenceIndex][0];
+        refLabel.style.opacity = '1';
+      }, 300);
     }
   }
   
   // Prepare updated chart data
   const chartData = CMPortal.benchmarkRadar.prepareChartData();
   
-  // Update chart datasets
+  // Update only the reference dataset values with animation
   if (chartData && CMPortal.benchmarkRadar.chart) {
-    CMPortal.benchmarkRadar.chart.data.datasets = chartData.datasets;
-    CMPortal.benchmarkRadar.chart.update();
+    // Only update the reference dataset (index 1) properties
+    const dataset = CMPortal.benchmarkRadar.chart.data.datasets[1];
+    
+    // For smoother transitions, update each property separately
+    // with different animation durations
+    
+    // First update dataset label
+    dataset.label = chartData.datasets[1].label;
+    
+    // Then animate the data points positions
+    // This ensures Chart.js creates a smooth animation between values
+    dataset.data = chartData.datasets[1].data;
+    
+    // Update the styling with a slight delay to create a staggered animation effect
+    setTimeout(() => {
+      dataset.pointBackgroundColor = chartData.datasets[1].pointBackgroundColor;
+      dataset.pointBorderColor = chartData.datasets[1].pointBorderColor;
+      dataset.pointRadius = chartData.datasets[1].pointRadius;
+      
+      // Force chart update with specific animation options for smoother transitions
+      CMPortal.benchmarkRadar.chart.update({
+        duration: 800,
+        easing: 'easeInOutQuart',
+      });
+    }, 100);
   }
 };
 

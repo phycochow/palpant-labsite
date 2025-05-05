@@ -13,7 +13,7 @@ CMPortal.benchmark.initialized = false;
 CMPortal.benchmark.selectedFeatures = [];
 CMPortal.benchmark.selectedPurpose = null;
 CMPortal.benchmark.selectedProtocolIds = [];
-CMPortal.benchmark.referencePairs = []; // NEW: replace referenceFiles array
+CMPortal.benchmark.referencePairs = [];
 
 // Initialize the benchmark functionality
 CMPortal.benchmark.init = function() {
@@ -24,7 +24,7 @@ CMPortal.benchmark.init = function() {
     CMPortal.benchmark.initializePurposeForm();
     CMPortal.benchmark.initializeProtocolIdSelection();
     CMPortal.benchmark.initializeFileUploads();
-    CMPortal.benchmark.initializeReferencePairs(); // NEW
+    CMPortal.benchmark.initializeReferencePairs();
     CMPortal.benchmark.initializeSubmitButton();
 
     CMPortal.benchmark.initialized = true;
@@ -324,8 +324,6 @@ CMPortal.benchmark.updateUploadAreaText = function(area, filename) {
     }
 };
 
-// ---------- REFERENCE PAIRS UPLOAD SETUP BELOW ----------
-
 // Initialize the reference protocol/data pairs
 CMPortal.benchmark.initializeReferencePairs = function() {
     const addBtn = document.getElementById('add-reference-btn');
@@ -422,7 +420,7 @@ CMPortal.benchmark.initializeSubmitButton = function() {
     submitBtn.disabled = true;
     submitBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        CMPortal.benchmark.submitAndDisplayResults(); // Use the updated submission function
+        CMPortal.benchmark.submitAndDisplayResults();
     });
 };
 
@@ -529,65 +527,141 @@ CMPortal.benchmark.resetProtocolIdSelections = function() {
     CMPortal.benchmark.updateSelectionSummary('protocols');
 };
 
-// Helper function to generate results table
-CMPortal.benchmark.generateResultsTable = function(results, tableId) {
-    if (!results) return '<p>No results data available</p>';
+// Display status message
+CMPortal.benchmark.showStatusMessage = function(message, isSuccess) {
+    const statusMessage = document.getElementById('benchmark-status-message');
     
-    let html = `<table class="table table-striped table-bordered" id="${tableId}-results">
-      <thead>
-        <tr>
-          <th>Indicator</th>
-          <th>Quantile</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>`;
+    if (!statusMessage) return;
     
-    for (const [indicator, data] of Object.entries(results)) {
-        // Skip protocol name entry
-        if (indicator === 'ProtocolName') continue;
-        
-        // Ensure data is correctly formatted (should be [quantile, flag])
-        if (!Array.isArray(data) || data.length < 2) continue;
-        
-        const [quantile, flag] = data;
-        
-        // Determine status text and class based on flag
-        let statusText, statusClass;
-        switch(Number(flag)) {
-            case 0:
-                statusText = 'Predicted';
-                statusClass = 'text-secondary';
-                break;
-            case 1:
-                statusText = 'Within Range';
-                statusClass = 'text-success';
-                break;
-            case 3:
-                statusText = 'Exceeds Best Bounds';
-                statusClass = 'text-primary font-weight-bold';
-                break;
-            case 4:
-                statusText = 'Below Worst Bounds';
-                statusClass = 'text-warning';
-                break;
-            default:
-                statusText = 'Unknown';
-                statusClass = '';
-        }
-        
-        html += `<tr>
-          <td>${indicator}</td>
-          <td>${quantile}</td>
-          <td class="${statusClass}">${statusText}</td>
-        </tr>`;
-    }
-    
-    html += `</tbody></table>`;
-    return html;
+    // Update message and styling
+    statusMessage.textContent = message;
+    statusMessage.className = isSuccess ? 
+        'benchmark-status benchmark-status-success' : 
+        'benchmark-status benchmark-status-error';
 };
 
-// This function formats the results for the radar chart
+// New function to handle form submission and display results
+CMPortal.benchmark.submitAndDisplayResults = function() {
+    // Show loading state
+    const submitBtn = document.getElementById('benchmark-submit-button');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Processing...';
+    
+    // Show the results container with loading message
+    const resultsContainer = document.getElementById('benchmark-results-container');
+    resultsContainer.style.display = 'block';
+    
+    // Show loading message
+    CMPortal.benchmark.showStatusMessage('Processing your protocol submission...', true);
+    
+    // Create FormData object for file upload
+    const formData = new FormData();
+    
+    // Add protocol file or selected features
+    const protocolFile = document.getElementById('protocol-file');
+    if (protocolFile && protocolFile.files && protocolFile.files.length > 0) {
+        formData.append('protocol_file', protocolFile.files[0]);
+    } else {
+        // Add selected features
+        CMPortal.benchmark.selectedFeatures.forEach(feature => {
+            formData.append('selected_features[]', feature);
+        });
+    }
+    
+    // Add experimental file (required)
+    const experimentalFile = document.getElementById('experimental-file');
+    if (experimentalFile && experimentalFile.files && experimentalFile.files.length > 0) {
+        formData.append('experimental_file', experimentalFile.files[0]);
+    } else {
+        CMPortal.benchmark.showStatusMessage('❌ Error: Experimental data file is required', false);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Benchmark Protocol';
+        return;
+    }
+    
+    // Add selected purpose (required)
+    if (CMPortal.benchmark.selectedPurpose) {
+        formData.append('selected_purpose', CMPortal.benchmark.selectedPurpose);
+    } else {
+        CMPortal.benchmark.showStatusMessage('❌ Error: Protocol purpose selection is required', false);
+        submitBtn.disabled = false;submitBtn.textContent = 'Benchmark Protocol';
+        return;
+    }
+    
+    // Add reference pairs
+    const referencePairs = CMPortal.benchmark.referencePairs.filter(pair => pair.protocolFile && pair.dataFile);
+    if (referencePairs.length > 0) {
+        // Convert to JSON to send in form data
+        formData.append('reference_pairs', JSON.stringify(
+            referencePairs.map(pair => ({
+                protocol: pair.protocolFile.name,
+                data: pair.dataFile.name
+            }))
+        ));
+        
+        // Add actual files
+        referencePairs.forEach((pair, i) => {
+            formData.append(`ref_protocol_${i}`, pair.protocolFile);
+            formData.append(`ref_data_${i}`, pair.dataFile);
+        });
+    }
+    
+    // Add selected protocol IDs
+    CMPortal.benchmark.selectedProtocolIds.forEach(id => {
+        formData.append('selected_protocol_ids[]', id);
+    });
+    
+    // Make the API request
+    fetch('/api/submit_benchmark', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Re-enable submit button
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Benchmark Protocol';
+        
+        // If there's an error, show it and stop
+        if (data.status === 'error') {
+            CMPortal.benchmark.showStatusMessage(`❌ ${data.message}`, false);
+            return;
+        }
+        
+        // Update UI with success message
+        CMPortal.benchmark.showStatusMessage('✅ Protocol benchmarking completed successfully', true);
+        
+        // Initialize the radar chart visualization if available
+        if (typeof CMPortal.benchmarkRadar !== 'undefined' && 
+            typeof CMPortal.benchmarkRadar.visualizeResults === 'function') {
+          
+            // Format the results for the radar chart
+            const radarData = CMPortal.benchmark.formatResultsForRadar(data);
+          
+            // Visualize the results
+            if (radarData && radarData.length > 0) {
+                CMPortal.benchmarkRadar.visualizeResults(radarData);
+            }
+        }
+    })
+    .catch(err => {
+        console.error('Error submitting benchmark:', err);
+        
+        // Re-enable submit button
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Benchmark Protocol';
+        
+        // Show error message
+        CMPortal.benchmark.showStatusMessage(`❌ Error processing benchmark: ${err.message}`, false);
+    });
+};
+
+// Format the results for the radar chart
 CMPortal.benchmark.formatResultsForRadar = function(data) {
     // Check if we have valid data
     if (!data || data.status === 'error') return null;
@@ -622,242 +696,6 @@ CMPortal.benchmark.formatResultsForRadar = function(data) {
     }
     
     return radarData;
-};
-
-// New function to handle form submission and display results
-CMPortal.benchmark.submitAndDisplayResults = function() {
-    // Show loading state
-    const submitBtn = document.getElementById('benchmark-submit-button');
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Processing...';
-    
-    // Get the result display areas
-    const resultDisplay = document.getElementById('benchmark-result-display');
-    resultDisplay.style.display = 'block'; // Make sure it's visible
-    const statusMessage = document.getElementById('benchmark-status-message');
-    const submissionResult = document.getElementById('benchmark-submission-result');
-    const resultsContainer = document.getElementById('benchmark-results-container');
-    
-    // Reset previous results
-    if (statusMessage) statusMessage.className = 'benchmark-status';
-    if (statusMessage) statusMessage.textContent = '';
-    
-    // Create FormData object for file upload
-    const formData = new FormData();
-    
-    // Add protocol file or selected features
-    const protocolFile = document.getElementById('protocol-file');
-    if (protocolFile && protocolFile.files && protocolFile.files.length > 0) {
-        formData.append('protocol_file', protocolFile.files[0]);
-    } else {
-        // Add selected features
-        CMPortal.benchmark.selectedFeatures.forEach(feature => {
-            formData.append('selected_features[]', feature);
-        });
-    }
-    
-    // Add experimental file (required)
-    const experimentalFile = document.getElementById('experimental-file');
-    if (experimentalFile && experimentalFile.files && experimentalFile.files.length > 0) {
-        formData.append('experimental_file', experimentalFile.files[0]);
-    } else {
-        if (statusMessage) {
-            statusMessage.className = 'benchmark-status benchmark-status-error';
-            statusMessage.textContent = '❌ Error: Experimental data file is required';
-        }
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Benchmark Protocol';
-        return;
-    }
-    
-    // Add selected purpose (required)
-    if (CMPortal.benchmark.selectedPurpose) {
-        formData.append('selected_purpose', CMPortal.benchmark.selectedPurpose);
-    } else {
-        if (statusMessage) {
-            statusMessage.className = 'benchmark-status benchmark-status-error';
-            statusMessage.textContent = '❌ Error: Protocol purpose selection is required';
-        }
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Benchmark Protocol';
-        return;
-    }
-    
-    // Add reference pairs
-    const referencePairs = CMPortal.benchmark.referencePairs.filter(pair => pair.protocolFile && pair.dataFile);
-    if (referencePairs.length > 0) {
-        // Convert to JSON to send in form data
-        formData.append('reference_pairs', JSON.stringify(
-            referencePairs.map(pair => ({
-                protocol: pair.protocolFile.name,
-                data: pair.dataFile.name
-            }))
-        ));
-        
-        // Add actual files
-        referencePairs.forEach((pair, i) => {
-            formData.append(`ref_protocol_${i}`, pair.protocolFile);
-            formData.append(`ref_data_${i}`, pair.dataFile);
-        });
-    }
-    
-    // Add selected protocol IDs
-    CMPortal.benchmark.selectedProtocolIds.forEach(id => {
-        formData.append('selected_protocol_ids[]', id);
-    });
-
-    // ADDED: Display what's being submitted
-    if (submissionResult) {
-        // Create an object to show what's being submitted
-        const submissionData = {
-            protocol: protocolFile && protocolFile.files && protocolFile.files.length > 0 
-                ? protocolFile.files[0].name 
-                : 'No file (using selected features)',
-            selectedFeatures: CMPortal.benchmark.selectedFeatures,
-            experimentalFile: experimentalFile && experimentalFile.files && experimentalFile.files.length > 0 
-                ? experimentalFile.files[0].name 
-                : 'Missing (required)',
-            selectedPurpose: CMPortal.benchmark.selectedPurpose,
-            selectedProtocolIds: CMPortal.benchmark.selectedProtocolIds,
-            referencePairs: referencePairs.map(pair => ({
-                protocol: pair.protocolFile.name,
-                data: pair.dataFile.name
-            }))
-        };
-
-        submissionResult.textContent = 'SUBMISSION DATA (before server response):\n\n' + 
-                                      JSON.stringify(submissionData, null, 2);
-        
-        // Add status message showing we're displaying pre-submission data
-        if (statusMessage) {
-            statusMessage.className = 'benchmark-status benchmark-status-info';
-            statusMessage.textContent = '🔄 Preparing to submit (data shown below)';
-        }
-    }
-    
-    // Make the API request
-    fetch('/api/submit_benchmark', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Re-enable submit button
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Benchmark Protocol';
-        
-        // Display raw JSON response (for debugging)
-        if (submissionResult) {
-            submissionResult.textContent = 'SERVER RESPONSE:\n\n' + JSON.stringify(data, null, 2);
-        }
-        
-        // If there's an error, show it and stop
-        if (data.status === 'error') {
-            if (statusMessage) {
-                statusMessage.className = 'benchmark-status benchmark-status-error';
-                statusMessage.textContent = '❌ ' + data.message;
-            }
-            return;
-        }
-        
-        // Update UI with success message
-        if (statusMessage) {
-            statusMessage.className = 'benchmark-status benchmark-status-success';
-            statusMessage.textContent = '✅ Protocol benchmarking completed successfully';
-        }
-        
-        // Show the results container
-        if (resultsContainer) {
-            resultsContainer.style.display = 'block';
-        }
-        
-        // Update user protocol info
-        document.getElementById('user-protocol-name').textContent = data.protocol_name || 'Custom Protocol';
-        document.getElementById('selected-purpose').textContent = data.selected_purpose || '';
-        
-        // Display user results
-        document.getElementById('user-results-table').innerHTML = CMPortal.benchmark.generateResultsTable(data.results, 'user');
-        
-        // Display reference results
-        const referenceContainer = document.getElementById('reference-results-container');
-        referenceContainer.innerHTML = '';
-        
-        if (data.reference_results && data.reference_results.length > 0) {
-            data.reference_results.forEach((reference, index) => {
-                const refDiv = document.createElement('div');
-                refDiv.className = 'reference-protocol';
-                refDiv.style.marginBottom = '20px';
-                
-                const refTitle = document.createElement('h5');
-                refTitle.textContent = reference.name || `Reference ${index + 1}`;
-                refDiv.appendChild(refTitle);
-                
-                const refTable = CMPortal.benchmark.generateResultsTable(reference.results, `ref-${index}`);
-                refDiv.innerHTML += refTable;
-                
-                referenceContainer.appendChild(refDiv);
-            });
-        } else {
-            referenceContainer.innerHTML = '<p>No reference protocols provided</p>';
-        }
-        
-        // Display database results
-        const databaseContainer = document.getElementById('database-results-container');
-        databaseContainer.innerHTML = '';
-        
-        if (data.db_protocol_results && data.db_protocol_results.length > 0) {
-            data.db_protocol_results.forEach((dbProtocol, index) => {
-                const dbDiv = document.createElement('div');
-                dbDiv.className = 'database-protocol';
-                dbDiv.style.marginBottom = '20px';
-                
-                const dbTitle = document.createElement('h5');
-                dbTitle.textContent = `${dbProtocol.name || `Protocol ID: ${dbProtocol.id}`}`;
-                dbDiv.appendChild(dbTitle);
-                
-                const dbTable = CMPortal.benchmark.generateResultsTable(dbProtocol.results, `db-${index}`);
-                dbDiv.innerHTML += dbTable;
-                
-                databaseContainer.appendChild(dbDiv);
-            });
-        } else {
-            databaseContainer.innerHTML = '<p>No database protocols selected</p>';
-        }
-        
-        // Scroll to results
-        resultsContainer.scrollIntoView({ behavior: 'smooth' });
-        
-        // NEW: Initialize the radar chart visualization if available
-        if (typeof CMPortal.benchmarkRadar !== 'undefined' && 
-            typeof CMPortal.benchmarkRadar.visualizeResults === 'function') {
-          
-            // Format the results for the radar chart
-            const radarData = CMPortal.benchmark.formatResultsForRadar(data);
-          
-            // Visualize the results
-            if (radarData && radarData.length > 0) {
-                CMPortal.benchmarkRadar.visualizeResults(radarData);
-            }
-        }
-    })
-    .catch(err => {
-        console.error('Error submitting benchmark:', err);
-        
-        // Re-enable submit button
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Benchmark Protocol';
-        
-        // Show error message
-        if (statusMessage) {
-            statusMessage.className = 'benchmark-status benchmark-status-error';
-            statusMessage.textContent = '❌ Error processing benchmark: ' + err.message;
-        }
-    });
 };
 
 // Tab activation handler (for lazy init)
