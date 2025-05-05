@@ -544,15 +544,25 @@ CMPortal.benchmark.showStatusMessage = function(message, isSuccess) {
 CMPortal.benchmark.submitAndDisplayResults = function() {
     // Show loading state
     const submitBtn = document.getElementById('benchmark-submit-button');
+    if (submitBtn) {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Processing...';
-    
+    }
+
     // Show the results container with loading message
     const resultsContainer = document.getElementById('benchmark-results-container');
+    if (resultsContainer) {
     resultsContainer.style.display = 'block';
-    
+    }
+
     // Show loading message
-    CMPortal.benchmark.showStatusMessage('Processing your protocol submission...', true);
+    const statusMessage = document.getElementById('benchmark-status-message');
+    if (statusMessage) {
+    statusMessage.textContent = 'Processing your protocol submission...';
+    statusMessage.className = 'benchmark-status benchmark-status-success';
+    } else {
+    console.warn('Status message element not found');
+    }
     
     // Create FormData object for file upload
     const formData = new FormData();
