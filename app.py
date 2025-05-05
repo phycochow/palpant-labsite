@@ -429,7 +429,7 @@ def process_benchmark_data(protocol_data, experimental_data, selected_features, 
                  'Max Capture Rate of Paced CMs (Hz)', 'MYH7 Percentage (MYH6)', 
                  'MYL2 Percentage (MYL7)', 'TNNI3 Percentage (TNNI1)']
     
-    PurposeData = {'ProtocolName': f'{selected_purpose} Protocols'}
+    PurposeData = {'ProtocolName': f'Key Characteristics of {selected_purpose}'}
     # Add empty values for all indicators
     for indicator in indicators:
         PurposeData[indicator] = ''

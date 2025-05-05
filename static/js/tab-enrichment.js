@@ -147,7 +147,7 @@ CMPortal.enrichment = {};
         if (json.error) throw new Error(json.error);
 
         if (resultDisplay && submissionResult) {
-          submissionResult.textContent = `✅ Success! Found ${json.data.length} enrichment records for "${label}".`;
+          submissionResult.textContent = `✅ Success! Found ${json.data.length} enriched protocol charactertistics for "${label}".`;
         }
 
         tableContainer.classList.remove('enrichment-hidden');

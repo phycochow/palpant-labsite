@@ -20,7 +20,6 @@ CMPortal.benchmarkRadar.benchmarkData = null;
 
 // Indicators list with number of quantile rings for each
 CMPortal.benchmarkRadar.indicators = [
-  { label: "Sarcomere Length (um)", rings: 5 },
   { label: "Cell Area (um²)", rings: 3 },
   { label: "T-tubule Structure (Found)", rings: 2 },
   { label: "Contractile Force (mN)", rings: 5 },
@@ -33,12 +32,67 @@ CMPortal.benchmarkRadar.indicators = [
   { label: "Action Potential Conduction Velocity (cm/s)", rings: 4 },
   { label: "Action Potential Amplitude (mV)", rings: 4 },
   { label: "Resting Membrane Potential (mV)", rings: 5 },
-  { label: "Beat Rate (bpm)", rings: 5 },
   { label: "Max Capture Rate of Paced CMs (Hz)", rings: 2 },
+  { label: "Beat Rate (bpm)", rings: 5 },
   { label: "MYH7 Percentage (MYH6)", rings: 2 },
   { label: "MYL2 Percentage (MYL7)", rings: 2 },
   { label: "TNNI3 Percentage (TNNI1)", rings: 2 },
+  { label: "Sarcomere Length (um)", rings: 5 },
 ];
+
+// Define category information with colors and icons
+CMPortal.benchmarkRadar.categories = {
+  "Morphology": {
+    color: "#1E40AF", // Royal Blue
+    icon: "🧫",
+    indicators: ["Sarcomere Length (um)", "Cell Area (um²)", "T-tubule Structure (Found)"]
+  },
+  "Contractile Function": {
+    color: "#166534", // Forest Green
+    icon: "💪",
+    indicators: ["Contractile Force (mN)", "Contractile Stress (mN/mm²)", "Contraction Upstroke Velocity (um/s)"]
+  },
+  "Electrophysiology": {
+    color: "#7E22CE", // Purple
+    icon: "⚡",
+    indicators: ["Action Potential Amplitude (mV)", "Resting Membrane Potential (mV)", 
+                "Action Potential Conduction Velocity (cm/s)", "Max Capture Rate of Paced CMs (Hz)"]
+  },
+  "Calcium Handling": {
+    color: "#C2410C", // Burnt Orange
+    icon: "Ca²⁺",
+    indicators: ["Calcium Flux Amplitude (F/F0)", "Time to Calcium Flux Peak (ms)", 
+                "Time from Calcium Peak to Relaxation (ms)", "Conduction Velocity from Calcium Imaging (cm/s)"]
+  },
+  "Rhythmicity": {
+    color: "#BE123C", // Crimson
+    icon: "❤️",
+    indicators: ["Beat Rate (bpm)"]
+  },
+  "Transcriptomic Markers": {
+    color: "#0F766E", // Dark Teal
+    icon: "🧬",
+    indicators: ["MYH7 Percentage (MYH6)", "MYL2 Percentage (MYL7)", "TNNI3 Percentage (TNNI1)"]
+  }
+};
+
+// Add helper function to get category for an indicator
+CMPortal.benchmarkRadar.getCategoryInfo = function(indicatorLabel) {
+  for (const [categoryName, category] of Object.entries(CMPortal.benchmarkRadar.categories)) {
+    if (category.indicators.includes(indicatorLabel)) {
+      return {
+        name: categoryName,
+        color: category.color,
+        icon: category.icon
+      };
+    }
+  }
+  return {
+    name: "Other",
+    color: "#333333",
+    icon: "📊"
+  };
+};
 
 // Initialize the radar chart visualization
 CMPortal.benchmarkRadar.init = function(benchmarkData) {
@@ -86,61 +140,91 @@ CMPortal.benchmarkRadar.createRadarContainer = function() {
   const resultsContainer = document.getElementById('benchmark-results-container');
   if (!resultsContainer) return;
   
-  // Create radar container - position it after the status message
+  // Create radar container with updated layout
   const radarContainer = document.createElement('div');
-  radarContainer.className = 'container';
+  radarContainer.className = 'compact-container';
+  
+  // Build the category legend HTML
+  let categoryLegendHtml = `
+    <div class="category-legend">
+      <h4>Categories:</h4>
+      <div class="category-legend-items">
+  `;
+  
+  // Add each category to the legend
+  for (const [categoryName, category] of Object.entries(CMPortal.benchmarkRadar.categories)) {
+    categoryLegendHtml += `
+      <div class="category-item">
+        <span class="category-icon">${category.icon}</span>
+        <span class="category-name" style="color: ${category.color}">${categoryName}</span>
+      </div>
+    `;
+  }
+  
+  categoryLegendHtml += `
+      </div>
+    </div>
+  `;
+  
+  // Combine all HTML
   radarContainer.innerHTML = `
-    <div class="legend">
-      <div class="legend-item">
-        <div class="legend-color your-protocol"></div><span id="userProtocolLabel">Your Protocol</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-color reference"></div><span id="refLabel">Reference 1</span>
-      </div>
-    </div>
-    
-    <div class="chart-container">
-      <canvas id="maturityChart"></canvas>
-    </div>
-    
-    <div class="legend-custom">
-      <div class="legend-row">
-        <div class="legend-markers">
+    <div class="protocol-selector">
+      <div class="protocol-labels">
+        <div class="legend-item">
+          <div class="legend-color your-protocol"></div><span id="userProtocolLabel">Your Protocol</span>
           <span class="legend-marker marker-pred-yours"></span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color reference"></div><span id="refLabel">Reference 1</span>
           <span class="legend-marker marker-pred-ref"></span>
         </div>
-        <div class="legend-label">Predicted Data</div>
       </div>
-      <div class="legend-row">
-        <div class="legend-markers">
-          <span class="legend-marker marker-expt-yours"></span>
-          <span class="legend-marker marker-expt-ref"></span>
-        </div>
-        <div class="legend-label">Experimental Data (Within Range)</div>
-      </div>
-      <div class="legend-row">
-        <div class="legend-markers">
-          <span class="legend-marker marker-exceeds-yours"></span>
-          <span class="legend-marker marker-exceeds-ref"></span>
-        </div>
-        <div class="legend-label">Experimental Data (Exceeds Best Bound)</div>
-      </div>
-      <div class="legend-row">
-        <div class="legend-markers">
-          <span class="legend-marker marker-below-yours"></span>
-          <span class="legend-marker marker-below-ref"></span>
-        </div>
-        <div class="legend-label">Experimental Data (Below Worst Bound)</div>
-      </div>
+      <button id="regenerateBtn" class="btn">Next Reference →</button>
     </div>
     
-    <div class="button-container">
-      <button id="regenerateBtn" class="btn">Next Reference</button>
+    <div class="info-box-top">
+      <strong>Chart Interpretation:</strong> Outer rings = more adult-like; inner rings = more fetal-like
     </div>
-    
-    <div class="info-box">
-      <strong>Chart Interpretation:</strong>
-      Outer rings (higher values) = more adult-like; inner rings = more fetal-like.
+
+    <div class="radar-content">
+      <div class="legend-panel">
+        <h4>LEGEND:</h4>
+        <div class="legend-row">
+          <div class="legend-markers">
+            <span class="legend-marker marker-pred-yours"></span>
+            <span class="legend-marker marker-pred-ref"></span>
+          </div>
+          <div class="legend-label">Predicted Data</div>
+        </div>
+        <div class="legend-row">
+          <div class="legend-markers">
+            <span class="legend-marker marker-expt-yours"></span>
+            <span class="legend-marker marker-expt-ref"></span>
+          </div>
+          <div class="legend-label">Experimental Data (Within Range)</div>
+        </div>
+        <div class="legend-row">
+          <div class="legend-markers">
+            <span class="legend-marker marker-exceeds-yours"></span>
+            <span class="legend-marker marker-exceeds-ref"></span>
+          </div>
+          <div class="legend-label">Experimental Data (Exceeds Best Bound)</div>
+        </div>
+        <div class="legend-row">
+          <div class="legend-markers">
+            <span class="legend-marker marker-below-yours"></span>
+            <span class="legend-marker marker-below-ref"></span>
+          </div>
+          <div class="legend-label">Experimental Data (Below Worst Bound)</div>
+        </div>
+        
+        <!-- Add category legend below existing legend -->
+        ${categoryLegendHtml}
+      </div>
+      
+      <div class="chart-container">
+        <canvas id="maturityChart"></canvas>
+      </div>
     </div>
   `;
   
@@ -210,6 +294,7 @@ CMPortal.benchmarkRadar.customRadarPlugin = function() {
       const scale = chart.scales.r;
       const radius = scale.drawingArea;
       const cx = scale.xCenter, cy = scale.yCenter;
+      
       ctx.save();
       CMPortal.benchmarkRadar.drawCustomGrid(ctx, cx, cy, radius);
       ctx.restore();
@@ -346,7 +431,8 @@ CMPortal.benchmarkRadar.prepareChartData = function() {
     const refStyle = CMPortal.benchmarkRadar.getDataPointStyling(refFlag, true);
     refBg.push(refStyle.bg);
     refBorder.push(refStyle.border);
-    refRadius.push(refStyle.radius);});
+    refRadius.push(refStyle.radius);
+  });
   
   // Return the prepared data
   return {
@@ -416,7 +502,18 @@ CMPortal.benchmarkRadar.initChart = function() {
           min: 0, 
           max: 1,
           ticks: { display: false },
-          pointLabels: { font: { size: 11 } },
+          pointLabels: { 
+            font: { size: 12 },
+            padding: 12, // Add padding to make more space for labels
+            color: function(context) {
+              // Get the indicator label
+              const index = context.index;
+              const indicatorLabel = CMPortal.benchmarkRadar.indicators[index].label;
+              
+              // Return the color for the category this indicator belongs to
+              return CMPortal.benchmarkRadar.getCategoryInfo(indicatorLabel).color;
+            }
+          },
           grid: { display: false },
           angleLines: { display: false }
         }
@@ -448,14 +545,36 @@ CMPortal.benchmarkRadar.initChart = function() {
               
               let kind = CMPortal.benchmarkRadar.getFlagDescription(flag);
               
-              return `${protocolName}: ${kind}: ${qv} of ${indicator.rings} quantiles`;
+              // Get category info for the indicator
+              const categoryInfo = CMPortal.benchmarkRadar.getCategoryInfo(indicator.label);
+              
+              // Include category in tooltip
+              return `${protocolName}: ${kind}: ${qv} of ${indicator.rings} quantiles (${categoryInfo.icon} ${categoryInfo.name})`;
             }
           }
         }
       },
-      elements: { line: { tension: 0.2 } }, // Slightly increased tension for smoother lines
+      elements: { 
+        line: { 
+          tension: 0.2,
+          borderWidth: 3 // Thicker lines for better visibility
+        }, 
+        point: {
+          radius: 5,      // Slightly larger default points
+          hoverRadius: 8, // Larger radius on hover
+          hitRadius: 10   // Larger hit radius for easier selection
+        }
+      },
       responsive: true, 
       maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 10,     // Add padding to ensure the chart stays within bounds
+          bottom: 10,
+          left: 10,
+          right: 10
+        }
+      },
       animation: {
         duration: 1000,
         easing: 'easeOutQuart',
@@ -479,6 +598,20 @@ CMPortal.benchmarkRadar.initChart = function() {
     const referenceProtocol = CMPortal.benchmarkRadar.benchmarkData[refIndex];
     document.getElementById('refLabel').textContent = referenceProtocol[0];
   }
+  
+  // Add a resize handler to ensure the chart fills the space when window resizes
+  window.addEventListener('resize', function() {
+    if (CMPortal.benchmarkRadar.chart) {
+      CMPortal.benchmarkRadar.chart.resize();
+    }
+  });
+
+  // Force resize after chart is created
+  setTimeout(function() {
+    if (CMPortal.benchmarkRadar.chart) {
+      CMPortal.benchmarkRadar.chart.resize();
+    }
+  }, 500);
 };
 
 // Move to next reference protocol
@@ -497,60 +630,6 @@ CMPortal.benchmarkRadar.nextReference = function() {
     // Update the chart
     CMPortal.benchmarkRadar.updateChart();
   }
-};
-
-// Get the next reference data for smooth transition
-CMPortal.benchmarkRadar.getNextReferenceData = function() {
-  if (!CMPortal.benchmarkRadar.benchmarkData || CMPortal.benchmarkRadar.benchmarkData.length <= 1) {
-    return null;
-  }
-  
-  // Get next reference index (with wrap-around)
-  const nextRefIndex = (CMPortal.benchmarkRadar.currentRefIndex + 1) % (CMPortal.benchmarkRadar.benchmarkData.length - 1) + 1;
-  
-  // Get reference protocol data
-  const referenceProtocol = CMPortal.benchmarkRadar.benchmarkData[nextRefIndex];
-  const referenceProtocolName = referenceProtocol[0];
-  const referenceProtocolData = referenceProtocol[1];
-  
-  // Prepare data arrays
-  const refData = [], refBg = [], refBorder = [], refRadius = [];
-  
-  // Process reference data
-  CMPortal.benchmarkRadar.indicators.forEach(indicator => {
-    const id = indicator.label;
-    const rings = indicator.rings;
-    
-    // Get the reference data for this indicator
-    const refValue = referenceProtocolData[id] || ['Q1', 0]; // Default to Q1 if not found
-    const refQuantile = refValue[0];
-    const refFlag = refValue[1];
-    
-    // Calculate the ring position (value from 0 to 1)
-    const refQNum = parseFloat(refQuantile.replace('Q', ''));
-    const refRingPos = (rings - (refQNum - 1)) / rings;
-    
-    // Add to reference data arrays
-    refData.push(refRingPos);
-    
-    // Get styling based on flag
-    const refStyle = CMPortal.benchmarkRadar.getDataPointStyling(refFlag, true);
-    refBg.push(refStyle.bg);
-    refBorder.push(refStyle.border);
-    refRadius.push(refStyle.radius);
-  });
-  
-  return {
-    label: referenceProtocolName,
-    data: refData,
-    backgroundColor: 'rgba(255,99,132,0.3)',
-    borderColor: 'rgba(255,99,132,1)',
-    borderWidth: 2,
-    pointBackgroundColor: refBg,
-    pointBorderColor: refBorder,
-    pointRadius: refRadius,
-    pointStyle: 'circle'
-  };
 };
 
 // Update the chart with new data - with smooth transitions
@@ -583,23 +662,19 @@ CMPortal.benchmarkRadar.updateChart = function() {
     // Only update the reference dataset (index 1) properties
     const dataset = CMPortal.benchmarkRadar.chart.data.datasets[1];
     
-    // For smoother transitions, update each property separately
-    // with different animation durations
-    
     // First update dataset label
     dataset.label = chartData.datasets[1].label;
     
     // Then animate the data points positions
-    // This ensures Chart.js creates a smooth animation between values
     dataset.data = chartData.datasets[1].data;
     
-    // Update the styling with a slight delay to create a staggered animation effect
+    // Update the styling with a slight delay for staggered animation
     setTimeout(() => {
       dataset.pointBackgroundColor = chartData.datasets[1].pointBackgroundColor;
       dataset.pointBorderColor = chartData.datasets[1].pointBorderColor;
       dataset.pointRadius = chartData.datasets[1].pointRadius;
       
-      // Force chart update with specific animation options for smoother transitions
+      // Force chart update with specific animation options
       CMPortal.benchmarkRadar.chart.update({
         duration: 800,
         easing: 'easeInOutQuart',

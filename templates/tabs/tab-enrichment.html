@@ -1,5 +1,25 @@
 <!-- tab-enrichment.html -->
-<p>Retrieve enrichments and protocols by application regardless of their intended purpose using outcome-specific features.</p>
+<div class="well">
+  <h4>How To Use The Enrichment Browser</h4>
+  <ul>
+      <li><strong>Step 1:</strong> Select a target parameter/outcome from the dropdown menu (e.g., "Best Contractile Force" or "Disease Modeling").</li>
+      <li><strong>Step 2:</strong> Review the enrichment results table showing protocol features significantly associated with your selected outcome.</li>
+      <li><strong>Step 3:</strong> Use the "Filter records" search box to narrow down results by specific terms or values.</li>
+      <li><strong>Important Note:</strong> The enrichment analysis may include protocols that don't directly report your selected metric. This is intentional and part of the data mining approach—we analyze which features are statistically overrepresented across the entire dataset, even in studies that measure related but different outcomes.</li>
+      <li><strong>Results Explanation:</strong>
+          <ul>
+              <li>Target Label: The outcome you selected</li>
+              <li>Feature: Specific protocol component or characteristic</li>
+              <li>Importance: Statistical measure of association strength</li>
+              <li>P-value: Statistical significance (lower values = stronger evidence)</li>
+              <li>Category: Which experimental domain the feature belongs to</li>
+          </ul>
+      </li>
+      <li><strong>Data Source:</strong> Results are derived from our comprehensive database of 322 hiPSC-CM protocols using advanced statistical techniques.</li>
+      <li><strong>Export:</strong> Use the "Export CSV" button to download results for your own analysis.</li>
+  </ul>
+</div>
+
 &nbsp;
 
 <!-- Full-width form container with flex layout removed -->

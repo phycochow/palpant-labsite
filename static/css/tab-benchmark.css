@@ -1,4 +1,4 @@
-/* tab-benchmark.css with shared container styling */
+/* tab-benchmark.css with improved compact radar layout */
 
 /* Inherit styles from tab-search.css for consistency */
 .search-row {
@@ -493,328 +493,384 @@
   font-size: 1.5rem;
 }
 
-/* ----- RADAR CHART STYLES ----- */
-/* Container styling */
-.container {
-  max-width: 900px; 
-  margin: 20px auto 0;
-  background: #fff; 
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-
-/* Chart container */
-.chart-container {
-  position: relative;
-  height: 70vh; 
-  width: 80vw; 
-  max-width: 800px;
+/* ----- COMPACT RADAR CHART STYLES ----- */
+/* New compact layout container */
+.compact-container {
+  max-width: 1000px;
   margin: 0 auto;
+  background: #fff;
+  border-radius: 8px;
+  padding: 15px;
+  box-sizing: border-box;
 }
 
-/* Next reference button */
-.btn {
-  background: #3498db; 
-  color: #fff; 
-  border: none;
-  padding: 10px 20px; 
+/* Top info box */
+.info-box-top {
+  background: #f1f8ff;
+  border: 1px solid #cce5ff;
   border-radius: 4px;
-  cursor: pointer; 
+  padding: 8px 15px;
+  text-align: center;
   font-size: 14px;
-  margin: 20px auto; 
-  display: block;
-  transition: background-color 0.3s;
+  color: #0c5460;
+  margin-bottom: 15px;
 }
 
-.btn:hover { 
-  background: #2980b9; 
-}
-
-/* Legend styling */
-.legend, .legend-custom {
-  display: flex; 
-  justify-content: center; 
-  gap: 20px;
-  margin-top: 10px; 
-  font-size: 14px; 
-  color: #2c3e50;
-  flex-wrap: wrap;
-}
-
-.legend-item { 
-  display: flex; 
-  align-items: center; 
-  gap: 5px; 
-}
-
-.legend-color {
-  width: 20px; 
-  height: 20px; 
-  border-radius: 50%;
-}
-
-/* Protocol colors */
-.your-protocol { 
-  background: rgba(54,162,235,0.5); 
-  border: 1px solid rgba(54,162,235,1); 
-}
-
-.reference { 
-  background: rgba(255,99,132,0.5); 
-  border: 1px solid rgba(255,99,132,1); 
-}
-
-/* Custom legend */
-.legend-custom {
-  margin-top: 20px;
-  margin-bottom: 20px;
+/* Protocol selector row */
+.protocol-selector {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 10px;
+  border: 1px solid #e9ecef;
   border-radius: 4px;
   background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
+  margin-bottom: 15px;
 }
 
+.protocol-labels {
+  display: flex;
+  gap: 25px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Main content with legend and chart */
+.radar-content {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.legend-panel {
+  width: 280px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+}
+
+.legend-panel h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.chart-container {
+  flex: 1;
+  height: 450px;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 10px;
+  position: relative;
+}
+
+/* Enhanced legend rows */
 .legend-row {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
-  width: 100%;
-}
-
-.legend-label {
-  flex: 1;
-  margin-left: 10px;
+  margin-bottom: 12px;
 }
 
 .legend-markers {
   display: flex;
   gap: 5px;
-  width: 60px;
-  justify-content: flex-end;
+  min-width: 35px;
+}
+
+.legend-label {
+  font-size: 13px;
+  margin-left: 8px;
+}
+
+/* Markers and colors */
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.your-protocol {
+  background: rgba(54,162,235,0.5);
+  border: 1px solid rgba(54,162,235,1);
+}
+
+.reference {
+  background: rgba(255,99,132,0.5);
+  border: 1px solid rgba(255,99,132,1);
 }
 
 .legend-marker {
-  display: inline-block; 
-  width: 12px; 
+  display: inline-block;
+  width: 12px;
   height: 12px;
   border-radius: 50%;
   vertical-align: middle;
 }
 
-/* Your Protocol Markers */
+/* Protocol Markers */
 .marker-pred-yours {
-  background-color: #fff; 
+  background-color: #fff;
   border: 2px solid rgba(54,162,235,1);
 }
 
 .marker-expt-yours {
-  background-color: rgba(30,120,190,1); 
+  background-color: rgba(30,120,190,1);
   border: none;
 }
 
 .marker-exceeds-yours {
-  background-color: rgba(10,60,110,1); 
+  background-color: rgba(10,60,110,1);
   border: none;
 }
 
 .marker-below-yours {
-  background-color: rgba(100,180,235,1); 
+  background-color: rgba(100,180,235,1);
   border: none;
 }
 
 /* Reference Markers */
 .marker-pred-ref {
-  background-color: #fff; 
+  background-color: #fff;
   border: 2px solid rgba(255,99,132,1);
 }
 
 .marker-expt-ref {
-  background-color: rgba(255,99,132,1); 
+  background-color: rgba(255,99,132,1);
   border: none;
 }
 
 .marker-exceeds-ref {
-  background-color: rgba(180,50,80,1); 
+  background-color: rgba(180,50,80,1);
   border: none;
 }
 
 .marker-below-ref {
-  background-color: rgba(255,170,192,1); 
+  background-color: rgba(255,170,192,1);
   border: none;
 }
 
-/* Info box */
-.info-box {
-  background: #f1f8ff; 
-  border: 1px solid #cce5ff;
-  border-radius: 4px; 
-  padding: 10px 15px;
-  margin-top: 20px; 
-  font-size: 14px; 
-  color: #0c5460;
-}
-
-/* Responsive adjustments for the radar chart */
-@media (max-width: 768px) {
-  .chart-container {
-    height: 50vh;
-    width: 95vw;
-  }
-  
-  .legend, .legend-custom {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .info-box {
-    margin-left: 10px;
-    margin-right: 10px;
-  }
-  
-  .reference-pair .upload-pair {
-    flex-direction: column;
-  }
-  
-  .search-row {
-    flex-direction: column;
-  }
-  
-  .search-ui-container {
-    width: 100%;
-    margin-bottom: 15px;
-  }
-  
-  .step-header {
-    flex-wrap: wrap;
-  }
-  
-  .step-status {
-    width: 100%;
-    margin-top: 5px;
-    margin-left: 0;
-    text-align: center;
-  }
-}
-
-/* Add these new styles to tab-benchmark.css */
-
-/* Button container for centered Next Reference button */
-.button-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 20px auto;
-  width: 100%;
-}
-
-/* Improved button styling */
+/* Next Reference button */
 #regenerateBtn {
   background: #3498db;
   color: #fff;
   border: none;
-  padding: 12px 30px;
+  padding: 8px 15px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 15px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  font-size: 14px;
+  transition: background-color 0.3s;
 }
 
 #regenerateBtn:hover {
   background: #2980b9;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
-#regenerateBtn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 3px rgba(0,0,0,0.1);
-}
-
-/* Transition for reference label */
+/* Transitions */
 #refLabel {
   transition: opacity 0.3s ease;
 }
 
-/* Improved chart container with better spacing */
-.chart-container {
-  position: relative;
-  height: 65vh;
-  width: 80vw;
-  max-width: 800px;
-  margin: 10px auto 20px;
+/* Responsive adjustments for compact layout */
+@media (max-width: 900px) {
+  .radar-content {
+    flex-direction: column;
+  }
+  
+  .legend-panel {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+  
+  .protocol-selector {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .protocol-labels {
+    width: 100%;
+    justify-content: space-around;
+  }
+  
+  .chart-container {
+    height: 350px;
+  }
 }
 
-/* Add a subtle animation for radar chart container */
-.container {
-  animation: fadeIn 0.8s ease;
+@media (max-width: 600px) {
+  .protocol-labels {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .legend-row {
+    margin-bottom: 10px;
+  }
+  
+  .info-box-top {
+    font-size: 12px;
+  }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Make the container fill more width */
+.compact-container {
+  max-width: 100%;
+  width: 100%;
+  padding: 10px;
+  margin: 0;
 }
 
-/* Legend item hover effect */
-.legend-item {
-  transition: transform 0.2s ease;
+/* Adjust the info box to be more compact */
+.info-box-top {
+  margin-bottom: 10px;
+  padding: 6px 10px;
 }
 
-.legend-item:hover {
-  transform: translateY(-2px);
-}
-
-/* Make chart points slightly larger for better visibility */
-.chart-point {
-  transform-origin: center;
-  transition: transform 0.3s ease;
-}
-
-.chart-point:hover {
-  transform: scale(1.2);
-}
-
-/* Improve legend styling */
-.legend-custom {
-  margin: 25px auto;
-  padding: 15px;
-  border-radius: 8px;
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  max-width: 90%;
-}
-
-/* Add subtle animation to legend rows on hover */
-.legend-row {
-  transition: background-color 0.2s ease;
+/* Make protocol selector more compact */
+.protocol-selector {
   padding: 8px 10px;
-  border-radius: 4px;
+  margin-bottom: 10px;
 }
 
-.legend-row:hover {
-  background-color: rgba(0,0,0,0.03);
+/* Optimize the legend and chart layout */
+.radar-content {
+  gap: 15px;
 }
 
-/* Improved styling for info box */
-.info-box {
-  background: #f1f8ff;
-  border: 1px solid #cce5ff;
-  border-radius: 6px;
-  padding: 15px 20px;
-  margin: 25px auto 0;
+/* Make legend panel narrower */
+.legend-panel {
+  width: 220px;
+  padding: 10px;
+  flex-shrink: 0;
+}
+
+/* Increase chart size */
+.chart-container {
+  flex: 1;
+  height: 550px; /* Taller chart */
+  min-width: 70%; /* Ensure chart takes at least 70% of the width */
+}
+
+/* Make legends more compact */
+.legend-row {
+  margin-bottom: 8px;
+}
+
+/* Optimize the overall layout */
+#benchmark-results-container {
+  padding: 15px;
+}
+
+/* Remove extra margin around header */
+#benchmark-results-container h3 {
+  margin-bottom: 10px;
+}
+
+/* Optimize for larger screens */
+@media (min-width: 1200px) {
+  .chart-container {
+    height: 650px; /* Even taller on large screens */
+  }
+  
+  .legend-panel {
+    width: 250px; /* Slightly wider on large screens */
+  }
+}
+
+/* Ensure chart fills the space horizontally */
+canvas#maturityChart {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Category legend section */
+.category-legend {
+  margin-top: 20px;
+  border-top: 1px solid #e9ecef;
+  padding-top: 15px;
+}
+
+.category-legend h4 {
+  margin-top: 0;
+  margin-bottom: 12px;
   font-size: 14px;
-  color: #0c5460;
-  max-width: 90%;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  font-weight: bold;
 }
 
-/* Make markers more interactive */
-.legend-marker {
-  transition: transform 0.2s ease;
+.category-legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.legend-marker:hover {
-  transform: scale(1.2);
+.category-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.category-icon {
+  font-size: 12px;
+  width: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.category-name {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+/* Adjust the legend panel width to accommodate category names */
+.legend-panel {
+  width: 250px;
+  padding: 15px;
+}
+
+/* Chart container fills more space */
+.chart-container {
+  flex: 1;
+  height: 550px; /* Taller chart */
+  min-width: 70%; /* Ensure chart takes at least 70% of the width */
+  padding: 20px;
+}
+
+/* Make the container fill more width */
+.compact-container {
+  max-width: 100%;
+  width: 100%;
+  padding: 10px;
+  margin: 0;
+}
+
+/* Ensure chart fills the space horizontally */
+canvas#maturityChart {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Responsive adjustments for category legend */
+@media (max-width: 900px) {
+  .category-legend-items {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .legend-panel {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .category-legend-items {
+    display: flex;
+    flex-direction: column;
+  }
 }
