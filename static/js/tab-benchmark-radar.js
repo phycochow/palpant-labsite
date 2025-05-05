@@ -141,7 +141,6 @@ CMPortal.benchmarkRadar.createRadarContainer = function() {
     <div class="info-box">
       <strong>Chart Interpretation:</strong>
       Outer rings (higher values) = more adult-like; inner rings = more fetal-like.
-      Each indicator has its own number of quantile bins (2–5).
     </div>
   `;
   
