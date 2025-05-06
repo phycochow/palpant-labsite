@@ -9,6 +9,9 @@ import csv
 import tempfile
 import shutil
 import traceback
+import threading
+import time
+from werkzeug.utils import secure_filename
 from PyPDF2 import PdfReader
 
 # Set up dedicated uploads directory
@@ -16,7 +19,8 @@ import os
 import tempfile
 
 # Set temp directory to our custom uploads folder
-tempfile.tempdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+tempfile.tempdir = UPLOAD_FOLDER
 # Create the directory if it doesn't exist
 os.makedirs(tempfile.tempdir, exist_ok=True)
 
@@ -29,12 +33,16 @@ app = Flask(__name__)
 app.logger.setLevel('INFO')
 app.logger.info('Flask application startup')
 
+# Set maximum file size (450KB)
+app.config['MAX_CONTENT_LENGTH'] = 450 * 1024  # 450KB in bytes
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 # ----- Centralized dataset paths -----
 DATA_DIR = os.path.join(app.static_folder, 'datasets')
 DATASET_PATHS = {
     'target_param_filepath': os.path.join(DATA_DIR, '0_TargetParameters_12Apr25.csv'),
     'feature_categories_filepath': os.path.join(DATA_DIR, '0_FeatureCategories_01Mar25.csv'),
-    'causal_feature_categories_filepath': os.path.join(DATA_DIR, '0_CausalFeatureCategories_04Mar25.csv'),  # Added new path
+    'causal_feature_categories_filepath': os.path.join(DATA_DIR, '0_CausalFeatureCategories_04Mar25.csv'),
     'enrich_filepath': os.path.join(DATA_DIR, '1_PermutatedImportancesTRUE_02May25.csv'),
     'cleaned_database_filepath': os.path.join(DATA_DIR, '0_CleanedDatabase_25Feb25.csv'),
     'binary_filepath': os.path.join(DATA_DIR, '1_BinaryFeatures_25Feb25.csv'),
@@ -56,7 +64,7 @@ from data_manager import (
     get_cleaned_df,
     get_target_feature_dict,
     get_categories_dict,
-    get_causal_categories_dict,  # Import the new function
+    get_causal_categories_dict,
     get_candidates
 )
 
@@ -71,12 +79,62 @@ from utils import (
 FeatureCategories_dict, TargetParameters_dict, CausalFeatureCategories_dict = load_lookup_tables(
     DATASET_PATHS['feature_categories_filepath'], 
     DATASET_PATHS['target_param_filepath'],
-    DATASET_PATHS['causal_feature_categories_filepath']  # Add the new file path
+    DATASET_PATHS['causal_feature_categories_filepath']
 )
-
 
 # Cache for benchmark results to avoid reprocessing
 _benchmark_results_cache = {}
+
+# Function to clean up uploaded files
+def cleanup_uploads():
+    """Delete files in the uploads directory that are older than 20 minutes"""
+    while True:
+        try:
+            current_time = time.time()
+            # Wait 20 minutes between cleanups
+            time.sleep(1200)  # 20 minutes in seconds
+            
+            # Get all files in uploads directory
+            for filename in os.listdir(app.config['UPLOAD_FOLDER']):
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                # Check if it's a file (not a directory)
+                if os.path.isfile(file_path):
+                    # Get file's last modification time
+                    file_mod_time = os.path.getmtime(file_path)
+                    # If file is older than 20 minutes
+                    if current_time - file_mod_time > 1200:  # 20 minutes in seconds
+                        try:
+                            os.remove(file_path)
+                            app.logger.info(f"Deleted old upload: {filename}")
+                        except Exception as e:
+                            app.logger.error(f"Error deleting {filename}: {e}")
+                            
+            # Also clean up any temporary directories
+            for dirname in os.listdir('/tmp'):
+                if dirname.startswith('benchmark_'):
+                    dir_path = os.path.join('/tmp', dirname)
+                    if os.path.isdir(dir_path):
+                        dir_mod_time = os.path.getmtime(dir_path)
+                        if current_time - dir_mod_time > 1200:
+                            try:
+                                shutil.rmtree(dir_path)
+                                app.logger.info(f"Deleted old temp directory: {dirname}")
+                            except Exception as e:
+                                app.logger.error(f"Error deleting directory {dirname}: {e}")
+        except Exception as e:
+            app.logger.error(f"Error in cleanup thread: {e}")
+
+# Start the cleanup thread
+cleanup_thread = threading.Thread(target=cleanup_uploads, daemon=True)
+cleanup_thread.start()
+
+# Error handler for file too large
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    return jsonify({
+        'status': 'error',
+        'message': 'File too large. Maximum allowed size is 450KB.'
+    }), 413
 
 # ----- API Routes -----
 @app.route('/api/enrichment_data', methods=['GET'])
@@ -265,6 +323,23 @@ def submit_benchmark():
     temp_dir = tempfile.mkdtemp(prefix="benchmark_")
     
     try:
+        # Check file sizes before processing - this is a secondary check
+        # The primary check is done by Flask with MAX_CONTENT_LENGTH
+        for key, file in request.files.items():
+            if file and file.filename:
+                # Read file data into memory to check size
+                file_data = file.read()
+                file_size = len(file_data)
+                
+                if file_size > app.config['MAX_CONTENT_LENGTH']:
+                    return jsonify({
+                        'status': 'error',
+                        'message': f'File {file.filename} is too large. Maximum allowed size is 450KB.'
+                    }), 413
+                
+                # Reset file pointer after reading
+                file.seek(0)
+        
         # Access files uploaded in the request
         protocol_file = request.files.get('protocol_file')
         experimental_file = request.files.get('experimental_file')
@@ -293,18 +368,22 @@ def submit_benchmark():
             ref_protocol = request.files.get(f'ref_protocol_{i}')
             ref_data = request.files.get(f'ref_data_{i}')
             if ref_protocol and ref_data:
+                # Secure the filenames
+                ref_protocol_filename = secure_filename(ref_protocol.filename)
+                ref_data_filename = secure_filename(ref_data.filename)
+                
                 # Save files to temp directory
-                ref_protocol_path = os.path.join(temp_dir, f"ref_protocol_{i}_{ref_protocol.filename}")
-                ref_data_path = os.path.join(temp_dir, f"ref_data_{i}_{ref_data.filename}")
+                ref_protocol_path = os.path.join(temp_dir, f"ref_protocol_{i}_{ref_protocol_filename}")
+                ref_data_path = os.path.join(temp_dir, f"ref_data_{i}_{ref_data_filename}")
                 
                 ref_protocol.save(ref_protocol_path)
                 ref_data.save(ref_data_path)
                 
                 reference_data.append({
                     'protocol_path': ref_protocol_path,
-                    'protocol_name': ref_protocol.filename,
+                    'protocol_name': ref_protocol_filename,
                     'data_path': ref_data_path,
-                    'data_name': ref_data.filename
+                    'data_name': ref_data_filename
                 })
         
         # Validate required inputs
@@ -320,18 +399,20 @@ def submit_benchmark():
         # Preprocess main files
         protocol_data = None
         if protocol_file:
-            protocol_path = os.path.join(temp_dir, protocol_file.filename)
+            protocol_filename = secure_filename(protocol_file.filename)
+            protocol_path = os.path.join(temp_dir, protocol_filename)
             protocol_file.save(protocol_path)
             protocol_data = {
                 'path': protocol_path,
-                'name': protocol_file.filename
+                'name': protocol_filename
             }
         
-        experimental_path = os.path.join(temp_dir, experimental_file.filename)
+        experimental_filename = secure_filename(experimental_file.filename)
+        experimental_path = os.path.join(temp_dir, experimental_filename)
         experimental_file.save(experimental_path)
         experimental_data = {
             'path': experimental_path,
-            'name': experimental_file.filename
+            'name': experimental_filename
         }
         
         # Process the data and generate results
@@ -546,6 +627,7 @@ if __name__ == '__main__':
 # sudo systemctl start flaskapp
 # sudo systemctl enable flaskapp
 # sudo systemctl status flaskapp
+# sudo systemctl restart nginx
 
 # Changes to other files like html and css require:
 # sudo systemctl daemon-reload
