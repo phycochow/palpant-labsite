@@ -34,7 +34,7 @@ app.logger.setLevel('INFO')
 app.logger.info('Flask application startup')
 
 # Set maximum file size (450KB)
-app.config['MAX_CONTENT_LENGTH'] = 450 * 1024  # 450KB in bytes
+app.config['MAX_CONTENT_LENGTH'] = 5000 * 1024  # 450KB in bytes
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # ----- Centralized dataset paths -----
