@@ -1,15 +1,51 @@
 <div class="well">
+  <h4>How to Use Variable Search</h4>
   <p>
-    Retrieve protocols by target parameters regardless of their intended purpose using outcome-specific features (Fig 2j).
+    Find protocols across the database based on specific features, target outcomes, or a combination of both.
   </p>
   
   <ul style="list-style-type: none; padding-left: 0; margin-top: 10px;">
-    <li><strong>Protocol Feature:</strong> Broad term for any variable in experiment design, study characteristics, or outcomes.</li>
-    <li><strong>Feature Category:</strong> Classification of protocol features (e.g., Protocol Variable, Analysis Method, Cell Profile, Study Characteristic, Measured Endpoint).</li>
-    <li><strong>Target Parameter/Topic/Label:</strong> A feature of interest, typically a study characteristic or outcome.</li>
-    <li><strong>Topic/Parameter Category:</strong> Groups for target parameters (e.g., Cell Profile, Disease Modelling, Drug Testing, Best/Worst/Average Maturation).</li>
-    <li><strong>Enrichment / Enriched Feature:</strong> A feature associated with a target parameter via data mining; not always statistically significant by conventional tests.</li>
-    <li><strong>One-hot Encoding:</strong> Converts categorical variables into binary format for analysis.</li>
+    <li><strong>Step 1: Select a Search Mode</strong>
+      <ul>
+        <li><strong>Normal Mode:</strong> Find protocols that contain ALL selected features</li>
+        <li><strong>Enrichment Mode:</strong> Find protocols based on a target topic's key characteristics</li>
+        <li><strong>Combined Mode:</strong> Find protocols by target topic and filter by specific features</li>
+      </ul>
+    </li>
+    <li><strong>Step 2: Select Search Parameters</strong>
+      <ul>
+        <li><strong>For Normal Mode:</strong> Select specific protocol features from the right panel</li>
+        <li><strong>For Enrichment Mode:</strong> Select a target topic/outcome from the left panel</li>
+        <li><strong>For Combined Mode:</strong> Select both a target topic AND specific features</li>
+      </ul>
+    </li>
+    <li><strong>Step 3 (Optional): Apply Enrichment Category Filters</strong>
+      <ul>
+        <li>When using Enrichment or Combined modes, you can filter by feature categories</li>
+        <li>The toggle buttons help focus on specific aspects like Protocol Variables, Analysis Methods, etc.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h4>Search Results</h4>
+  <p>
+    Results are displayed in a table showing:
+  </p>
+  
+  <ul style="list-style-type: none; padding-left: 0;">
+    <li><strong>Protocol ID:</strong> Unique identifier for each protocol</li>
+    <li><strong>Title:</strong> Title or description of the protocol</li>
+    <li><strong>DOI:</strong> Digital Object Identifier (clickable link to the publication)</li>
+    <li><strong>Similarity Rank:</strong> In Normal mode, shows how closely the protocol matches your criteria</li>
+    <li><strong>Feature Found:</strong> In Enrichment mode, shows which categories contain matching features</li>
+  </ul>
+
+  <p><strong>Tips:</strong></p>
+  <ul style="list-style-type: none; padding-left: 0;">
+    <li>• Use the "Filter records" box to further narrow down results</li>
+    <li>• Export your results to CSV using the Export button</li>
+    <li>• For broader results, select fewer features in Normal mode</li>
+    <li>• For more specific results, use Combined mode with multiple constraints</li>
   </ul>
 </div>
 

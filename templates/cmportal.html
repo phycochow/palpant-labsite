@@ -53,33 +53,34 @@
         <div class="card-body">
             <!-- Tab Navigation -->
             <div class="tab-nav">
+                <div class="tab-link active" data-tab="tab-video">Video Tutorial</div>
                 <div class="tab-link" data-tab="tab-search">Variable Search</div>
                 <div class="tab-link" data-tab="tab-enrichment">Enrichment Browser</div>
-                <div class="tab-link active" data-tab="tab-viewer">Database Viewer</div>
+                <div class="tab-link" data-tab="tab-viewer">Database Viewer</div>
                 <div class="tab-link" data-tab="tab-benchmark">Protocol Benchmarking</div>
             </div>
-            
-            <!-- Tab 1 Variable Search -->
+
+            <!-- 2. Add the Video tab as the first content div -->
+            <div id="tab-video" class="tab-content active">
+                {% include 'tabs/tab-video.html' %}
+            </div>
+
+            <!-- 3. Update the other tabs to not have "active" class initially -->
             <div id="tab-search" class="tab-content">
                 {% include 'tabs/tab-search.html' %}
             </div>
-            
-            <!-- Tab 2 Database Enrichments -->
+
             <div id="tab-enrichment" class="tab-content">
                 {% include 'tabs/tab-enrichment.html' %}
             </div>
 
-            <!-- Tab 3 Database Viewer -->
-            <div id="tab-viewer" class="tab-content active">
+            <div id="tab-viewer" class="tab-content">
                 {% include 'tabs/tab-viewer.html' %}
             </div>
-            
-            <!-- Tab 4 Protocol Benchmarking -->
+
             <div id="tab-benchmark" class="tab-content">
                 {% include 'tabs/tab-benchmark.html' %}
             </div>
-        </div>
-    </div>
     
     <!-- Custom JavaScript -->
     <script src="{{ url_for('static', filename='js/cmportal-base.js') }}"></script>
