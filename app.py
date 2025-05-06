@@ -11,6 +11,15 @@ import shutil
 import traceback
 from PyPDF2 import PdfReader
 
+# Set up dedicated uploads directory
+import os
+import tempfile
+
+# Set temp directory to our custom uploads folder
+tempfile.tempdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+# Create the directory if it doesn't exist
+os.makedirs(tempfile.tempdir, exist_ok=True)
+
 # Configure logging
 logging.basicConfig(level=logging.INFO,
                    format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s')
@@ -297,15 +306,6 @@ def submit_benchmark():
                     'data_path': ref_data_path,
                     'data_name': ref_data.filename
                 })
-        
-        # Print for debugging (keep your existing debug code)
-        print(f"Protocol file: {protocol_file.filename if protocol_file else 'None'}")
-        print(f"Experimental file: {experimental_file.filename if experimental_file else 'None'}")
-        print(f"Selected features: {selected_features}")
-        print(f"Selected purpose: {selected_purpose}")
-        print(f"Selected protocol IDs: {selected_protocol_ids}")
-        print(f"Reference pairs: {reference_pairs}")
-        print(f"Reference files: {[{k: v for k, v in pair.items() if k.endswith('_name')} for pair in reference_data]}")
         
         # Validate required inputs
         if not experimental_file:
