@@ -1,34 +1,46 @@
-<div class="well">
+<div class="additional-info">
   <h4>Welcome to CMPortal</h4>
-  <p>
-    This portal provides tools to analyze and benchmark hiPSC-CM protocols. Watch the video below for a complete walkthrough of all features.
-  </p>
-  
-  <ul style="list-style-type: none; padding-left: 0; margin-top: 10px;">
-    <li><strong>Video Instructions:</strong> Complete demonstration of all portal features</li>
-    <li><strong>Database Viewer:</strong> Browse the complete database of 322 curated protocols</li>
-    <li><strong>Variable Search:</strong> Find protocols matching specific features or outcomes</li>
-    <li><strong>Enrichment Browser:</strong> Explore statistical associations between features and outcomes</li>
-    <li><strong>Protocol Benchmarking:</strong> Compare your protocol against established standards</li>
-  </ul>
+  <div class="info-grid">
+    <div class="info-card" onclick="activateTab('tab-viewer')">
+      <div class="info-icon">🔍</div>
+      <div class="info-title">Explore the Database</div>
+      <div class="info-desc">Browse all 322 protocols in the Database Viewer tab, with powerful filtering options.</div>
+    </div>
+    <div class="info-card" onclick="activateTab('tab-search')">
+      <div class="info-icon">🧪</div>
+      <div class="info-title">Find Specific Protocols</div>
+      <div class="info-desc">Use the Variable Search tab to find protocols with specific features or outcomes.</div>
+    </div>
+    <div class="info-card" onclick="activateTab('tab-enrichment')">
+      <div class="info-icon">📊</div>
+      <div class="info-title">Discover Protocol Patterns</div>
+      <div class="info-desc">Explore features of target topics in the Enrichment Browser tab.</div>
+    </div>
+    <div class="info-card" onclick="activateTab('tab-benchmark')">
+      <div class="info-icon">📈</div>
+      <div class="info-title">Evaluate Your Protocol</div>
+      <div class="info-desc">Upload your protocol in the Benchmarking tab to compare against established standards.</div>
+    </div>
+  </div>
+
+  &nbsp;
+
+  <div class="well">
+    <p>
+      Retrieve protocols by target parameters regardless of their intended purpose using outcome-specific features (Fig 2j).
+    </p>
+    
+    <ul style="list-style-type: none; padding-left: 0; margin-top: 10px;">
+      <li><strong>Protocol Feature:</strong> Broad term for any variable in experiment design, study characteristics, or outcomes.</li>
+      <li><strong>Feature Category:</strong> Classification of protocol features (e.g., Protocol Variable, Analysis Method, Cell Profile, Study Characteristic, Measured Endpoint).</li>
+      <li><strong>Target Parameter/Topic/Label:</strong> A feature of interest, typically a study characteristic or outcome.</li>
+      <li><strong>Topic/Parameter Category:</strong> Groups for target parameters (e.g., Cell Profile, Disease Modelling, Drug Testing, Best/Worst/Average Maturation).</li>
+      <li><strong>Enrichment / Enriched Feature:</strong> A feature associated with a target parameter via data mining; not always statistically significant by conventional tests.</li>
+      <li><strong>One-hot Encoding:</strong> Converts categorical variables into binary format for analysis.</li>
+    </ul>
+  </div>
+
 </div>
-
-
-<div class="well">
-  <p>
-    Retrieve protocols by target parameters regardless of their intended purpose using outcome-specific features (Fig 2j).
-  </p>
-  
-  <ul style="list-style-type: none; padding-left: 0; margin-top: 10px;">
-    <li><strong>Protocol Feature:</strong> Broad term for any variable in experiment design, study characteristics, or outcomes.</li>
-    <li><strong>Feature Category:</strong> Classification of protocol features (e.g., Protocol Variable, Analysis Method, Cell Profile, Study Characteristic, Measured Endpoint).</li>
-    <li><strong>Target Parameter/Topic/Label:</strong> A feature of interest, typically a study characteristic or outcome.</li>
-    <li><strong>Topic/Parameter Category:</strong> Groups for target parameters (e.g., Cell Profile, Disease Modelling, Drug Testing, Best/Worst/Average Maturation).</li>
-    <li><strong>Enrichment / Enriched Feature:</strong> A feature associated with a target parameter via data mining; not always statistically significant by conventional tests.</li>
-    <li><strong>One-hot Encoding:</strong> Converts categorical variables into binary format for analysis.</li>
-  </ul>
-</div>
-
 
 <div class="video-container">
   <div class="responsive-video-wrapper">
@@ -37,36 +49,27 @@
   </div>
 </div>
 
-<!-- Additional information section below the video -->
-<div class="additional-info">
-  <h4>Getting Started Guide</h4>
-  <div class="info-grid">
-    <div class="info-card">
-      <div class="info-icon">🔍</div>
-      <div class="info-title">Explore the Database</div>
-      <div class="info-desc">Browse all 322 protocols in the Database Viewer tab, with powerful filtering options.</div>
-    </div>
-    <div class="info-card">
-      <div class="info-icon">🧪</div>
-      <div class="info-title">Find Specific Protocols</div>
-      <div class="info-desc">Use the Variable Search tab to find protocols with specific features or outcomes.</div>
-    </div>
-    <div class="info-card">
-      <div class="info-icon">📊</div>
-      <div class="info-title">Discover Protocol Patterns</div>
-      <div class="info-desc">Explore statistical associations in the Enrichment Browser tab.</div>
-    </div>
-    <div class="info-card">
-      <div class="info-icon">📈</div>
-      <div class="info-title">Evaluate Your Protocol</div>
-      <div class="info-desc">Upload your protocol in the Benchmarking tab to compare against established standards.</div>
-    </div>
-  </div>
-</div>
-
-
-
-
+<!-- JavaScript function to handle tab activation -->
+<script>
+  function activateTab(tabId) {
+    // First, remove active class from all tabs
+    document.querySelectorAll('.tab-content, .tab-link').forEach(item => {
+      item.classList.remove('active');
+    });
+    
+    // Activate the selected tab content
+    document.getElementById(tabId).classList.add('active');
+    
+    // Also activate the corresponding tab link
+    document.querySelector(`.tab-link[data-tab="${tabId}"]`).classList.add('active');
+    
+    // Dispatch the tab-activated event for any functionality that depends on it
+    $(document).trigger('tab-activated', [tabId]);
+    
+    // Scroll to top to ensure the new tab is visible
+    window.scrollTo(0, 0);
+  }
+</script>
 
 <!-- Add some CSS for the video tab specifically -->
 <style>
@@ -117,11 +120,31 @@
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer; /* Add cursor pointer to indicate clickable */
+    position: relative; /* For hover effect */
+    overflow: hidden; /* For hover effect */
   }
   
   .info-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+  
+  /* Add a subtle overlay effect on hover to enhance clickability perception */
+  .info-card:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0);
+    transition: background 0.2s ease;
+    pointer-events: none;
+  }
+  
+  .info-card:hover:after {
+    background: rgba(0,0,0,0.02);
   }
   
   .info-icon {
