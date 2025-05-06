@@ -33,8 +33,8 @@ app = Flask(__name__)
 app.logger.setLevel('INFO')
 app.logger.info('Flask application startup')
 
-# Set maximum file size (450KB)
-app.config['MAX_CONTENT_LENGTH'] = 5000 * 1024  # 450KB in bytes
+# Set maximum file size (5MB)
+app.config['MAX_CONTENT_LENGTH'] = 5000 * 1024  # 5MB in bytes
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # ----- Centralized dataset paths -----
@@ -85,47 +85,70 @@ FeatureCategories_dict, TargetParameters_dict, CausalFeatureCategories_dict = lo
 # Cache for benchmark results to avoid reprocessing
 _benchmark_results_cache = {}
 
-# Function to clean up uploaded files
-def cleanup_uploads():
-    """Delete files in the uploads directory that are older than 20 minutes"""
+# Function to clean up temporary files and directories
+def cleanup_temp_files():
+    """
+    Clean up temporary files and directories periodically
+    This is a safety net in case any temp files aren't immediately deleted
+    """
     while True:
         try:
             current_time = time.time()
             # Wait 20 minutes between cleanups
             time.sleep(1200)  # 20 minutes in seconds
             
-            # Get all files in uploads directory
-            for filename in os.listdir(app.config['UPLOAD_FOLDER']):
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                # Check if it's a file (not a directory)
-                if os.path.isfile(file_path):
-                    # Get file's last modification time
-                    file_mod_time = os.path.getmtime(file_path)
-                    # If file is older than 20 minutes
-                    if current_time - file_mod_time > 1200:  # 20 minutes in seconds
-                        try:
-                            os.remove(file_path)
-                            app.logger.info(f"Deleted old upload: {filename}")
-                        except Exception as e:
-                            app.logger.error(f"Error deleting {filename}: {e}")
-                            
-            # Also clean up any temporary directories
-            for dirname in os.listdir('/tmp'):
-                if dirname.startswith('benchmark_'):
-                    dir_path = os.path.join('/tmp', dirname)
-                    if os.path.isdir(dir_path):
-                        dir_mod_time = os.path.getmtime(dir_path)
-                        if current_time - dir_mod_time > 1200:
+            app.logger.info("Running scheduled temp file cleanup")
+            
+            # 1. Clean up uploads directory
+            if os.path.exists(app.config['UPLOAD_FOLDER']):
+                for filename in os.listdir(app.config['UPLOAD_FOLDER']):
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    if os.path.isfile(file_path):
+                        # If file is older than 20 minutes
+                        if current_time - os.path.getmtime(file_path) > 1200:
                             try:
-                                shutil.rmtree(dir_path)
-                                app.logger.info(f"Deleted old temp directory: {dirname}")
+                                os.remove(file_path)
+                                app.logger.info(f"Deleted old upload: {filename}")
                             except Exception as e:
-                                app.logger.error(f"Error deleting directory {dirname}: {e}")
+                                app.logger.error(f"Error deleting {filename}: {e}")
+            
+            # 2. Clean up temporary benchmark directories
+            # Check system temp directory
+            system_temp = tempfile.gettempdir()
+            if os.path.exists(system_temp):
+                for dirname in os.listdir(system_temp):
+                    if dirname.startswith('benchmark_'):
+                        dir_path = os.path.join(system_temp, dirname)
+                        if os.path.isdir(dir_path):
+                            # If directory is older than 20 minutes
+                            if current_time - os.path.getmtime(dir_path) > 1200:
+                                try:
+                                    shutil.rmtree(dir_path)
+                                    app.logger.info(f"Deleted old temp directory: {dirname}")
+                                except Exception as e:
+                                    app.logger.error(f"Error deleting directory {dirname}: {e}")
+            
+            # 3. Also check for temp directories in /tmp if it exists and is different
+            if os.path.exists('/tmp') and '/tmp' != system_temp:
+                for dirname in os.listdir('/tmp'):
+                    if dirname.startswith('benchmark_'):
+                        dir_path = os.path.join('/tmp', dirname)
+                        if os.path.isdir(dir_path):
+                            # If directory is older than 20 minutes
+                            if current_time - os.path.getmtime(dir_path) > 1200:
+                                try:
+                                    shutil.rmtree(dir_path)
+                                    app.logger.info(f"Deleted old temp directory from /tmp: {dirname}")
+                                except Exception as e:
+                                    app.logger.error(f"Error deleting directory from /tmp {dirname}: {e}")
+            
+            app.logger.info("Finished scheduled temp file cleanup")
+                            
         except Exception as e:
             app.logger.error(f"Error in cleanup thread: {e}")
 
-# Start the cleanup thread
-cleanup_thread = threading.Thread(target=cleanup_uploads, daemon=True)
+# Start the cleanup thread as a daemon
+cleanup_thread = threading.Thread(target=cleanup_temp_files, daemon=True)
 cleanup_thread.start()
 
 # Error handler for file too large
@@ -133,7 +156,7 @@ cleanup_thread.start()
 def request_entity_too_large(error):
     return jsonify({
         'status': 'error',
-        'message': 'File too large. Maximum allowed size is 450KB.'
+        'message': 'File too large. Maximum allowed size is 5MB per file, with a total request size limit of 5MB.'
     }), 413
 
 # ----- API Routes -----
@@ -316,29 +339,29 @@ def filter_features():
 @app.route('/api/submit_benchmark', methods=['POST'])
 def submit_benchmark():
     """
-    Handle the benchmark form submission, preprocess all inputs into Python data structures,
-    then pass them to process_benchmark_data for actual processing.
+    Handle the benchmark form submission, processing files in memory where possible
+    and deleting temporary files immediately after use.
     """
     # Create temporary directory for file processing
-    temp_dir = tempfile.mkdtemp(prefix="benchmark_")
+    # Since PyPDF2 requires files on disk, we still need this
+    temp_dir = None
     
     try:
-        # Check file sizes before processing - this is a secondary check
-        # The primary check is done by Flask with MAX_CONTENT_LENGTH
+        # Check file sizes before processing
         for key, file in request.files.items():
             if file and file.filename:
-                # Read file data into memory to check size
-                file_data = file.read()
-                file_size = len(file_data)
+                # Check file size
+                file.seek(0, os.SEEK_END)
+                file_size = file.tell()
+                file.seek(0)  # Reset file pointer
                 
-                if file_size > app.config['MAX_CONTENT_LENGTH']:
+                # Individual file size limit (450KB)
+                individual_limit = 450 * 1024
+                if file_size > individual_limit:
                     return jsonify({
                         'status': 'error',
-                        'message': f'File {file.filename} is too large. Maximum allowed size is 450KB.'
+                        'message': f'File {file.filename} is too large. Maximum allowed size per file is 450KB.'
                     }), 413
-                
-                # Reset file pointer after reading
-                file.seek(0)
         
         # Access files uploaded in the request
         protocol_file = request.files.get('protocol_file')
@@ -362,30 +385,6 @@ def submit_benchmark():
             except json.JSONDecodeError:
                 return jsonify({'status': 'error', 'message': 'Invalid reference pairs data'})
         
-        # Access reference pair files and save them to temp directory
-        reference_data = []
-        for i in range(len(reference_pairs)):
-            ref_protocol = request.files.get(f'ref_protocol_{i}')
-            ref_data = request.files.get(f'ref_data_{i}')
-            if ref_protocol and ref_data:
-                # Secure the filenames
-                ref_protocol_filename = secure_filename(ref_protocol.filename)
-                ref_data_filename = secure_filename(ref_data.filename)
-                
-                # Save files to temp directory
-                ref_protocol_path = os.path.join(temp_dir, f"ref_protocol_{i}_{ref_protocol_filename}")
-                ref_data_path = os.path.join(temp_dir, f"ref_data_{i}_{ref_data_filename}")
-                
-                ref_protocol.save(ref_protocol_path)
-                ref_data.save(ref_data_path)
-                
-                reference_data.append({
-                    'protocol_path': ref_protocol_path,
-                    'protocol_name': ref_protocol_filename,
-                    'data_path': ref_data_path,
-                    'data_name': ref_data_filename
-                })
-        
         # Validate required inputs
         if not experimental_file:
             return jsonify({'status': 'error', 'message': 'Experimental data file is required'})
@@ -396,7 +395,11 @@ def submit_benchmark():
         if not protocol_file and not selected_features:
             return jsonify({'status': 'error', 'message': 'Either protocol file or feature selection is required'})
         
-        # Preprocess main files
+        # Create temporary directory only now that we've validated inputs
+        temp_dir = tempfile.mkdtemp(prefix="benchmark_")
+        app.logger.info(f"Created temporary directory: {temp_dir}")
+        
+        # Process main files
         protocol_data = None
         if protocol_file:
             protocol_filename = secure_filename(protocol_file.filename)
@@ -415,6 +418,28 @@ def submit_benchmark():
             'name': experimental_filename
         }
         
+        # Process reference pair files if any
+        reference_data = []
+        for i in range(len(reference_pairs)):
+            ref_protocol = request.files.get(f'ref_protocol_{i}')
+            ref_data = request.files.get(f'ref_data_{i}')
+            if ref_protocol and ref_data:
+                ref_protocol_filename = secure_filename(ref_protocol.filename)
+                ref_data_filename = secure_filename(ref_data.filename)
+                
+                ref_protocol_path = os.path.join(temp_dir, f"ref_protocol_{i}_{ref_protocol_filename}")
+                ref_data_path = os.path.join(temp_dir, f"ref_data_{i}_{ref_data_filename}")
+                
+                ref_protocol.save(ref_protocol_path)
+                ref_data.save(ref_data_path)
+                
+                reference_data.append({
+                    'protocol_path': ref_protocol_path,
+                    'protocol_name': ref_protocol_filename,
+                    'data_path': ref_data_path,
+                    'data_name': ref_data_filename
+                })
+        
         # Process the data and generate results
         try:
             results = process_benchmark_data(
@@ -428,7 +453,6 @@ def submit_benchmark():
             return jsonify(results)
         except Exception as e:
             app.logger.error(f"Error processing benchmark: {str(e)}")
-            import traceback
             app.logger.error(traceback.format_exc())
             return jsonify({
                 'status': 'error',
@@ -437,7 +461,6 @@ def submit_benchmark():
         
     except Exception as e:
         app.logger.error(f"Error in submit_benchmark: {str(e)}")
-        import traceback
         app.logger.error(traceback.format_exc())
         return jsonify({
             'status': 'error',
@@ -445,11 +468,13 @@ def submit_benchmark():
         })
         
     finally:
-        # Clean up temporary files
-        try:
-            shutil.rmtree(temp_dir)
-        except Exception as e:
-            app.logger.error(f"Error cleaning up temporary files: {e}")
+        # Always clean up temporary files immediately
+        if temp_dir and os.path.exists(temp_dir):
+            try:
+                shutil.rmtree(temp_dir)
+                app.logger.info(f"Cleaned up temporary directory: {temp_dir}")
+            except Exception as e:
+                app.logger.error(f"Error cleaning up temporary directory {temp_dir}: {e}")
 
 
 def process_benchmark_data(protocol_data, experimental_data, selected_features, selected_purpose, 
@@ -590,7 +615,7 @@ def home():
 def cmportal():
     return render_template('cmportal.html',
         FeatureCategories=FeatureCategories_dict.keys(),
-        CausalFeatureCategories=CausalFeatureCategories_dict.keys(),  # Add this line
+        CausalFeatureCategories=CausalFeatureCategories_dict.keys(),
         TargetParameters=TargetParameters_dict.keys()
     )
 
