@@ -656,6 +656,14 @@ CMPortal.benchmark.submitAndDisplayResults = function() {
             // Visualize the results
             if (radarData && radarData.length > 0) {
                 CMPortal.benchmarkRadar.visualizeResults(radarData);
+                
+                // Scroll to the results container after a short delay to ensure rendering is complete
+                setTimeout(() => {
+                    const resultsContainer = document.getElementById('benchmark-results-container');
+                    if (resultsContainer) {
+                        resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 100);
             }
         }
     })
