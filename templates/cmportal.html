@@ -55,13 +55,13 @@
             <!-- Tab Navigation -->
             <div class="tab-nav">
                 <div class="tab-link active" data-tab="tab-video">Video Tutorial</div>
+                <div class="tab-link" data-tab="tab-viewer">Database Viewer</div>
                 <div class="tab-link" data-tab="tab-search">Variable Search</div>
                 <div class="tab-link" data-tab="tab-enrichment">Enrichment Browser</div>
-                <div class="tab-link" data-tab="tab-viewer">Database Viewer</div>
-                <div class="tab-link" data-tab="tab-benchmark">Protocol Benchmarking</div>
+                <div class="tab-link" data-tab="tab-benchmark">Benchmark Protocols</div>
             </div>
 
-            <!-- 2. Add the Video tab as the first content div -->
+            <!-- Tab Contents (in the same order) -->
             <div id="tab-video" class="tab-content active">
                 {% include 'tabs/tab-video.html' %}
             </div>
@@ -70,7 +70,6 @@
                 {% include 'tabs/tab-viewer.html' %}
             </div>
 
-            <!-- 3. Update the other tabs to not have "active" class initially -->
             <div id="tab-search" class="tab-content">
                 {% include 'tabs/tab-search.html' %}
             </div>

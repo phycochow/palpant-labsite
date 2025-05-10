@@ -401,3 +401,35 @@
         margin-bottom: 15px;
     }
 }
+
+/* Feature Found column styling */
+.feature-flag-column {
+    text-align: center !important;
+    font-weight: bold;
+}
+
+/* Category toggle header colors - these match the colors in CSS variables */
+.category-toggle-protocol-variable {
+    background-color: var(--category-variable-color) !important;
+    color: black !important;
+}
+
+.category-toggle-analysis-method {
+    background-color: var(--category-analysis-color) !important;
+    color: white !important;
+}
+
+.category-toggle-cell-profile {
+    background-color: var(--category-cell-color) !important;
+    color: black !important;
+}
+
+.category-toggle-study-characteristic {
+    background-color: var(--category-study-color) !important;
+    color: black !important;
+}
+
+.category-toggle-measured-endpoint {
+    background-color: var(--category-endpoint-color) !important;
+    color: white !important;
+}

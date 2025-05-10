@@ -397,16 +397,35 @@ CMPortal.search = {};
             $('#search-results-table').DataTable().destroy();
         }
 
-        const columns = results.columns.map(col => ({
+        // Get all columns from the first result object to ensure we capture all fields
+        // This is important for enrichment/combined mode to show category flag columns
+        const allColumns = results.data.length > 0 
+            ? Object.keys(results.data[0]) 
+            : results.columns;
+
+        const columns = allColumns.map(col => ({
             data: col,
             title: col.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-            className: 'dt-center',
+            // Add special formatting for category flag columns
+            className: col.includes('Feature Found') 
+                ? 'dt-center feature-flag-column' 
+                : 'dt-center',
             render: (data, type) => {
                 if (data == null || (typeof data === 'number' && isNaN(data))) return '';
+                
+                // Handle DOI links
                 if (type === 'display' && col.toLowerCase() === 'doi') {
                     let url = data.startsWith('http') ? data : 'https://doi.org/' + data.replace(/^doi:?\s*/i, '');
                     return `<a href="${url}" target="_blank">${data}</a>`;
                 }
+                
+                // Format boolean values for Feature Found columns
+                if (type === 'display' && col.includes('Feature Found')) {
+                    return data === true ? 
+                        '<span style="color: green; font-weight: bold;">✓</span>' : 
+                        '<span style="color: #ccc;">✗</span>';
+                }
+                
                 return data;
             }
         }));
@@ -439,9 +458,30 @@ CMPortal.search = {};
                     search: "_INPUT_",
                     searchPlaceholder: "Filter records..."
                 },
-                ordering: false,
-                initComplete() {
-                    setTimeout(() => $(tableEl).DataTable().columns.adjust().draw(), 100);
+                ordering: true, // Enable ordering
+                order: [], // No default ordering
+                initComplete: function() {
+                    // Add a class to color code the Feature Found column headers
+                    setTimeout(() => {
+                        const table = $(tableEl).DataTable();
+                        
+                        // Get column indexes for Feature Found columns
+                        columns.forEach((col, idx) => {
+                            if (col.data.includes('Feature Found')) {
+                                // Extract category name
+                                const categoryMatch = col.data.match(/(.*) Feature Found/);
+                                if (categoryMatch && categoryMatch[1]) {
+                                    const category = categoryMatch[1].toLowerCase().replace(/\s+/g, '-');
+                                    // Add category-specific class to header
+                                    $(table.column(idx).header())
+                                        .addClass(`category-toggle-${category}`)
+                                        .css('background-color', getCategoryColor(category));
+                                }
+                            }
+                        });
+                        
+                        table.columns.adjust().draw();
+                    }, 100);
                 }
             });
             document.getElementById('search-results-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -449,6 +489,18 @@ CMPortal.search = {};
             console.error('Error initializing DataTable:', error);
             document.getElementById('search-results-container').innerHTML = '<div class="alert alert-danger">Error displaying results. Please try again.</div>';
         }
+    }
+
+    // Helper function to get category colors
+    function getCategoryColor(category) {
+        const colors = {
+            'protocol-variable': 'var(--category-variable-color)',
+            'analysis-method': 'var(--category-analysis-color)',
+            'cell-profile': 'var(--category-cell-color)',
+            'study-characteristic': 'var(--category-study-color)',
+            'measured-endpoint': 'var(--category-endpoint-color)'
+        };
+        return colors[category] || '#888';
     }
     
     function submitAllSelections() {
