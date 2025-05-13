@@ -1,4 +1,4 @@
-Target Label,Prioritised Features,Entropy Value,Entropy Conf,Gini Index Value,Gini Index Conf,Category,Best Conf,Significant,PlotSig
+Target Label,Prioritised Features,Entropy Value,Entropy Conf,Gini Index Value,Gini Index Conf,Category,Best Conf,Weakly Significant,Significant
 Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),Action Potential Amplitude (mV) Quantiles - Q1 (>110 and ≤170) (10),0.03388,0,0.03356,0,Best Maturity,0,TRUE,TRUE
 Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),Metabolic Component Category - Signaling Pathway Regulators (6),0.02676,0.00080008,0.03274,0.00020002,Best Maturity,0.00020002,TRUE,TRUE
 Sarcomere Length (um) Quantiles - Q1 (>1.95 and ≤2.5) (13),T-tubule Structure (Found) Quantiles - Q1 (Yes) (18),0.01956,0.00270027,0.01503,0.00420042,Best Maturity,0.00270027,TRUE,TRUE
