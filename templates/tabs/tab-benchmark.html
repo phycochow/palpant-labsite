@@ -1,3 +1,4 @@
+<!-- Full HTML for tab-benchmark.html -->
 <div class="well">
   <h4>How to Use Protocol Benchmarking</h4>
   <p>
@@ -5,16 +6,16 @@
   </p>
   
   <ul style="list-style-type: none; padding-left: 0; margin-top: 10px;">
-    <li><strong>Step 1: Upload Your Protocol or Select Features</strong>
+    <li><strong>Step 1: Choose Your Protocol Method</strong>
       <ul>
         <li>Either upload your protocol PDF (<a href="https://raw.githubusercontent.com/phycochow/palpant-labsite/main/static/datasets/CMPortal_Protocol_Form.pdf" download>Install Here</a>) OR</li>
-        <li>Manually select protocol features from the dropdown categories</li>
+        <li>Select an existing protocol directly from our database by ID (experimental data will be auto-loaded)</li>
       </ul>
     </li>
     <li><strong>Step 2: Upload Experimental Measurements</strong>
       <ul>
-        <li>Upload your experimental data PDF (<a href="https://raw.githubusercontent.com/phycochow/palpant-labsite/main/static/datasets/CMPortal_Data_Form.pdf" download>Install Here</a>)</li>
-        <li>This should contain measured parameters like sarcomere length, cell area, etc.</li>
+        <li>If you uploaded your own protocol, upload your experimental data PDF (<a href="https://raw.githubusercontent.com/phycochow/palpant-labsite/main/static/datasets/CMPortal_Data_Form.pdf" download>Install Here</a>)</li>
+        <li>If you selected a protocol from the database, experimental data will be auto-loaded</li>
       </ul>
     </li>
     <li><strong>Step 3: Select Protocol Purpose</strong>
@@ -81,31 +82,21 @@
       <h3>Your Protocol</h3>
       <div class="step-status" id="protocol-step-status">Incomplete</div>
     </div>
-    <p>Upload your protocol or select features (choose one method)</p>
+    <p>Upload your protocol or select from database (choose one method)</p>
     <div class="upload-area mb-3">
       <p>Drag and drop your protocol file here</p>
       <input type="file" id="protocol-file" accept=".pdf" style="display: none;">
       <button class="btn btn-secondary" id="browse-button">Browse Files</button>
+      <button class="btn btn-link reset-button" id="reset-protocol-file" style="display: none;">Reset</button>
     </div>
     <div class="or-separator"><span>OR</span></div>
-    <form id="benchmark-form-features" class="mt-3">
-      <div class="search-ui-form-group">
-        <label for="benchmark-key-dropdown-features" class="search-ui-label">Feature Category</label>
-        <select id="benchmark-key-dropdown-features" name="category" class="search-ui-select">
-          <option value="">-- Select Feature Category --</option>
-          {% for category in CausalFeatureCategories %}
-            <option value="{{ category }}">{{ category }}</option>
-          {% endfor %}
-        </select>
+    <div class="search-ui-form-group mt-3">
+      <label class="search-ui-label">Select a protocol from database:</label>
+      <div class="search-ui-checkbox-container" id="own-protocol-id-container" style="max-height: 350px; overflow-y: auto;">
+        <!-- JS will populate protocol IDs 001-322 -->
       </div>
-      <div class="search-ui-form-group">
-        <label class="search-ui-label">Select features of your protocol:</label>
-        <div id="benchmark-checkbox-container-features" class="search-ui-checkbox-container search-ui-hidden">
-          <p id="benchmark-loading-message-features">Please select a category first...</p>
-        </div>
-        <div class="search-ui-selection-summary" id="benchmark-selection-summary-features"></div>
-      </div>
-    </form>
+      <div class="search-ui-selection-summary" id="benchmark-selection-summary-own-protocol"></div>
+    </div>
   </div>
 
   <!-- Middle Panel: Experimental Measurements and Protocol Purpose -->
@@ -116,12 +107,15 @@
       <h3>Experimental Data & Purpose</h3>
       <div class="step-status" id="experiment-step-status">Incomplete</div>
     </div>
-    <p>Upload your experimental measurements (required)</p>
-    <div class="upload-area required-upload mb-3">
+    <p>Upload your experimental measurements (if using your own protocol)</p>
+    <div class="upload-area required-upload mb-3" id="experimental-upload-area">
       <div class="completion-marker" id="experimental-file-marker"><span class="checkmark">✓</span></div>
       <p><strong>Required:</strong> Upload your experimental measurements</p>
       <input type="file" id="experimental-file" accept=".pdf" style="display: none;">
       <button class="btn btn-secondary" id="experimental-browse-button">Upload Measurements</button>
+    </div>
+    <div id="auto-loaded-message" style="display: none;" class="alert alert-success mb-3">
+      <strong>Experimental data auto-loaded from selected protocol</strong>
     </div>
     <p>Select the purpose of your protocol (required)</p>
     <form id="benchmark-form-purpose">
@@ -162,7 +156,7 @@
 
     <div class="or-separator"><span>OR</span></div>
     <div class="search-ui-form-group mt-3">
-      <label class="search-ui-label">Select protocols from database (max 5):</label>
+      <label class="search-ui-label">Select protocols from database (max 3):</label>
       <div class="search-ui-checkbox-container" id="protocol-id-container" style="max-height: 200px; overflow-y: auto;">
         <!-- JS populates 001–322 -->
       </div>
@@ -174,7 +168,7 @@
 <!-- Submit button -->
 <div class="global-submit-container">
   <button id="benchmark-submit-button" class="btn btn-primary">Benchmark Protocol</button>
-  <p class="text-muted mt-2 small">Note: Your protocol, experimental data, and protocol purpose are all required</p>
+  <p class="text-muted mt-2 small">Note: Your protocol and protocol purpose are required. Experimental data will be auto-loaded if you select a protocol from the database.</p>
 </div>
 
 <!-- Combined Results Container - Now using just a container for styling -->

@@ -341,13 +341,15 @@ def submit_benchmark():
     """
     Handle the benchmark form submission, processing files in memory where possible
     and deleting temporary files immediately after use.
+    
+    Now supports selecting a protocol directly from the database.
     """
     # Create temporary directory for file processing
     # Since PyPDF2 requires files on disk, we still need this
     temp_dir = None
     
     try:
-        # Check file sizes before processing
+        # Check file sizes before processing (if they exist)
         for key, file in request.files.items():
             if file and file.filename:
                 # Check file size
@@ -366,6 +368,12 @@ def submit_benchmark():
         # Access files uploaded in the request
         protocol_file = request.files.get('protocol_file')
         experimental_file = request.files.get('experimental_file')
+        
+        # Access selected own protocol ID (new feature)
+        selected_own_protocol_id = request.form.get('selected_own_protocol_id')
+        
+        # Print debug information
+        app.logger.info(f"Selected own protocol ID: {selected_own_protocol_id}")
         
         # Access selected features (as a list)
         selected_features = request.form.getlist('selected_features[]')
@@ -386,20 +394,21 @@ def submit_benchmark():
                 return jsonify({'status': 'error', 'message': 'Invalid reference pairs data'})
         
         # Validate required inputs
-        if not experimental_file:
-            return jsonify({'status': 'error', 'message': 'Experimental data file is required'})
+        if not protocol_file and not selected_own_protocol_id:
+            return jsonify({'status': 'error', 'message': 'Either a protocol file or a protocol selection from the database is required'})
         
         if not selected_purpose:
             return jsonify({'status': 'error', 'message': 'Protocol purpose selection is required'})
         
-        if not protocol_file and not selected_features:
-            return jsonify({'status': 'error', 'message': 'Either protocol file or feature selection is required'})
+        # Validate experimental file only if protocol file is used (and not database selection)
+        if not selected_own_protocol_id and protocol_file and not experimental_file:
+            return jsonify({'status': 'error', 'message': 'Experimental data file is required when using your own protocol'})
         
         # Create temporary directory only now that we've validated inputs
         temp_dir = tempfile.mkdtemp(prefix="benchmark_")
         app.logger.info(f"Created temporary directory: {temp_dir}")
         
-        # Process main files
+        # Process main files - if using protocol from database, skip protocol file processing
         protocol_data = None
         if protocol_file:
             protocol_filename = secure_filename(protocol_file.filename)
@@ -410,13 +419,16 @@ def submit_benchmark():
                 'name': protocol_filename
             }
         
-        experimental_filename = secure_filename(experimental_file.filename)
-        experimental_path = os.path.join(temp_dir, experimental_filename)
-        experimental_file.save(experimental_path)
-        experimental_data = {
-            'path': experimental_path,
-            'name': experimental_filename
-        }
+        # Process experimental file only if using own protocol (not database selection)
+        experimental_data = None
+        if experimental_file:
+            experimental_filename = secure_filename(experimental_file.filename)
+            experimental_path = os.path.join(temp_dir, experimental_filename)
+            experimental_file.save(experimental_path)
+            experimental_data = {
+                'path': experimental_path,
+                'name': experimental_filename
+            }
         
         # Process reference pair files if any
         reference_data = []
@@ -448,7 +460,8 @@ def submit_benchmark():
                 selected_features=selected_features,
                 selected_purpose=selected_purpose,
                 selected_protocol_ids=selected_protocol_ids,
-                reference_data=reference_data
+                reference_data=reference_data,
+                selected_own_protocol_id=selected_own_protocol_id  # Add the selected own protocol ID
             )
             return jsonify(results)
         except Exception as e:
@@ -478,17 +491,18 @@ def submit_benchmark():
 
 
 def process_benchmark_data(protocol_data, experimental_data, selected_features, selected_purpose, 
-                         selected_protocol_ids, reference_data):
+                         selected_protocol_ids, reference_data, selected_own_protocol_id=None):
     """
     Process the benchmark data and return results.
     
     Args:
-        protocol_data: Dictionary with protocol file path and name, or None if features selected
-        experimental_data: Dictionary with experimental file path and name
+        protocol_data: Dictionary with protocol file path and name, or None if protocol ID selected
+        experimental_data: Dictionary with experimental file path and name, or None if protocol ID selected
         selected_features: List of selected features (used if protocol_data is None)
         selected_purpose: The selected protocol purpose
         selected_protocol_ids: List of database protocol IDs to compare against
         reference_data: List of dictionaries with reference protocol and data info
+        selected_own_protocol_id: Optional protocol ID selected from database for the main protocol
         
     Returns:
         Dictionary with benchmark results formatted for visualization
@@ -497,22 +511,67 @@ def process_benchmark_data(protocol_data, experimental_data, selected_features, 
     c_candidates = get_candidates()
     target_feature_dict = get_target_feature_dict(DATASET_PATHS['odds_filepath'])
     
-    # Load binary features dataframe
+    # Load binary features dataframe and cleaned dataframe
     binary_df = get_binary_df(DATASET_PATHS['binary_filepath'])
+    cleaned_df = get_cleaned_df(DATASET_PATHS['cleaned_database_filepath'])
     
-    # 1. Process User's experimental data
-    main_data = getUserData(experimental_data['path'])
+    # Define indicators list (used for both protocol upload and database selection)
+    indicators = ['Sarcomere Length (um)', 'Cell Area (um2)', 'T-tubule Structure (Found)', 
+                 'Contractile Force (mN)', 'Contractile Stress (mN/mm2)', 
+                 'Contraction Upstroke Velocity (um/s)', 'Calcium Flux Amplitude (F/F0)', 
+                 'Time to Calcium Flux Peak (ms)', 'Time from Calcium Peak to Relaxation (ms)', 
+                 'Conduction Velocity from Calcium Imaging (cm/s)', 
+                 'Action Potential Conduction Velocity (cm/s)', 'Action Potential Amplitude (mV)', 
+                 'Resting Membrane Potential (mV)', 'Beat Rate (bpm)', 
+                 'Max Capture Rate of Paced CMs (Hz)', 'MYH7 Percentage (MYH6)', 
+                 'MYL2 Percentage (MYL7)', 'TNNI3 Percentage (TNNI1)']
     
-    # 2. Process User's protocol - either from file or selected features        
-    if protocol_data:
-        # User uploaded a protocol file
-        main_features = getUserProtocolFeatures(protocol_data['path'], c_candidates)
+    # NEW CODE: Handle protocol and data from database selection
+    if selected_own_protocol_id:
+        try:
+            # Use same logic as for protocol ID selection but for main protocol
+            index_for_binary = int(selected_own_protocol_id) - 1
+            index_for_cleaned = int(selected_own_protocol_id)
+            
+            # Get features from binary dataframe for this protocol
+            filtered_b_row = binary_df.loc[index_for_binary, c_candidates]
+            main_features = [col for col, val in filtered_b_row.items() if val]
+            
+            # Get experimental data from cleaned dataframe
+            filtered_c_row = cleaned_df.loc[index_for_cleaned, indicators]
+            main_data = {'ProtocolName': f'Protocol {selected_own_protocol_id}'}
+            
+            for indicator in indicators:
+                if indicator in filtered_c_row and not pd.isna(filtered_c_row[indicator]) and str(filtered_c_row[indicator]) != "nan":
+                    if indicator == 'T-tubule Structure (Found)':
+                        main_data[indicator] = '1'
+                    else:
+                        main_data[indicator] = str(filtered_c_row[indicator])
+                else:
+                    main_data[indicator] = ""
+            
+            # Process the selected protocol data
+            main_protocol_name, main_results_by_indicator = process_maturity_indicators(main_data, main_features, target_feature_dict)
+            
+        except Exception as e:
+            app.logger.error(f"Error processing protocol ID {selected_own_protocol_id}: {str(e)}")
+            app.logger.error(traceback.format_exc())
+            raise Exception(f"Failed to load protocol ID {selected_own_protocol_id}: {str(e)}")
+            
     else:
-        # User selected features from dropdown
-        main_features = selected_features
+        # 1. Process User's experimental data - only if not using database selection
+        main_data = getUserData(experimental_data['path'])
+        
+        # 2. Process User's protocol - either from file or selected features        
+        if protocol_data:
+            # User uploaded a protocol file
+            main_features = getUserProtocolFeatures(protocol_data['path'], c_candidates)
+        else:
+            # User selected features from dropdown (for backward compatibility)
+            main_features = selected_features
 
-    # 3. Process main protocol data
-    main_protocol_name, main_results_by_indicator = process_maturity_indicators(main_data, main_features, target_feature_dict)
+        # 3. Process main protocol data
+        main_protocol_name, main_results_by_indicator = process_maturity_indicators(main_data, main_features, target_feature_dict)
     
     # Create the main results structure
     results = {
@@ -525,16 +584,6 @@ def process_benchmark_data(protocol_data, experimental_data, selected_features, 
     }
 
     # Process purpose-based reference data
-    indicators = ['Sarcomere Length (um)', 'Cell Area (um2)', 'T-tubule Structure (Found)', 
-                 'Contractile Force (mN)', 'Contractile Stress (mN/mm2)', 
-                 'Contraction Upstroke Velocity (um/s)', 'Calcium Flux Amplitude (F/F0)', 
-                 'Time to Calcium Flux Peak (ms)', 'Time from Calcium Peak to Relaxation (ms)', 
-                 'Conduction Velocity from Calcium Imaging (cm/s)', 
-                 'Action Potential Conduction Velocity (cm/s)', 'Action Potential Amplitude (mV)', 
-                 'Resting Membrane Potential (mV)', 'Beat Rate (bpm)', 
-                 'Max Capture Rate of Paced CMs (Hz)', 'MYH7 Percentage (MYH6)', 
-                 'MYL2 Percentage (MYL7)', 'TNNI3 Percentage (TNNI1)']
-    
     PurposeData = {'ProtocolName': f'Key Characteristics of {selected_purpose}'}
     # Add empty values for all indicators
     for indicator in indicators:
@@ -568,9 +617,7 @@ def process_benchmark_data(protocol_data, experimental_data, selected_features, 
         })
     
     # Process database protocol comparisons
-    cleaned_df = get_cleaned_df(DATASET_PATHS['cleaned_database_filepath'])
-    
-    for protocol_id in selected_protocol_ids:
+    for protocol_id in selected_protocol_ids:  # Use the original list, not filtered
         # Adjust indices as needed (binary df is 0-indexed, cleaned might be 1-indexed)
         try:
             index_for_binary = int(protocol_id) - 1
@@ -582,7 +629,13 @@ def process_benchmark_data(protocol_data, experimental_data, selected_features, 
             
             # Get experimental data from cleaned dataframe
             filtered_c_row = cleaned_df.loc[index_for_cleaned, indicators]
-            IDRefData = {'ProtocolName': f'Protocol {protocol_id}'}
+            
+            # Add a suffix if this protocol is the same as the main protocol
+            protocol_name_suffix = ""
+            if protocol_id == selected_own_protocol_id:
+                protocol_name_suffix = " (Reference)"
+                
+            IDRefData = {'ProtocolName': f'Protocol {protocol_id}{protocol_name_suffix}'}
             
             for indicator in indicators:
                 if indicator in filtered_c_row and not pd.isna(filtered_c_row[indicator]) and str(filtered_c_row[indicator]) != "nan":
@@ -602,7 +655,6 @@ def process_benchmark_data(protocol_data, experimental_data, selected_features, 
             })
         except Exception as e:
             app.logger.error(f"Error processing protocol ID {protocol_id}: {str(e)}")
-            continue
     
     return results
 
