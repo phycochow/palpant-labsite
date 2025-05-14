@@ -80,14 +80,18 @@ PDF_FIELD_MAP = {
     'Max_Capture_Rate_of_Paced_CMs_Hz': 'Max Capture Rate of Paced CMs (Hz)',
     'MYH7_Percentage_MYH6': 'MYH7 Percentage (MYH6)',
     'MYL2_Percentage_MYL7': 'MYL2 Percentage (MYL7)',
-    'TNNI3_Percentage_TNNI1': 'TNNI3 Percentage (TNNI1)'
+    'TNNI3_Percentage_TTNI1': 'TNNI3 Percentage (TNNI1)'  # Special werid PDF form behavoir TTNT instead of TNNT
 }
 
 # NEW: Function to normalize field names by replacing Unicode with ASCII equivalents
 def normalize_field_name(field_name):
     """
-    Normalize field names by replacing unicode symbols with ASCII equivalents
+    Normalize field names by replacing Unicode symbols with ASCII equivalents
+    and standardizing formatting for consistent matching.
     """
+    if not isinstance(field_name, str):
+        return str(field_name)
+        
     replacements = {
         'um²': 'um2',
         'mm²': 'mm2',
@@ -95,6 +99,7 @@ def normalize_field_name(field_name):
         'μm': 'um',
         'μm/s': 'um/s',
         '²': '2',
+        '%C2%B2': '2',  # URL-encoded version of ²
     }
     
     result = field_name
@@ -278,7 +283,10 @@ def getUserProtocolFeatures(file_path, causal_candidates):
 
 def getUserData(pdf_path):
     """
-    Extract experimental data from a PDF file.
+    Extract experimental data from a PDF file by reading fields in order.
+    This approach tries multiple strategies:
+    1. First map by field names using the PDF_FIELD_MAP
+    2. Then fill in any missing fields by assuming order if needed
     
     Args:
         pdf_path: String path to the PDF file or file object
@@ -286,37 +294,71 @@ def getUserData(pdf_path):
     Returns:
         Dictionary with extracted form data
     """
-    reader = PdfReader(pdf_path)
-    fields = reader.get_fields()
+    # Define expected fields in their expected order
+    expected_fields = [
+        "ProtocolName",
+        "Sarcomere Length (um)",
+        "Cell Area (um2)", 
+        "T-tubule Structure (Found)",
+        "Contractile Force (mN)", 
+        "Contractile Stress (mN/mm2)",
+        "Contraction Upstroke Velocity (um/s)", 
+        "Calcium Flux Amplitude (F/F0)",
+        "Time to Calcium Flux Peak (ms)", 
+        "Time from Calcium Peak to Relaxation (ms)",
+        "Conduction Velocity from Calcium Imaging (cm/s)",
+        "Action Potential Conduction Velocity (cm/s)", 
+        "Action Potential Amplitude (mV)",
+        "Resting Membrane Potential (mV)", 
+        "Beat Rate (bpm)",
+        "Max Capture Rate of Paced CMs (Hz)", 
+        "MYH7 Percentage (MYH6)",
+        "MYL2 Percentage (MYL7)", 
+        "TNNI3 Percentage (TNNI1)"
+    ]
     
-    if not fields:
-        return {}
-    
-    # For debugging - print received fields
-    print(f"PDF fields received: {list(fields.keys())}")
+    try:
+        reader = PdfReader(pdf_path)
+        fields = reader.get_fields()
         
-    # Process the fields based on whether keys are in the mapping
-    result = {}
-    for key, val in fields.items():
-        field_value = val.get('/V', '')
+        if not fields:
+            print("WARNING: No form fields found in the PDF.")
+            return {}
         
-        # Normalize the key to handle Unicode characters
-        normalized_key = normalize_field_name(key)
+        # First attempt: Map fields by name using our field mapping
+        result = {}
+        mapped_fields = set()
+        all_fields_list = []
         
-        if key in PDF_FIELD_MAP:
-            mapped_key = PDF_FIELD_MAP[key]
-            result[mapped_key] = field_value
-        elif normalized_key in PDF_FIELD_MAP:
-            mapped_key = PDF_FIELD_MAP[normalized_key]
-            result[mapped_key] = field_value
-        else:
-            # For fields not in the mapping, use the original key
-            result[key] = field_value
-    
-    # For debugging - print mapped results
-    print(f"Mapped results: {list(result.keys())}")
+        # Get all field values and store their values in a list to track order
+        for field_name, field in fields.items():
+            field_value = field.get('/V', '') or field.get('V', '')
+            all_fields_list.append((field_name, field_value))
             
-    return result
+            # Normalize the field name to handle Unicode characters
+            normalized_key = normalize_field_name(field_name)
+            
+            # Try to map this field using our field mapping
+            if field_name in PDF_FIELD_MAP:
+                mapped_key = PDF_FIELD_MAP[field_name]
+                result[mapped_key] = field_value
+                mapped_fields.add(mapped_key)
+            elif normalized_key in PDF_FIELD_MAP:
+                mapped_key = PDF_FIELD_MAP[normalized_key]
+                result[mapped_key] = field_value
+                mapped_fields.add(mapped_key)
+        
+        # Debug output
+        print(f"PDF contains {len(fields)} form fields")
+        print(f"Successfully mapped {len(mapped_fields)} fields by name")
+        
+        return result
+        
+    except Exception as e:
+        print(f"Error reading PDF: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return {}
 
 def GetQuantileFeatures(CategoryLabel, FeaturesByAllLabels, AllQuantileFeatures):
     FeaturesByQuantile, IsQuantileFeature = {}, False
@@ -395,8 +437,8 @@ def process_maturity_indicators(user_data, protocol_features, target_feature_dic
     # Initialize the results dictionary
     ResultsDict = {}
     
-    # For debugging - print received user_data keys
-    print(f"Received keys for user_data: {list(user_data.keys())}")
+    # For debugging - print received user_data keys and values
+    # print(f"Received keys for user_data: {list(user_data.keys())}")
     
     # Define expected indicators for clear reference
     expected_indicators = [
@@ -410,8 +452,7 @@ def process_maturity_indicators(user_data, protocol_features, target_feature_dic
         'Max Capture Rate of Paced CMs (Hz)', 'MYH7 Percentage (MYH6)',
         'MYL2 Percentage (MYL7)', 'TNNI3 Percentage (TNNI1)'
     ]
-    
-    print(f"Expected indicators: {expected_indicators}")
+
     
     # Get all quantile features
     FeaturesByAllLabels = target_feature_dict
@@ -426,63 +467,66 @@ def process_maturity_indicators(user_data, protocol_features, target_feature_dic
             Name = value
             
         elif value and value.strip():  # If reported value is not empty
-            # Convert value to float
-            float_value = float(value)
-            
-            # Check if value is within any quantile range
-            quantile = None
-            flag = 1  # Default to normal experimental data
-            
-            if indicator_id in MATURITY_QUANTILES:
-                ranges = MATURITY_QUANTILES[indicator_id]
+            try:
+                # Convert value to float
+                float_value = float(value)
                 
-                # Get the best and worst bounds for this indicator
-                best_low, best_high = ranges[0]
-                worst_low, worst_high = ranges[-1]
+                # Check if value is within any quantile range
+                quantile = None
+                flag = 1  # Default to normal experimental data
                 
-                # Special cases for Beat Rate, Time, and Resting Membrane Potential where direction is reversed
-                reversed_metrics = ["Beat Rate", "Time", "Resting"]
-                is_reversed = any(term in indicator_id for term in reversed_metrics)
-                
-                if is_reversed:
-                    # For reversed metrics (Beat Rate, Time, Resting Membrane)
-                    # Check if value is better than the best range
-                    if float_value < best_low:  # Using <= for the lower bound
-                        quantile = f"Q1"  # Best quantile
-                        flag = 3  # Above best bound
-                    # Check if value is worse than the worst range
-                    elif float_value >= worst_high:  # Using >= for the upper bound
-                        quantile = f"Q{len(ranges)}"  # Worst quantile
-                        flag = 4  # Below worst bound
+                if indicator_id in MATURITY_QUANTILES:
+                    ranges = MATURITY_QUANTILES[indicator_id]
+                    
+                    # Get the best and worst bounds for this indicator
+                    best_low, best_high = ranges[0]
+                    worst_low, worst_high = ranges[-1]
+                    
+                    # Special cases for Beat Rate, Time, and Resting Membrane Potential where direction is reversed
+                    reversed_metrics = ["Beat Rate", "Time", "Resting"]
+                    is_reversed = any(term in indicator_id for term in reversed_metrics)
+                    
+                    if is_reversed:
+                        # For reversed metrics (Beat Rate, Time, Resting Membrane)
+                        # Check if value is better than the best range
+                        if float_value < best_low:  # Using <= for the lower bound
+                            quantile = f"Q1"  # Best quantile
+                            flag = 3  # Above best bound
+                        # Check if value is worse than the worst range
+                        elif float_value >= worst_high:  # Using >= for the upper bound
+                            quantile = f"Q{len(ranges)}"  # Worst quantile
+                            flag = 4  # Below worst bound
+                        else:
+                            # Use classify_quantile to get the normal quantile
+                            quantile = classify_quantile(indicator_id, float_value)
                     else:
-                        # Use classify_quantile to get the normal quantile
-                        quantile = classify_quantile(indicator_id, float_value)
+                        # For normal metrics
+                        # Check if value is better than the best range
+                        if float_value > best_high:  # Using >= for the upper bound
+                            quantile = "Q1"  # Best quantile
+                            flag = 3  # Above best bound
+                        # Check if value is worse than the worst range
+                        elif float_value <= worst_low:  # Using <= for the lower bound
+                            quantile = f"Q{len(ranges)}"  # Worst quantile
+                            flag = 4  # Below worst bound
+                        else:
+                            # Use classify_quantile to get the normal quantile
+                            quantile = classify_quantile(indicator_id, float_value)
                 else:
-                    # For normal metrics
-                    # Check if value is better than the best range
-                    if float_value > best_high:  # Using >= for the upper bound
-                        quantile = "Q1"  # Best quantile
-                        flag = 3  # Above best bound
-                    # Check if value is worse than the worst range
-                    elif float_value <= worst_low:  # Using <= for the lower bound
-                        quantile = f"Q{len(ranges)}"  # Worst quantile
-                        flag = 4  # Below worst bound
-                    else:
-                        # Use classify_quantile to get the normal quantile
-                        quantile = classify_quantile(indicator_id, float_value)
-            else:
-                # If no quantile ranges defined, use default classification
-                quantile = classify_quantile(indicator_id, float_value)
-            
-            ResultsDict[indicator_id] = (quantile, flag)
+                    # If no quantile ranges defined, use default classification
+                    quantile = classify_quantile(indicator_id, float_value)
+                
+                ResultsDict[indicator_id] = (quantile, flag)
+                # print(f"Successfully processed {indicator_id} with experimental value {value} -> {quantile}, flag={flag}")
+                
+            except ValueError as e:
+                print(f"ERROR converting {indicator_id} value '{value}' to float: {str(e)}")
+                continue
                 
         else:
             # Need to predict reference value if no reported value
-            category_label = INDICATOR_CATEGORIES.get(indicator_id)
+            category_label = INDICATOR_CATEGORIES[indicator_id]
             
-            if not category_label:
-                continue  # Skip if no category found
-
             # Get features for each quantile in this category
             quantile_features = GetQuantileFeatures(category_label, FeaturesByAllLabels, AllQuantileFeatures)
 
@@ -494,5 +538,8 @@ def process_maturity_indicators(user_data, protocol_features, target_feature_dic
             
             # Store in results dictionary with 0 to indicate predicted (reference) value
             ResultsDict[indicator_id] = (predicted_quantile, 0)
+            # print(f"Predicted value for {indicator_id} -> {predicted_quantile}, flag=0")
     
+    print(ResultsDict)
+
     return Name, ResultsDict

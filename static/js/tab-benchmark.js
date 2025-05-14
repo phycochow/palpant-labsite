@@ -966,7 +966,12 @@ CMPortal.benchmark.updateUIState = function() {
 // Tab activation handler (for lazy init)
 $(document).on('tab-activated', function(event, tabId) {
     if (tabId === 'tab-benchmark') {
-        CMPortal.benchmark.init();
+        // Reset selections when the tab is activated to ensure fresh state
+        if (CMPortal.benchmark.initialized) {
+            CMPortal.benchmark.resetAllSelections();
+        } else {
+            CMPortal.benchmark.init();
+        }
     }
 });
 

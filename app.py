@@ -336,6 +336,8 @@ def filter_features():
         'data': {'filtered_features': features}
     })
 
+# Updated submit_benchmark route for app.py
+
 @app.route('/api/submit_benchmark', methods=['POST'])
 def submit_benchmark():
     """
@@ -369,14 +371,15 @@ def submit_benchmark():
         protocol_file = request.files.get('protocol_file')
         experimental_file = request.files.get('experimental_file')
         
-        # Access selected own protocol ID (new feature)
+        # Access selected own protocol ID (database selection)
         selected_own_protocol_id = request.form.get('selected_own_protocol_id')
+        
+        # Convert to None if not provided or empty
+        if not selected_own_protocol_id or selected_own_protocol_id.strip() == '':
+            selected_own_protocol_id = None
         
         # Print debug information
         app.logger.info(f"Selected own protocol ID: {selected_own_protocol_id}")
-        
-        # Access selected features (as a list)
-        selected_features = request.form.getlist('selected_features[]')
         
         # Access the purpose selection (single value)
         selected_purpose = request.form.get('selected_purpose')
@@ -457,11 +460,10 @@ def submit_benchmark():
             results = process_benchmark_data(
                 protocol_data=protocol_data,
                 experimental_data=experimental_data,
-                selected_features=selected_features,
                 selected_purpose=selected_purpose,
                 selected_protocol_ids=selected_protocol_ids,
                 reference_data=reference_data,
-                selected_own_protocol_id=selected_own_protocol_id  # Add the selected own protocol ID
+                selected_own_protocol_id=selected_own_protocol_id  # Will be None if not provided
             )
             return jsonify(results)
         except Exception as e:
@@ -489,8 +491,8 @@ def submit_benchmark():
             except Exception as e:
                 app.logger.error(f"Error cleaning up temporary directory {temp_dir}: {e}")
 
-
-def process_benchmark_data(protocol_data, experimental_data, selected_features, selected_purpose, 
+# Updated process_benchmark_data function for app.py
+def process_benchmark_data(protocol_data, experimental_data, selected_purpose, 
                          selected_protocol_ids, reference_data, selected_own_protocol_id=None):
     """
     Process the benchmark data and return results.
@@ -498,7 +500,6 @@ def process_benchmark_data(protocol_data, experimental_data, selected_features, 
     Args:
         protocol_data: Dictionary with protocol file path and name, or None if protocol ID selected
         experimental_data: Dictionary with experimental file path and name, or None if protocol ID selected
-        selected_features: List of selected features (used if protocol_data is None)
         selected_purpose: The selected protocol purpose
         selected_protocol_ids: List of database protocol IDs to compare against
         reference_data: List of dictionaries with reference protocol and data info
@@ -526,10 +527,10 @@ def process_benchmark_data(protocol_data, experimental_data, selected_features, 
                  'Max Capture Rate of Paced CMs (Hz)', 'MYH7 Percentage (MYH6)', 
                  'MYL2 Percentage (MYL7)', 'TNNI3 Percentage (TNNI1)']
     
-    # NEW CODE: Handle protocol and data from database selection
+    # Handle protocol and data from database selection or PDF upload
     if selected_own_protocol_id:
         try:
-            # Use same logic as for protocol ID selection but for main protocol
+            # Use logic for protocol ID selection for main protocol
             index_for_binary = int(selected_own_protocol_id) - 1
             index_for_cleaned = int(selected_own_protocol_id)
             
@@ -559,18 +560,20 @@ def process_benchmark_data(protocol_data, experimental_data, selected_features, 
             raise Exception(f"Failed to load protocol ID {selected_own_protocol_id}: {str(e)}")
             
     else:
-        # 1. Process User's experimental data - only if not using database selection
+        # Process User's experimental data - only if not using database selection
+        if not experimental_data:
+            raise Exception("Experimental data is required when uploading your own protocol")
+            
         main_data = getUserData(experimental_data['path'])
         
-        # 2. Process User's protocol - either from file or selected features        
+        # Process User's protocol from uploaded file
         if protocol_data:
             # User uploaded a protocol file
             main_features = getUserProtocolFeatures(protocol_data['path'], c_candidates)
         else:
-            # User selected features from dropdown (for backward compatibility)
-            main_features = selected_features
+            raise Exception("Protocol data is required. Either upload a protocol file or select one from the database.")
 
-        # 3. Process main protocol data
+        # Process main protocol data
         main_protocol_name, main_results_by_indicator = process_maturity_indicators(main_data, main_features, target_feature_dict)
     
     # Create the main results structure
