@@ -18,12 +18,13 @@ CMPortal.benchmarkRadar.currentRefIndex = 0;
 // Store the benchmark data
 CMPortal.benchmarkRadar.benchmarkData = null;
 
-// Indicators list with number of quantile rings for each
+// Indicators list with number of quantile rings for each - USING ASCII CHARACTERS CONSISTENTLY
 CMPortal.benchmarkRadar.indicators = [
-  { label: "Cell Area (um²)", rings: 3 },
+  { label: "Sarcomere Length (um)", rings: 5 },
+  { label: "Cell Area (um2)", rings: 3 },  // Changed from um² to um2
   { label: "T-tubule Structure (Found)", rings: 2 },
   { label: "Contractile Force (mN)", rings: 5 },
-  { label: "Contractile Stress (mN/mm²)", rings: 4 },
+  { label: "Contractile Stress (mN/mm2)", rings: 4 },  // Changed from mm² to mm2
   { label: "Contraction Upstroke Velocity (um/s)", rings: 4 },
   { label: "Calcium Flux Amplitude (F/F0)", rings: 5 },
   { label: "Time to Calcium Flux Peak (ms)", rings: 5 },
@@ -32,12 +33,11 @@ CMPortal.benchmarkRadar.indicators = [
   { label: "Action Potential Conduction Velocity (cm/s)", rings: 4 },
   { label: "Action Potential Amplitude (mV)", rings: 4 },
   { label: "Resting Membrane Potential (mV)", rings: 5 },
-  { label: "Max Capture Rate of Paced CMs (Hz)", rings: 2 },
   { label: "Beat Rate (bpm)", rings: 5 },
+  { label: "Max Capture Rate of Paced CMs (Hz)", rings: 2 },
   { label: "MYH7 Percentage (MYH6)", rings: 2 },
   { label: "MYL2 Percentage (MYL7)", rings: 2 },
   { label: "TNNI3 Percentage (TNNI1)", rings: 2 },
-  { label: "Sarcomere Length (um)", rings: 5 },
 ];
 
 // Define category information with colors and icons
@@ -45,12 +45,12 @@ CMPortal.benchmarkRadar.categories = {
   "Morphology": {
     color: "#1E40AF", // Royal Blue
     icon: "🧫",
-    indicators: ["Sarcomere Length (um)", "Cell Area (um²)", "T-tubule Structure (Found)"]
+    indicators: ["Sarcomere Length (um)", "Cell Area (um2)", "T-tubule Structure (Found)"]
   },
   "Contractile Function": {
     color: "#166534", // Forest Green
     icon: "💪",
-    indicators: ["Contractile Force (mN)", "Contractile Stress (mN/mm²)", "Contraction Upstroke Velocity (um/s)"]
+    indicators: ["Contractile Force (mN)", "Contractile Stress (mN/mm2)", "Contraction Upstroke Velocity (um/s)"]
   },
   "Electrophysiology": {
     color: "#7E22CE", // Purple
@@ -76,10 +76,29 @@ CMPortal.benchmarkRadar.categories = {
   }
 };
 
+// Helper function to normalize field names
+CMPortal.benchmarkRadar.normalizeFieldName = function(fieldName) {
+  if (!fieldName) return fieldName;
+  
+  return fieldName
+      .replace(/um²/g, 'um2')
+      .replace(/mm²/g, 'mm2')
+      .replace(/µm²/g, 'um2')
+      .replace(/µm/g, 'um');
+};
+
 // Add helper function to get category for an indicator
 CMPortal.benchmarkRadar.getCategoryInfo = function(indicatorLabel) {
+  // Normalize the label for comparison
+  const normalizedLabel = CMPortal.benchmarkRadar.normalizeFieldName(indicatorLabel);
+  
   for (const [categoryName, category] of Object.entries(CMPortal.benchmarkRadar.categories)) {
-    if (category.indicators.includes(indicatorLabel)) {
+    // Normalize category indicator labels for comparison
+    const normalizedIndicators = category.indicators.map(
+      label => CMPortal.benchmarkRadar.normalizeFieldName(label)
+    );
+    
+    if (normalizedIndicators.includes(normalizedLabel)) {
       return {
         name: categoryName,
         color: category.color,
@@ -135,8 +154,6 @@ CMPortal.benchmarkRadar.loadChartJs = function(callback) {
 };
 
 // Create the container for the radar chart
-
-// Modify the createRadarContainer function to reposition the button
 CMPortal.benchmarkRadar.createRadarContainer = function() {
   // Check if results container exists
   const resultsContainer = document.getElementById('benchmark-results-container');
@@ -168,7 +185,7 @@ CMPortal.benchmarkRadar.createRadarContainer = function() {
     </div>
   `;
   
-  // Combine all HTML - IMPORTANT CHANGE: Remove the Next Reference button from the protocol-selector
+  // Combine all HTML
   radarContainer.innerHTML = `
     <div class="protocol-selector">
       <div class="protocol-labels">
@@ -306,6 +323,73 @@ CMPortal.benchmarkRadar.customRadarPlugin = function() {
   };
 };
 
+// Custom tooltips to handle "?" in the quantile values
+CMPortal.benchmarkRadar.customTooltips = function() {
+  return {
+    callbacks: {
+      label(ctx) {
+        const idx = ctx.dataIndex;
+        const indicator = CMPortal.benchmarkRadar.indicators[idx];
+        const isRef = ctx.dataset.label.includes("Reference");
+        
+        let dataArray;
+        let protocolName;
+        
+        if (isRef) {
+          const refIndex = CMPortal.benchmarkRadar.currentRefIndex + 1;
+          const referenceProtocol = CMPortal.benchmarkRadar.benchmarkData[refIndex];
+          dataArray = referenceProtocol[1][indicator.label];
+          protocolName = referenceProtocol[0];
+        } else {
+          const userProtocol = CMPortal.benchmarkRadar.benchmarkData[0];
+          dataArray = userProtocol[1][indicator.label];
+          protocolName = userProtocol[0];
+        }
+        
+        // Better handling for missing or malformed data
+        if (!dataArray || !Array.isArray(dataArray)) {
+          console.warn(`Missing or invalid data for ${indicator.label}: ${JSON.stringify(dataArray)}`);
+          return `${protocolName}: Missing Data`;
+        }
+        
+        const [qv, flag] = dataArray;
+        
+        // Handle unknown quantile value (the "?" issue)
+        let quantileDisplay = qv;
+        if (qv === undefined || qv === null || qv === "?") {
+          quantileDisplay = "?";
+          console.warn(`Unknown quantile for ${indicator.label}: ${qv}`);
+        }
+        
+        // Get descriptive text for flag
+        let kind;
+        switch(parseInt(flag)) {
+          case 0:
+            kind = "Predicted Data";
+            break;
+          case 1:
+            kind = "Experimental Data (Within Range)";
+            break;
+          case 3:
+            kind = "Experimental Data (Exceeds Best Bound)";
+            break;
+          case 4:
+            kind = "Experimental Data (Below Worst Bound)";
+            break;
+          default:
+            kind = "Data";
+        }
+        
+        // Get category info for the indicator
+        const categoryInfo = CMPortal.benchmarkRadar.getCategoryInfo(indicator.label);
+        
+        // Include category in tooltip with clear indication of value
+        return `${protocolName}: ${kind}: Quantile ${quantileDisplay} of ${indicator.rings} (${categoryInfo.icon} ${categoryInfo.name})`;
+      }
+    }
+  };
+};
+
 // Get styling for data points based on flag value
 CMPortal.benchmarkRadar.getDataPointStyling = function(flag, isReference) {
   // Default flag to 0 if not provided
@@ -392,6 +476,22 @@ CMPortal.benchmarkRadar.prepareChartData = function() {
   const referenceProtocolName = referenceProtocol[0];
   const referenceProtocolData = referenceProtocol[1];
   
+  // Create a normalized version of the protocol data to handle character encoding mismatches
+  const normalizedUserData = {};
+  const normalizedRefData = {};
+  
+  // Normalize all keys in the user protocol data
+  for (const key in userProtocolData) {
+    const normalizedKey = CMPortal.benchmarkRadar.normalizeFieldName(key);
+    normalizedUserData[normalizedKey] = userProtocolData[key];
+  }
+  
+  // Normalize all keys in the reference protocol data
+  for (const key in referenceProtocolData) {
+    const normalizedKey = CMPortal.benchmarkRadar.normalizeFieldName(key);
+    normalizedRefData[normalizedKey] = referenceProtocolData[key];
+  }
+  
   // Prepare data arrays and styling for chart
   const yourData = [], yourBg = [], yourBorder = [], yourRadius = [];
   const refData = [], refBg = [], refBorder = [], refRadius = [];
@@ -401,8 +501,11 @@ CMPortal.benchmarkRadar.prepareChartData = function() {
     const id = indicator.label;
     const rings = indicator.rings;
     
+    // Normalize the indicator ID for comparison
+    const normalizedId = CMPortal.benchmarkRadar.normalizeFieldName(id);
+    
     // Get the user's data for this indicator
-    const userValue = userProtocolData[id] || ['Q1', 0]; // Default to Q1 if not found
+    const userValue = normalizedUserData[normalizedId] || ['Q1', 0]; // Default to Q1 if not found
     const userQuantile = userValue[0];
     const userFlag = userValue[1];
     
@@ -420,7 +523,7 @@ CMPortal.benchmarkRadar.prepareChartData = function() {
     yourRadius.push(userStyle.radius);
     
     // Get the reference data for this indicator
-    const refValue = referenceProtocolData[id] || ['Q1', 0]; // Default to Q1 if not found
+    const refValue = normalizedRefData[normalizedId] || ['Q1', 0]; // Default to Q1 if not found
     const refQuantile = refValue[0];
     const refFlag = refValue[1];
     
@@ -468,22 +571,6 @@ CMPortal.benchmarkRadar.prepareChartData = function() {
   };
 };
 
-// Get description for flag values
-CMPortal.benchmarkRadar.getFlagDescription = function(flag) {
-  switch(Number(flag)) {
-    case 0:
-      return "Predicted Data";
-    case 1:
-      return "Experimental Data (Within Range)";
-    case 3:
-      return "Experimental Data (Exceeds Best Bound)";
-    case 4:
-      return "Experimental Data (Below Worst Bound)";
-    default:
-      return "Data";
-  }
-};
-
 // Initialize the radar chart
 CMPortal.benchmarkRadar.initChart = function() {
   const ctx = document.getElementById('maturityChart').getContext('2d');
@@ -524,39 +611,7 @@ CMPortal.benchmarkRadar.initChart = function() {
       },
       plugins: {
         legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label(ctx) {
-              const idx = ctx.dataIndex;
-              const indicator = CMPortal.benchmarkRadar.indicators[idx];
-              const isRef = ctx.dataset.label !== CMPortal.benchmarkRadar.benchmarkData[0][0];
-              
-              let dataArray;
-              let protocolName;
-              
-              if (isRef) {
-                const refIndex = CMPortal.benchmarkRadar.currentRefIndex + 1;
-                const referenceProtocol = CMPortal.benchmarkRadar.benchmarkData[refIndex];
-                dataArray = referenceProtocol[1][indicator.label] || ['?', 0];
-                protocolName = referenceProtocol[0];
-              } else {
-                const userProtocol = CMPortal.benchmarkRadar.benchmarkData[0];
-                dataArray = userProtocol[1][indicator.label] || ['?', 0];
-                protocolName = userProtocol[0];
-              }
-              
-              const [qv, flag] = dataArray;
-              
-              let kind = CMPortal.benchmarkRadar.getFlagDescription(flag);
-              
-              // Get category info for the indicator
-              const categoryInfo = CMPortal.benchmarkRadar.getCategoryInfo(indicator.label);
-              
-              // Include category in tooltip
-              return `${protocolName}: ${kind}: ${qv} of ${indicator.rings} quantiles (${categoryInfo.icon} ${categoryInfo.name})`;
-            }
-          }
-        }
+        tooltip: CMPortal.benchmarkRadar.customTooltips()
       },
       elements: { 
         line: { 
@@ -706,6 +761,19 @@ CMPortal.benchmarkRadar.visualizeResults = function(benchmarkData) {
     return;
   }
   
+  // Debug output for data structure
+  console.log("Visualizing benchmark data:", benchmarkData);
+  
+  // Check for problematic fields
+  const problematicFields = ['Cell Area (um2)', 'Contractile Stress (mN/mm2)'];
+  if (benchmarkData[0] && benchmarkData[0][1]) {
+    problematicFields.forEach(field => {
+      const normalizedField = CMPortal.benchmarkRadar.normalizeFieldName(field);
+      console.log(`Field ${field} data:`, benchmarkData[0][1][field]);
+      console.log(`Normalized field ${normalizedField} data:`, benchmarkData[0][1][normalizedField]);
+    });
+  }
+  
   // Initialize the radar chart
   CMPortal.benchmarkRadar.init(benchmarkData);
 };
@@ -726,24 +794,31 @@ CMPortal.benchmarkRadar.addDownloadButtons = function() {
     // Check if buttons already exist
     if (document.getElementById('download-radar-png')) return;
     
-    // Get the radar chart container
-    const chartContainer = document.querySelector('.protocol-selector');
-    if (!chartContainer) return;
+    // Get the protocol selector for button placement
+    const protocolSelector = document.querySelector('.protocol-selector');
+    if (!protocolSelector) return;
     
-    // Create download buttons container
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'download-buttons';
-    buttonContainer.style.marginLeft = 'auto';
-    buttonContainer.style.display = 'flex';
-    buttonContainer.style.gap = '10px';
+    // Get or create the button container
+    let buttonContainer = protocolSelector.querySelector('.button-container');
+    if (!buttonContainer) {
+      buttonContainer = document.createElement('div');
+      buttonContainer.className = 'button-container';
+      protocolSelector.appendChild(buttonContainer);
+    }
+
+    // Make sure regenerateBtn is in the button container
+    const regenerateBtn = document.getElementById('regenerateBtn');
+    if (regenerateBtn && regenerateBtn.parentNode !== buttonContainer) {
+      regenerateBtn.parentNode.removeChild(regenerateBtn);
+      buttonContainer.appendChild(regenerateBtn);
+    }
     
-    // Create the PNG download button
+    // Create download buttons
     const pngBtn = document.createElement('button');
     pngBtn.id = 'download-radar-png';
     pngBtn.className = 'btn download-btn';
     pngBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Install PNG';
     
-    // Create the SVG download button for Illustrator
     const svgBtn = document.createElement('button');
     svgBtn.id = 'download-radar-svg';
     svgBtn.className = 'btn download-btn';
@@ -753,10 +828,7 @@ CMPortal.benchmarkRadar.addDownloadButtons = function() {
     buttonContainer.appendChild(pngBtn);
     buttonContainer.appendChild(svgBtn);
     
-    // Add the button container to the protocol selector
-    chartContainer.appendChild(buttonContainer);
-    
-    // Add styles for the download buttons
+    // Add styles for the buttons
     const style = document.createElement('style');
     style.textContent = `
       .download-btn {
@@ -771,6 +843,7 @@ CMPortal.benchmarkRadar.addDownloadButtons = function() {
         align-items: center;
         gap: 6px;
         transition: background-color 0.3s;
+        margin-left: 10px;
       }
       .download-btn:hover {
         background-color: #2980b9;
@@ -783,6 +856,13 @@ CMPortal.benchmarkRadar.addDownloadButtons = function() {
         display: flex;
         justify-content: space-between;
         align-items: center;
+      }
+      .button-container {
+        display: flex;
+        align-items: center;
+      }
+      #regenerateBtn {
+        margin-right: 5px;
       }
     `;
     document.head.appendChild(style);
@@ -863,7 +943,6 @@ CMPortal.benchmarkRadar.downloadPNG = function() {
 };
 
 // Function to create an editable SVG for Illustrator
-// Fix the SVG download function
 CMPortal.benchmarkRadar.downloadEditableSVG = function() {
   // Show loading indicator
   const svgBtn = document.getElementById('download-radar-svg');
@@ -1106,105 +1185,5 @@ CMPortal.benchmarkRadar.downloadEditableSVG = function() {
     // Reset button
     svgBtn.innerHTML = originalText;
     svgBtn.disabled = false;
-  }
-};
-
-// Add download buttons (PNG and Editable SVG)
-CMPortal.benchmarkRadar.addDownloadButtons = function() {
-  // Add html2canvas library for better quality capture
-  if (!window.html2canvas) {
-    const html2canvasScript = document.createElement('script');
-    html2canvasScript.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
-    html2canvasScript.onload = addButtons;
-    document.head.appendChild(html2canvasScript);
-  } else {
-    addButtons();
-  }
-  
-  function addButtons() {
-    // Check if buttons already exist
-    if (document.getElementById('download-radar-png')) return;
-    
-    // Get the protocol selector for button placement
-    const protocolSelector = document.querySelector('.protocol-selector');
-    if (!protocolSelector) return;
-    
-    // Get or create the button container
-    let buttonContainer = protocolSelector.querySelector('.button-container');
-    if (!buttonContainer) {
-      buttonContainer = document.createElement('div');
-      buttonContainer.className = 'button-container';
-      protocolSelector.appendChild(buttonContainer);
-    }
-
-    // Make sure regenerateBtn is in the button container
-    const regenerateBtn = document.getElementById('regenerateBtn');
-    if (regenerateBtn && regenerateBtn.parentNode !== buttonContainer) {
-      regenerateBtn.parentNode.removeChild(regenerateBtn);
-      buttonContainer.appendChild(regenerateBtn);
-    }
-    
-    // Create download buttons
-    const pngBtn = document.createElement('button');
-    pngBtn.id = 'download-radar-png';
-    pngBtn.className = 'btn download-btn';
-    pngBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Install PNG';
-    
-    const svgBtn = document.createElement('button');
-    svgBtn.id = 'download-radar-svg';
-    svgBtn.className = 'btn download-btn';
-    svgBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Install SVG';
-    
-    // Add the buttons to the container
-    buttonContainer.appendChild(pngBtn);
-    buttonContainer.appendChild(svgBtn);
-    
-    // Add styles for the buttons
-    const style = document.createElement('style');
-    style.textContent = `
-      .download-btn {
-        background-color: #3498db;
-        color: white;
-        border: none;
-        padding: 8px 12px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        transition: background-color 0.3s;
-        margin-left: 10px;
-      }
-      .download-btn:hover {
-        background-color: #2980b9;
-      }
-      .download-btn svg {
-        width: 16px;
-        height: 16px;
-      }
-      .protocol-selector {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .button-container {
-        display: flex;
-        align-items: center;
-      }
-      #regenerateBtn {
-        margin-right: 5px;
-      }
-    `;
-    document.head.appendChild(style);
-    
-    // Add click event handlers
-    pngBtn.addEventListener('click', function() {
-      CMPortal.benchmarkRadar.downloadPNG();
-    });
-    
-    svgBtn.addEventListener('click', function() {
-      CMPortal.benchmarkRadar.downloadEditableSVG();
-    });
   }
 };
