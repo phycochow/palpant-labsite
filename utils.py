@@ -58,14 +58,16 @@ INDICATOR_CATEGORIES = {
     '3D Estimated Tissue Size (mm2)': '3D Estimated Tissue Size (mm2) Quantiles'
 }
 
-# PDF field mapping for consistency
+# PDF field mapping for consistency - UPDATED for consistent field names
 PDF_FIELD_MAP = {
     'ProtocolName': 'ProtocolName',
     'Sarcomere_Length_um': 'Sarcomere Length (um)',
-    'Cell_Area_um²': 'Cell Area (um2)',
+    'Cell_Area_um²': 'Cell Area (um2)',  # Handle both um² and um2
+    'Cell_Area_um2': 'Cell Area (um2)',  # Alternative entry for ASCII version
     'T-tubule_Structure_Found': 'T-tubule Structure (Found)',
     'Contractile_Force_mN': 'Contractile Force (mN)',
-    'Contractile_Stress_mN_mm²': 'Contractile Stress (mN/mm2)',
+    'Contractile_Stress_mN_mm²': 'Contractile Stress (mN/mm2)',  # Handle both mm² and mm2
+    'Contractile_Stress_mN_mm2': 'Contractile Stress (mN/mm2)',  # Alternative entry for ASCII version
     'Contraction_Upstroke_Velocity_um_s': 'Contraction Upstroke Velocity (um/s)',
     'Calcium_Flux_Amplitude_F_F0': 'Calcium Flux Amplitude (F/F0)',
     'Time_to_Calcium_Flux_Peak_ms': 'Time to Calcium Flux Peak (ms)',
@@ -80,6 +82,26 @@ PDF_FIELD_MAP = {
     'MYL2_Percentage_MYL7': 'MYL2 Percentage (MYL7)',
     'TNNI3_Percentage_TNNI1': 'TNNI3 Percentage (TNNI1)'
 }
+
+# NEW: Function to normalize field names by replacing Unicode with ASCII equivalents
+def normalize_field_name(field_name):
+    """
+    Normalize field names by replacing unicode symbols with ASCII equivalents
+    """
+    replacements = {
+        'um²': 'um2',
+        'mm²': 'mm2',
+        'μm²': 'um2',
+        'μm': 'um',
+        'μm/s': 'um/s',
+        '²': '2',
+    }
+    
+    result = field_name
+    for original, replacement in replacements.items():
+        result = result.replace(original, replacement)
+    
+    return result
 
 # Cache for protocol features to avoid reprocessing
 _protocol_features_cache = {}
@@ -269,16 +291,30 @@ def getUserData(pdf_path):
     
     if not fields:
         return {}
+    
+    # For debugging - print received fields
+    print(f"PDF fields received: {list(fields.keys())}")
         
     # Process the fields based on whether keys are in the mapping
     result = {}
     for key, val in fields.items():
+        field_value = val.get('/V', '')
+        
+        # Normalize the key to handle Unicode characters
+        normalized_key = normalize_field_name(key)
+        
         if key in PDF_FIELD_MAP:
             mapped_key = PDF_FIELD_MAP[key]
-            result[mapped_key] = val.get('/V', '')
+            result[mapped_key] = field_value
+        elif normalized_key in PDF_FIELD_MAP:
+            mapped_key = PDF_FIELD_MAP[normalized_key]
+            result[mapped_key] = field_value
         else:
             # For fields not in the mapping, use the original key
-            result[key] = val.get('/V', '')
+            result[key] = field_value
+    
+    # For debugging - print mapped results
+    print(f"Mapped results: {list(result.keys())}")
             
     return result
 
@@ -358,6 +394,24 @@ def process_maturity_indicators(user_data, protocol_features, target_feature_dic
     """
     # Initialize the results dictionary
     ResultsDict = {}
+    
+    # For debugging - print received user_data keys
+    print(f"Received keys for user_data: {list(user_data.keys())}")
+    
+    # Define expected indicators for clear reference
+    expected_indicators = [
+        'Sarcomere Length (um)', 'Cell Area (um2)', 'T-tubule Structure (Found)',
+        'Contractile Force (mN)', 'Contractile Stress (mN/mm2)',
+        'Contraction Upstroke Velocity (um/s)', 'Calcium Flux Amplitude (F/F0)',
+        'Time to Calcium Flux Peak (ms)', 'Time from Calcium Peak to Relaxation (ms)',
+        'Conduction Velocity from Calcium Imaging (cm/s)',
+        'Action Potential Conduction Velocity (cm/s)', 'Action Potential Amplitude (mV)',
+        'Resting Membrane Potential (mV)', 'Beat Rate (bpm)',
+        'Max Capture Rate of Paced CMs (Hz)', 'MYH7 Percentage (MYH6)',
+        'MYL2 Percentage (MYL7)', 'TNNI3 Percentage (TNNI1)'
+    ]
+    
+    print(f"Expected indicators: {expected_indicators}")
     
     # Get all quantile features
     FeaturesByAllLabels = target_feature_dict

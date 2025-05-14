@@ -612,6 +612,11 @@ CMPortal.benchmarkRadar.initChart = function() {
       CMPortal.benchmarkRadar.chart.resize();
     }
   }, 500);
+  
+  // Add the download buttons
+  setTimeout(function() {
+    CMPortal.benchmarkRadar.addDownloadButtons();
+  }, 600);
 };
 
 // Move to next reference protocol
@@ -699,4 +704,595 @@ CMPortal.benchmarkRadar.visualizeResults = function(benchmarkData) {
   
   // Initialize the radar chart
   CMPortal.benchmarkRadar.init(benchmarkData);
+};
+
+// Add download buttons (PNG and Editable SVG)
+CMPortal.benchmarkRadar.addDownloadButtons = function() {
+  // Add html2canvas library for better quality capture
+  if (!window.html2canvas) {
+    const html2canvasScript = document.createElement('script');
+    html2canvasScript.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+    html2canvasScript.onload = addButtons;
+    document.head.appendChild(html2canvasScript);
+  } else {
+    addButtons();
+  }
+  
+  function addButtons() {
+    // Check if buttons already exist
+    if (document.getElementById('download-radar-png')) return;
+    
+    // Get the radar chart container
+    const chartContainer = document.querySelector('.protocol-selector');
+    if (!chartContainer) return;
+    
+    // Create download buttons container
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'download-buttons';
+    buttonContainer.style.marginLeft = 'auto';
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.gap = '10px';
+    
+    // Create the PNG download button
+    const pngBtn = document.createElement('button');
+    pngBtn.id = 'download-radar-png';
+    pngBtn.className = 'btn download-btn';
+    pngBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Install PNG';
+    
+    // Create the SVG download button for Illustrator
+    const svgBtn = document.createElement('button');
+    svgBtn.id = 'download-radar-svg';
+    svgBtn.className = 'btn download-btn';
+    svgBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Install SVG';
+    
+    // Add the buttons to the container
+    buttonContainer.appendChild(pngBtn);
+    buttonContainer.appendChild(svgBtn);
+    
+    // Add the button container to the protocol selector
+    chartContainer.appendChild(buttonContainer);
+    
+    // Add styles for the download buttons
+    const style = document.createElement('style');
+    style.textContent = `
+      .download-btn {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: background-color 0.3s;
+      }
+      .download-btn:hover {
+        background-color: #2980b9;
+      }
+      .download-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+      .protocol-selector {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Add click event handlers
+    pngBtn.addEventListener('click', function() {
+      CMPortal.benchmarkRadar.downloadPNG();
+    });
+    
+    svgBtn.addEventListener('click', function() {
+      CMPortal.benchmarkRadar.downloadEditableSVG();
+    });
+  }
+};
+
+// Function to download the radar chart as PNG with legends
+CMPortal.benchmarkRadar.downloadPNG = function() {
+  // Show loading indicator
+  const pngBtn = document.getElementById('download-radar-png');
+  if (!pngBtn) return;
+  
+  const originalText = pngBtn.innerHTML;
+  pngBtn.innerHTML = 'Generating PNG...';
+  pngBtn.disabled = true;
+  
+  try {
+    // Get the entire radar container including legend
+    const radarContainer = document.querySelector('.radar-content');
+    if (!radarContainer) throw new Error('Radar container not found');
+    
+    // Get protocol names for the filename
+    const yourProtocolLabel = document.getElementById('userProtocolLabel').textContent;
+    const refLabel = document.getElementById('refLabel').textContent;
+    
+    // Create clean names for the filename
+    const cleanYourProtocol = yourProtocolLabel.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+    const cleanRefProtocol = refLabel.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+    const fileName = `CMPortal-Maturity-${cleanYourProtocol}-vs-${cleanRefProtocol}.png`;
+    
+    // Use html2canvas to capture the entire container
+    html2canvas(radarContainer, {
+      scale: 2, // Higher scale for better quality
+      logging: false,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff'
+    }).then(function(canvas) {
+      // Convert canvas to PNG data URL
+      const dataURL = canvas.toDataURL('image/png');
+      
+      // Create a download link
+      const link = document.createElement('a');
+      link.href = dataURL;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Reset button
+      pngBtn.innerHTML = originalText;
+      pngBtn.disabled = false;
+    }).catch(function(error) {
+      console.error('Error generating PNG:', error);
+      alert('Could not generate PNG image. Please try again.');
+      
+      // Reset button
+      pngBtn.innerHTML = originalText;
+      pngBtn.disabled = false;
+    });
+  } catch (error) {
+    console.error('Error generating PNG:', error);
+    alert('Could not generate PNG image. Please try again.');
+    
+    // Reset button
+    pngBtn.innerHTML = originalText;
+    pngBtn.disabled = false;
+  }
+};
+
+// Function to create an editable SVG for Illustrator
+CMPortal.benchmarkRadar.downloadEditableSVG = function() {
+  // Show loading indicator
+  const svgBtn = document.getElementById('download-radar-svg');
+  if (!svgBtn) return;
+  
+  const originalText = svgBtn.innerHTML;
+  svgBtn.innerHTML = 'Generating SVG...';
+  svgBtn.disabled = true;
+  
+  try {
+    // Get the chart data and configuration
+    const chart = CMPortal.benchmarkRadar.chart;
+    if (!chart) {
+      throw new Error('Chart instance not found');
+    }
+    
+    // Get chart dimensions
+    const canvas = chart.canvas;
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Get protocol names for the filename
+    const yourProtocolLabel = document.getElementById('userProtocolLabel').textContent;
+    const refLabel = document.getElementById('refLabel').textContent;
+    
+    // Create clean names for the filename
+    const cleanYourProtocol = yourProtocolLabel.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+    const cleanRefProtocol = refLabel.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+    const fileName = `CMPortal-Maturity-${cleanYourProtocol}-vs-${cleanRefProtocol}.svg`;
+    
+    // Create SVG document
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("version", "1.1");
+    svg.setAttribute("xmlns", svgNS);
+    
+    // Add title and description
+    const title = document.createElementNS(svgNS, "title");
+    title.textContent = `CMPortal Maturity Analysis: ${yourProtocolLabel} vs ${refLabel}`;
+    svg.appendChild(title);
+    
+    const desc = document.createElementNS(svgNS, "desc");
+    desc.textContent = `Radar chart comparing maturity indicators between ${yourProtocolLabel} and ${refLabel}. Generated by CMPortal.`;
+    svg.appendChild(desc);
+    
+    // Add white background
+    const background = document.createElementNS(svgNS, "rect");
+    background.setAttribute("width", width);
+    background.setAttribute("height", height);
+    background.setAttribute("fill", "#FFFFFF"); // Use hex color instead of rgba
+    svg.appendChild(background);
+    
+    // Calculate chart center and radius
+    const center = {
+      x: width / 2,
+      y: height / 2
+    };
+    const radius = Math.min(width, height) * 0.4; // Use 40% of smaller dimension
+    
+    // Get indicators and their count
+    const indicators = CMPortal.benchmarkRadar.indicators;
+    const numIndicators = indicators.length;
+    const angleStep = (Math.PI * 2) / numIndicators;
+    
+    // Create a group for the grid lines
+    const gridGroup = document.createElementNS(svgNS, "g");
+    gridGroup.setAttribute("id", "grid");
+    
+    // Draw the spider web grid (concentric circles)
+    for (let r = 0.2; r <= 1; r += 0.2) {
+      const circle = document.createElementNS(svgNS, "circle");
+      circle.setAttribute("cx", center.x);
+      circle.setAttribute("cy", center.y);
+      circle.setAttribute("r", radius * r);
+      circle.setAttribute("fill", "none");
+      circle.setAttribute("stroke", "#E0E0E0"); // Use a light gray hex color instead of rgba
+      circle.setAttribute("stroke-width", "1");
+      gridGroup.appendChild(circle);
+    }
+    
+    // Draw the spokes (lines from center to edges)
+    for (let i = 0; i < numIndicators; i++) {
+      const angle = i * angleStep - Math.PI / 2; // Start from top
+      const x = center.x + radius * Math.cos(angle);
+      const y = center.y + radius * Math.sin(angle);
+      
+      const line = document.createElementNS(svgNS, "line");
+      line.setAttribute("x1", center.x);
+      line.setAttribute("y1", center.y);
+      line.setAttribute("x2", x);
+      line.setAttribute("y2", y);
+      line.setAttribute("stroke", "#E0E0E0"); // Use a light gray hex color instead of rgba
+      line.setAttribute("stroke-width", "1");
+      gridGroup.appendChild(line);
+      
+      // Add indicator labels
+      const indicator = indicators[i];
+      const labelDistance = radius * 1.15; // Place labels outside the chart
+      const labelX = center.x + labelDistance * Math.cos(angle);
+      const labelY = center.y + labelDistance * Math.sin(angle);
+      
+      const text = document.createElementNS(svgNS, "text");
+      text.setAttribute("x", labelX);
+      text.setAttribute("y", labelY);
+      text.setAttribute("font-family", "Arial, sans-serif");
+      text.setAttribute("font-size", "12");
+      
+      // Convert rgba to hex for label colors
+      const catInfo = CMPortal.benchmarkRadar.getCategoryInfo(indicator.label);
+      const catColor = catInfo.color.startsWith('#') ? catInfo.color : "#333333"; // Fallback to dark gray
+      text.setAttribute("fill", catColor);
+      
+      // Set text-anchor based on position
+      if (angle === 0) {
+        text.setAttribute("text-anchor", "start");
+      } else if (Math.abs(angle - Math.PI) < 0.1) {
+        text.setAttribute("text-anchor", "end");
+      } else if (angle > 0 && angle < Math.PI) {
+        text.setAttribute("text-anchor", "start");
+      } else {
+        text.setAttribute("text-anchor", "end");
+      }
+      
+      // Align text vertically
+      if (angle === -Math.PI / 2) {
+        text.setAttribute("dominant-baseline", "text-before-edge");
+      } else if (angle === Math.PI / 2) {
+        text.setAttribute("dominant-baseline", "text-after-edge");
+      } else {
+        text.setAttribute("dominant-baseline", "middle");
+      }
+      
+      text.textContent = indicator.label;
+      gridGroup.appendChild(text);
+    }
+    
+    svg.appendChild(gridGroup);
+    
+    // Get the chart data
+    const chartData = chart.data;
+    
+    // Color conversion helper function
+    function rgbaToHex(rgba) {
+      // For "rgba(r,g,b,a)" format
+      if (rgba.startsWith('rgba(')) {
+        const parts = rgba.substring(5, rgba.length - 1).split(',');
+        const r = parseInt(parts[0].trim());
+        const g = parseInt(parts[1].trim());
+        const b = parseInt(parts[2].trim());
+        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+      }
+      // For white fill which might render as black in Illustrator
+      if (rgba === 'rgba(255,255,255,1)' || rgba === '#ffffff' || rgba === 'white') {
+        return '#FFFFFF';
+      }
+      // Return the original if it's already a hex color
+      if (rgba.startsWith('#')) {
+        return rgba;
+      }
+      // Default fallback
+      return '#333333';
+    }
+    
+    // Create a group for the protocols
+    for (let datasetIndex = 0; datasetIndex < chartData.datasets.length; datasetIndex++) {
+      const dataset = chartData.datasets[datasetIndex];
+      const isYourProtocol = datasetIndex === 0;
+      
+      // Create a group for this dataset
+      const datasetGroup = document.createElementNS(svgNS, "g");
+      datasetGroup.setAttribute("id", isYourProtocol ? "your-protocol" : "reference-protocol");
+      
+      // Create polygon for the area
+      const points = [];
+      for (let i = 0; i < numIndicators; i++) {
+        const angle = i * angleStep - Math.PI / 2;
+        const value = dataset.data[i];
+        const pointRadius = value * radius;
+        const x = center.x + pointRadius * Math.cos(angle);
+        const y = center.y + pointRadius * Math.sin(angle);
+        points.push(`${x},${y}`);
+      }
+      
+      const polygon = document.createElementNS(svgNS, "polygon");
+      polygon.setAttribute("points", points.join(" "));
+      
+      // Convert RGBA to Hex for better Illustrator compatibility
+      let fillColor = isYourProtocol ? '#E3F2FD' : '#FFEBEE'; // Light blue/red fill
+      let strokeColor = isYourProtocol ? '#2196F3' : '#F44336'; // Bold blue/red borders
+      
+      polygon.setAttribute("fill", fillColor);
+      polygon.setAttribute("fill-opacity", "0.3"); // Make it translucent
+      polygon.setAttribute("stroke", strokeColor);
+      polygon.setAttribute("stroke-width", dataset.borderWidth);
+      polygon.setAttribute("stroke-linejoin", "round");
+      
+      datasetGroup.appendChild(polygon);
+      
+      // Add data points as circles
+      for (let i = 0; i < numIndicators; i++) {
+        const angle = i * angleStep - Math.PI / 2;
+        const value = dataset.data[i];
+        const pointRadius = value * radius;
+        const x = center.x + pointRadius * Math.cos(angle);
+        const y = center.y + pointRadius * Math.sin(angle);
+        
+        // Get point styling
+        const indicator = indicators[i];
+        let bgColor, borderColor, circleRadius;
+        
+        if (isYourProtocol) {
+          // Your protocol
+          const userProtocol = CMPortal.benchmarkRadar.benchmarkData[0];
+          const userProtocolData = userProtocol[1];
+          const userValue = userProtocolData[indicator.label] || ['Q1', 0];
+          const userFlag = userValue[1];
+          
+          // Convert colors and handle special cases
+          switch(parseInt(userFlag)) {
+            case 0: // Predicted data (hollow points)
+              bgColor = "#FFFFFF"; // Ensure white fill
+              borderColor = "#2196F3"; // Blue border
+              break;
+            case 1: // Normal experimental data
+              bgColor = "#2196F3"; // Blue fill
+              borderColor = "#2196F3"; // Blue border
+              break;
+            case 3: // Exceeds best bound
+              bgColor = "#0D47A1"; // Darker blue
+              borderColor = "#0D47A1";
+              break;
+            case 4: // Below worst bound
+              bgColor = "#90CAF9"; // Lighter blue
+              borderColor = "#90CAF9";
+              break;
+            default:
+              bgColor = "#2196F3"; // Default blue
+              borderColor = "#2196F3";
+          }
+          
+          const style = CMPortal.benchmarkRadar.getDataPointStyling(userFlag, false);
+          circleRadius = style.radius;
+        } else {
+          // Reference protocol
+          const refIndex = CMPortal.benchmarkRadar.currentRefIndex + 1;
+          const referenceProtocol = CMPortal.benchmarkRadar.benchmarkData[refIndex];
+          const referenceProtocolData = referenceProtocol[1];
+          const refValue = referenceProtocolData[indicator.label] || ['Q1', 0];
+          const refFlag = refValue[1];
+          
+          // Convert colors and handle special cases
+          switch(parseInt(refFlag)) {
+            case 0: // Predicted data (hollow points)
+              bgColor = "#FFFFFF"; // Ensure white fill
+              borderColor = "#F44336"; // Red border
+              break;
+            case 1: // Normal experimental data
+              bgColor = "#F44336"; // Red fill
+              borderColor = "#F44336"; // Red border
+              break;
+            case 3: // Exceeds best bound
+              bgColor = "#B71C1C"; // Darker red
+              borderColor = "#B71C1C";
+              break;
+            case 4: // Below worst bound
+              bgColor = "#FFCDD2"; // Lighter red
+              borderColor = "#FFCDD2";
+              break;
+            default:
+              bgColor = "#F44336"; // Default red
+              borderColor = "#F44336";
+          }
+          
+          const style = CMPortal.benchmarkRadar.getDataPointStyling(refFlag, true);
+          circleRadius = style.radius;
+        }
+        
+        // Create the data point circle
+        const circle = document.createElementNS(svgNS, "circle");
+        circle.setAttribute("cx", x);
+        circle.setAttribute("cy", y);
+        circle.setAttribute("r", circleRadius);
+        circle.setAttribute("fill", bgColor);
+        circle.setAttribute("stroke", borderColor);
+        circle.setAttribute("stroke-width", "1");
+        
+        // Add data as attributes for editing
+        circle.setAttribute("data-indicator", indicator.label);
+        circle.setAttribute("data-protocol", dataset.label);
+        circle.setAttribute("data-value", value);
+        circle.setAttribute("data-flag", isYourProtocol ? 
+            userProtocolData[indicator.label]?.[1] || 0 : 
+            referenceProtocolData[indicator.label]?.[1] || 0);
+        
+        // Add tooltip text
+        const title = document.createElementNS(svgNS, "title");
+        title.textContent = `${dataset.label}: ${indicator.label} - ${value.toFixed(2)}`;
+        circle.appendChild(title);
+        
+        datasetGroup.appendChild(circle);
+      }
+      
+      svg.appendChild(datasetGroup);
+    }
+    
+    // Add a legend
+    const legendGroup = document.createElementNS(svgNS, "g");
+    legendGroup.setAttribute("id", "legend");
+    legendGroup.setAttribute("transform", `translate(20, ${height - 80})`);
+    
+    // Add legend title
+    const legendTitle = document.createElementNS(svgNS, "text");
+    legendTitle.setAttribute("x", "0");
+    legendTitle.setAttribute("y", "0");
+    legendTitle.setAttribute("font-family", "Arial, sans-serif");
+    legendTitle.setAttribute("font-size", "14");
+    legendTitle.setAttribute("font-weight", "bold");
+    legendTitle.textContent = "Legend:";
+    legendGroup.appendChild(legendTitle);
+    
+    // Add legend items
+    const legendItems = [
+      { color: "#2196F3", text: `${yourProtocolLabel}` },
+      { color: "#F44336", text: `${refLabel}` }
+    ];
+    
+    legendItems.forEach((item, index) => {
+      const g = document.createElementNS(svgNS, "g");
+      g.setAttribute("transform", `translate(0, ${index * 25 + 20})`);
+      
+      const rect = document.createElementNS(svgNS, "rect");
+      rect.setAttribute("width", "20");
+      rect.setAttribute("height", "20");
+      rect.setAttribute("fill", item.color);
+      rect.setAttribute("rx", "4");
+      rect.setAttribute("ry", "4");
+      g.appendChild(rect);
+      
+      const text = document.createElementNS(svgNS, "text");
+      text.setAttribute("x", "30");
+      text.setAttribute("y", "15");
+      text.setAttribute("font-family", "Arial, sans-serif");
+      text.setAttribute("font-size", "12");
+      text.textContent = item.text;
+      g.appendChild(text);
+      
+      legendGroup.appendChild(g);
+    });
+    
+    // Add legend for different data point types
+    const markerLegend = document.createElementNS(svgNS, "g");
+    markerLegend.setAttribute("id", "marker-legend");
+    markerLegend.setAttribute("transform", `translate(${width - 220}, 20)`);
+    
+    // Marker legend title
+    const markerTitle = document.createElementNS(svgNS, "text");
+    markerTitle.setAttribute("x", "0");
+    markerTitle.setAttribute("y", "0");
+    markerTitle.setAttribute("font-family", "Arial, sans-serif");
+    markerTitle.setAttribute("font-size", "14");
+    markerTitle.setAttribute("font-weight", "bold");
+    markerTitle.textContent = "Data Point Types:";
+    markerLegend.appendChild(markerTitle);
+    
+    // Marker items
+    const markerItems = [
+      { fill: "#FFFFFF", stroke: "#2196F3", text: "Predicted Data" },
+      { fill: "#2196F3", stroke: "#2196F3", text: "Experimental Data (Within Range)" },
+      { fill: "#0D47A1", stroke: "#0D47A1", text: "Experimental Data (Exceeds Best Bound)" },
+      { fill: "#90CAF9", stroke: "#90CAF9", text: "Experimental Data (Below Worst Bound)" }
+    ];
+    
+    markerItems.forEach((item, index) => {
+      const g = document.createElementNS(svgNS, "g");
+      g.setAttribute("transform", `translate(0, ${index * 20 + 20})`);
+      
+      const circle = document.createElementNS(svgNS, "circle");
+      circle.setAttribute("cx", "10");
+      circle.setAttribute("cy", "0");
+      circle.setAttribute("r", "6");
+      circle.setAttribute("fill", item.fill);
+      circle.setAttribute("stroke", item.stroke);
+      circle.setAttribute("stroke-width", "1");
+      g.appendChild(circle);
+      
+      const text = document.createElementNS(svgNS, "text");
+      text.setAttribute("x", "20");
+      text.setAttribute("y", "4");
+      text.setAttribute("font-family", "Arial, sans-serif");
+      text.setAttribute("font-size", "12");
+      text.textContent = item.text;
+      g.appendChild(text);
+      
+      markerLegend.appendChild(g);
+    });
+    
+    svg.appendChild(legendGroup);
+    svg.appendChild(markerLegend);
+    
+    // Convert SVG to a string
+    const serializer = new XMLSerializer();
+    let svgString = serializer.serializeToString(svg);
+    
+    // Add XML declaration
+    svgString = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' + svgString;
+    
+    // Create a Blob with the SVG content
+    const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+    const blobURL = URL.createObjectURL(blob);
+    
+    // Create a download link and trigger the download
+    const link = document.createElement('a');
+    link.href = blobURL;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up the Blob URL
+    URL.revokeObjectURL(blobURL);
+    
+    // Reset the button
+    svgBtn.innerHTML = originalText;
+    svgBtn.disabled = false;
+    
+  } catch (error) {
+    console.error('Error generating editable SVG:', error);
+    alert('There was an error generating the editable SVG file. Please try again.');
+    
+    // Reset the button
+    svgBtn.innerHTML = originalText;
+    svgBtn.disabled = false;
+  }
 };
