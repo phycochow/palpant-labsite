@@ -943,6 +943,7 @@ CMPortal.benchmarkRadar.downloadPNG = function() {
 };
 
 // Function to create an editable SVG for Illustrator
+// Function to create an illustrator-friendly editable SVG
 CMPortal.benchmarkRadar.downloadEditableSVG = function() {
   // Show loading indicator
   const svgBtn = document.getElementById('download-radar-svg');
@@ -973,25 +974,32 @@ CMPortal.benchmarkRadar.downloadEditableSVG = function() {
     const cleanRefProtocol = refLabel.replace(/[^a-z0-9]/gi, '-').toLowerCase();
     const fileName = `CMPortal-Maturity-${cleanYourProtocol}-vs-${cleanRefProtocol}.svg`;
     
-    // Create a simplified SVG with just the chart data
+    // Create a new SVG with proper namespaces for Illustrator compatibility
     const svgNS = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(svgNS, "svg");
     svg.setAttribute("width", width);
     svg.setAttribute("height", height);
     svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
     svg.setAttribute("xmlns", svgNS);
+    svg.setAttribute("version", "1.1");
+    svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
     
-    // Add white background
+    // Add document title and description for Illustrator
+    const title = document.createElementNS(svgNS, "title");
+    title.textContent = `CMPortal Maturity Radar: ${yourProtocolLabel} vs ${refLabel}`;
+    svg.appendChild(title);
+    
+    const desc = document.createElementNS(svgNS, "desc");
+    desc.textContent = `Radar chart comparing cardiomyocyte maturity indicators between ${yourProtocolLabel} and ${refLabel}. Created with CMPortal.`;
+    svg.appendChild(desc);
+    
+    // Add white background rectangle
     const background = document.createElementNS(svgNS, "rect");
+    background.setAttribute("id", "background");
     background.setAttribute("width", width);
     background.setAttribute("height", height);
     background.setAttribute("fill", "#ffffff");
     svg.appendChild(background);
-
-    // Add title element
-    const title = document.createElementNS(svgNS, "title");
-    title.textContent = `Radar chart comparing ${yourProtocolLabel} and ${refLabel}`;
-    svg.appendChild(title);
     
     // Calculate chart center and radius
     const chartArea = chart.chartArea;
@@ -1004,12 +1012,59 @@ CMPortal.benchmarkRadar.downloadEditableSVG = function() {
     // Get datasets from the chart
     const datasets = chart.data.datasets;
     const labels = chart.data.labels;
+    const numPoints = labels.length;
+    const angleStep = (Math.PI * 2) / numPoints;
     
-    // Create a group for grid lines
+    // Create a group structure for Illustrator layers
+    // Main container for all chart elements
+    const chartContainer = document.createElementNS(svgNS, "g");
+    chartContainer.setAttribute("id", "chart-container");
+    
+    // --- GRID LAYERS ---
+    // Create a group for grid elements (background)
     const gridGroup = document.createElementNS(svgNS, "g");
-    gridGroup.setAttribute("id", "grid");
+    gridGroup.setAttribute("id", "grid-layer");
     
-    // Draw concentric circles for grid
+    // 1. Add sectors (alternating background)
+    const sectorsGroup = document.createElementNS(svgNS, "g");
+    sectorsGroup.setAttribute("id", "sector-backgrounds");
+    
+    for (let i = 0; i < numPoints; i++) {
+      const startAngle = i * angleStep - Math.PI / 2 - angleStep / 2;
+      const endAngle = i * angleStep - Math.PI / 2 + angleStep / 2;
+      
+      // Create sector path
+      const sectorPath = document.createElementNS(svgNS, "path");
+      
+      // Calculate path 
+      const startX = center.x + radius * Math.cos(startAngle);
+      const startY = center.y + radius * Math.sin(startAngle);
+      const endX = center.x + radius * Math.cos(endAngle);
+      const endY = center.y + radius * Math.sin(endAngle);
+      
+      // Define SVG arc path
+      const d = [
+        `M ${center.x} ${center.y}`, // Move to center
+        `L ${startX} ${startY}`,     // Line to start of arc
+        `A ${radius} ${radius} 0 0 1 ${endX} ${endY}`, // Arc to end
+        'Z'                          // Close path
+      ].join(' ');
+      
+      sectorPath.setAttribute("d", d);
+      sectorPath.setAttribute("fill", i % 2 ? 'rgba(0,0,0,0.04)' : 'rgba(0,0,0,0.02)');
+      sectorPath.setAttribute("stroke", "none");
+      sectorPath.setAttribute("id", `sector-${i}`);
+      sectorPath.setAttribute("class", "sector-background");
+      
+      sectorsGroup.appendChild(sectorPath);
+    }
+    gridGroup.appendChild(sectorsGroup);
+    
+    // 2. Add concentric circles (quantile rings)
+    const ringsGroup = document.createElementNS(svgNS, "g");
+    ringsGroup.setAttribute("id", "quantile-rings");
+    
+    // Create all common rings first
     for (let r = 0.2; r <= 1; r += 0.2) {
       const circle = document.createElementNS(svgNS, "circle");
       circle.setAttribute("cx", center.x);
@@ -1018,12 +1073,70 @@ CMPortal.benchmarkRadar.downloadEditableSVG = function() {
       circle.setAttribute("fill", "none");
       circle.setAttribute("stroke", "#e0e0e0");
       circle.setAttribute("stroke-width", "1");
-      gridGroup.appendChild(circle);
+      circle.setAttribute("id", `common-ring-${(r * 100).toFixed(0)}`);
+      circle.setAttribute("class", "quantile-ring common-ring");
+      ringsGroup.appendChild(circle);
     }
     
-    // Draw spokes for grid
-    const numPoints = labels.length;
-    const angleStep = (Math.PI * 2) / numPoints;
+    // Now add individual indicator rings
+    const indicatorRingsGroup = document.createElementNS(svgNS, "g");
+    indicatorRingsGroup.setAttribute("id", "indicator-specific-rings");
+    
+    CMPortal.benchmarkRadar.indicators.forEach((indicator, i) => {
+      const indicatorGroup = document.createElementNS(svgNS, "g");
+      indicatorGroup.setAttribute("id", `rings-${i}-${indicator.label.replace(/[\s()\/]/g, '-')}`);
+      indicatorGroup.setAttribute("class", "indicator-rings");
+      
+      // Get category info for coloring
+      const categoryInfo = CMPortal.benchmarkRadar.getCategoryInfo(indicator.label);
+      
+      const baseAngle = i * angleStep - Math.PI / 2;
+      const startAngle = baseAngle - angleStep / 2;
+      const endAngle = baseAngle + angleStep / 2;
+      
+      for (let q = 0; q < indicator.rings; q++) {
+        const r = ((indicator.rings - q) / indicator.rings) * radius;
+        
+        // Create arc path for ring segment
+        const arcPath = document.createElementNS(svgNS, "path");
+        
+        // Calculate points for arc
+        const startX = center.x + r * Math.cos(startAngle);
+        const startY = center.y + r * Math.sin(startAngle);
+        const endX = center.x + r * Math.cos(endAngle);
+        const endY = center.y + r * Math.sin(endAngle);
+        
+        // Large arc flag is 0 for angles < 180 degrees
+        const largeArcFlag = Math.abs(endAngle - startAngle) > Math.PI ? 1 : 0;
+        
+        // Define path
+        const d = [
+          `M ${startX} ${startY}`, // Move to start point
+          `A ${r} ${r} 0 ${largeArcFlag} 1 ${endX} ${endY}` // Arc to end point
+        ].join(' ');
+        
+        arcPath.setAttribute("d", d);
+        arcPath.setAttribute("fill", "none");
+        arcPath.setAttribute("stroke", "#e0e0e0");
+        arcPath.setAttribute("stroke-width", "1");
+        arcPath.setAttribute("id", `ring-${i}-q${q+1}`);
+        arcPath.setAttribute("class", "indicator-ring");
+        arcPath.setAttribute("data-indicator", indicator.label);
+        arcPath.setAttribute("data-quantile", `Q${q+1}`);
+        arcPath.setAttribute("data-category", categoryInfo.name);
+        
+        indicatorGroup.appendChild(arcPath);
+      }
+      
+      indicatorRingsGroup.appendChild(indicatorGroup);
+    });
+    
+    ringsGroup.appendChild(indicatorRingsGroup);
+    gridGroup.appendChild(ringsGroup);
+    
+    // 3. Add spokes radiating from center
+    const spokesGroup = document.createElementNS(svgNS, "g");
+    spokesGroup.setAttribute("id", "spokes");
     
     for (let i = 0; i < numPoints; i++) {
       const angle = i * angleStep - Math.PI / 2; // Start from the top
@@ -1037,56 +1150,62 @@ CMPortal.benchmarkRadar.downloadEditableSVG = function() {
       line.setAttribute("y2", y);
       line.setAttribute("stroke", "#e0e0e0");
       line.setAttribute("stroke-width", "1");
-      gridGroup.appendChild(line);
+      line.setAttribute("id", `spoke-${i}`);
+      line.setAttribute("class", "grid-spoke");
+      line.setAttribute("data-indicator", labels[i]);
       
-      // Add label
-      const labelDistance = radius * 1.1;
-      const labelX = center.x + labelDistance * Math.cos(angle);
-      const labelY = center.y + labelDistance * Math.sin(angle);
+      // Get category info
+      const categoryInfo = CMPortal.benchmarkRadar.getCategoryInfo(labels[i]);
+      line.setAttribute("data-category", categoryInfo.name);
       
-      const text = document.createElementNS(svgNS, "text");
-      text.setAttribute("x", labelX);
-      text.setAttribute("y", labelY);
-      
-      // Set anchor based on position
-      if (angle === 0) text.setAttribute("text-anchor", "start");
-      else if (Math.abs(angle - Math.PI) < 0.1) text.setAttribute("text-anchor", "end");
-      else if (angle > 0 && angle < Math.PI) text.setAttribute("text-anchor", "start");
-      else text.setAttribute("text-anchor", "end");
-      
-      text.setAttribute("font-family", "Arial, sans-serif");
-      text.setAttribute("font-size", "12px");
-      text.textContent = labels[i];
-      gridGroup.appendChild(text);
+      spokesGroup.appendChild(line);
     }
     
-    svg.appendChild(gridGroup);
+    gridGroup.appendChild(spokesGroup);
+    chartContainer.appendChild(gridGroup);
     
-    // Add datasets
-    for (let d = 0; d < datasets.length; d++) {
-      const dataset = datasets[d];
-      const dataGroup = document.createElementNS(svgNS, "g");
-      dataGroup.setAttribute("id", `dataset-${d}`);
+    // --- DATASET LAYERS ---
+    // Create a group for all datasets
+    const datasetsGroup = document.createElementNS(svgNS, "g");
+    datasetsGroup.setAttribute("id", "datasets-layer");
+    
+    // Process each dataset (protocol data)
+    datasets.forEach((dataset, datasetIndex) => {
+      const datasetName = datasetIndex === 0 ? 'your-protocol' : 'reference-protocol';
+      const datasetLabel = datasetIndex === 0 ? yourProtocolLabel : refLabel;
       
-      // Create polygon for dataset area
-      const points = [];
+      const datasetGroup = document.createElementNS(svgNS, "g");
+      datasetGroup.setAttribute("id", `dataset-${datasetName}`);
+      datasetGroup.setAttribute("class", "dataset");
+      datasetGroup.setAttribute("data-name", datasetLabel);
+      
+      // Add polygon shape (area fill)
+      const polygonPoints = [];
+      
       for (let i = 0; i < numPoints; i++) {
         const angle = i * angleStep - Math.PI / 2;
         const value = dataset.data[i];
         const pointRadius = value * radius;
         const x = center.x + pointRadius * Math.cos(angle);
         const y = center.y + pointRadius * Math.sin(angle);
-        points.push(`${x},${y}`);
+        polygonPoints.push(`${x},${y}`);
       }
       
       const polygon = document.createElementNS(svgNS, "polygon");
-      polygon.setAttribute("points", points.join(" "));
+      polygon.setAttribute("points", polygonPoints.join(" "));
       polygon.setAttribute("fill", dataset.backgroundColor);
       polygon.setAttribute("stroke", dataset.borderColor);
       polygon.setAttribute("stroke-width", dataset.borderWidth);
-      dataGroup.appendChild(polygon);
+      polygon.setAttribute("id", `${datasetName}-area`);
+      polygon.setAttribute("class", "dataset-area");
       
-      // Add points
+      datasetGroup.appendChild(polygon);
+      
+      // Create a group for data points
+      const pointsGroup = document.createElementNS(svgNS, "g");
+      pointsGroup.setAttribute("id", `${datasetName}-points`);
+      
+      // Add individual data points with metadata
       for (let i = 0; i < numPoints; i++) {
         const angle = i * angleStep - Math.PI / 2;
         const value = dataset.data[i];
@@ -1095,46 +1214,174 @@ CMPortal.benchmarkRadar.downloadEditableSVG = function() {
         const y = center.y + pointRadius * Math.sin(angle);
         
         // Get point styling
-        const bgColor = Array.isArray(dataset.pointBackgroundColor) ? dataset.pointBackgroundColor[i] : dataset.pointBackgroundColor;
-        const borderColor = Array.isArray(dataset.pointBorderColor) ? dataset.pointBorderColor[i] : dataset.pointBorderColor;
-        const pointSize = Array.isArray(dataset.pointRadius) ? dataset.pointRadius[i] : dataset.pointRadius;
+        const bgColor = Array.isArray(dataset.pointBackgroundColor) ? 
+          dataset.pointBackgroundColor[i] : dataset.pointBackgroundColor;
+        const borderColor = Array.isArray(dataset.pointBorderColor) ? 
+          dataset.pointBorderColor[i] : dataset.pointBorderColor;
+        const pointSize = Array.isArray(dataset.pointRadius) ? 
+          dataset.pointRadius[i] : dataset.pointRadius;
         
+        // Create a group for each point to make selection easier in Illustrator
+        const pointGroup = document.createElementNS(svgNS, "g");
+        pointGroup.setAttribute("id", `${datasetName}-point-${i}`);
+        pointGroup.setAttribute("class", "data-point");
+        pointGroup.setAttribute("transform", `translate(${x}, ${y})`);
+        
+        // Add the point data as metadata for Illustrator
+        const indicator = labels[i];
+        pointGroup.setAttribute("data-indicator", indicator);
+        pointGroup.setAttribute("data-protocol", datasetLabel);
+        
+        // Get flag type - extract from original data
+        let dataFlag = 0;
+        
+        if (datasetIndex === 0 && CMPortal.benchmarkRadar.benchmarkData[0][1][indicator]) {
+          // For user protocol
+          const data = CMPortal.benchmarkRadar.benchmarkData[0][1][indicator];
+          if (Array.isArray(data) && data.length > 1) {
+            dataFlag = data[1];
+          }
+        } else if (datasetIndex === 1 && 
+                  CMPortal.benchmarkRadar.benchmarkData[CMPortal.benchmarkRadar.currentRefIndex + 1][1][indicator]) {
+          // For reference protocol
+          const data = CMPortal.benchmarkRadar.benchmarkData[CMPortal.benchmarkRadar.currentRefIndex + 1][1][indicator];
+          if (Array.isArray(data) && data.length > 1) {
+            dataFlag = data[1];
+          }
+        }
+        
+        // Add flag type info
+        let flagType = "Predicted Data";
+        switch(parseInt(dataFlag)) {
+          case 1: flagType = "Experimental Data (Within Range)"; break;
+          case 3: flagType = "Experimental Data (Exceeds Best Bound)"; break;
+          case 4: flagType = "Experimental Data (Below Worst Bound)"; break;
+        }
+        
+        pointGroup.setAttribute("data-flag-type", flagType);
+        pointGroup.setAttribute("data-flag", dataFlag);
+        
+        // Get category info
+        const categoryInfo = CMPortal.benchmarkRadar.getCategoryInfo(indicator);
+        pointGroup.setAttribute("data-category", categoryInfo.name);
+        
+        // Create the actual circle 
         const circle = document.createElementNS(svgNS, "circle");
-        circle.setAttribute("cx", x);
-        circle.setAttribute("cy", y);
         circle.setAttribute("r", pointSize);
         circle.setAttribute("fill", bgColor);
         circle.setAttribute("stroke", borderColor);
         circle.setAttribute("stroke-width", "1");
-        dataGroup.appendChild(circle);
+        
+        pointGroup.appendChild(circle);
+        pointsGroup.appendChild(pointGroup);
       }
       
-      svg.appendChild(dataGroup);
+      datasetGroup.appendChild(pointsGroup);
+      datasetsGroup.appendChild(datasetGroup);
+    });
+    
+    chartContainer.appendChild(datasetsGroup);
+    
+    // --- LABELS LAYER ---
+    // Add indicator labels in a separate layer for easier editing
+    const labelsGroup = document.createElementNS(svgNS, "g");
+    labelsGroup.setAttribute("id", "labels-layer");
+    
+    // Add indicator labels with proper metadata
+    for (let i = 0; i < numPoints; i++) {
+      const angle = i * angleStep - Math.PI / 2; // Start from the top
+      const labelDistance = radius * 1.08; // Slightly beyond the grid
+      const labelX = center.x + labelDistance * Math.cos(angle);
+      const labelY = center.y + labelDistance * Math.sin(angle);
+      
+      // Create a group for the label to make it easier to select in Illustrator
+      const labelGroup = document.createElementNS(svgNS, "g");
+      labelGroup.setAttribute("id", `label-${i}`);
+      labelGroup.setAttribute("class", "indicator-label");
+      
+      const text = document.createElementNS(svgNS, "text");
+      text.setAttribute("x", labelX);
+      text.setAttribute("y", labelY);
+      
+      // Set anchor based on position
+      if (Math.abs(angle) < 0.1) { // Right side
+        text.setAttribute("text-anchor", "start");
+        text.setAttribute("dominant-baseline", "middle");
+      } 
+      else if (Math.abs(angle - Math.PI) < 0.1) { // Left side
+        text.setAttribute("text-anchor", "end");
+        text.setAttribute("dominant-baseline", "middle");
+      }
+      else if (Math.abs(angle + Math.PI/2) < 0.1) { // Top
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("dominant-baseline", "auto");
+      }
+      else if (Math.abs(angle - Math.PI/2) < 0.1) { // Bottom
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("dominant-baseline", "hanging");
+      }
+      else if (angle > -Math.PI/2 && angle < Math.PI/2) { // Right half
+        text.setAttribute("text-anchor", "start");
+        if (angle < 0) {
+          text.setAttribute("dominant-baseline", "auto");
+        } else {
+          text.setAttribute("dominant-baseline", "hanging");
+        }
+      }
+      else { // Left half
+        text.setAttribute("text-anchor", "end");
+        if (angle > Math.PI/2) {
+          text.setAttribute("dominant-baseline", "hanging");
+        } else {
+          text.setAttribute("dominant-baseline", "auto");
+        }
+      }
+      
+      // Get category info for styling
+      const indicator = labels[i];
+      const categoryInfo = CMPortal.benchmarkRadar.getCategoryInfo(indicator);
+      
+      text.setAttribute("font-family", "Arial, sans-serif");
+      text.setAttribute("font-size", "11px");
+      text.setAttribute("fill", categoryInfo.color);
+      text.setAttribute("data-indicator", indicator);
+      text.setAttribute("data-category", categoryInfo.name);
+      text.textContent = indicator;
+      
+      labelGroup.appendChild(text);
+      labelsGroup.appendChild(labelGroup);
     }
     
-    // Add legend
-    const legendGroup = document.createElementNS(svgNS, "g");
-    legendGroup.setAttribute("transform", `translate(20, 20)`);
+    chartContainer.appendChild(labelsGroup);
     
-    // Create legend items
+    // --- LEGEND LAYER ---
+    // Add a legend in a separate group
+    const legendGroup = document.createElementNS(svgNS, "g");
+    legendGroup.setAttribute("id", "legend-layer");
+    legendGroup.setAttribute("transform", `translate(30, 30)`);
+    
+    // Create legend items - protocols
     const legendItems = [
-      { color: datasets[0].borderColor, text: yourProtocolLabel },
-      { color: datasets[1].borderColor, text: refLabel }
+      { color: datasets[0].borderColor, text: yourProtocolLabel, id: "your-protocol" },
+      { color: datasets[1].borderColor, text: refLabel, id: "reference-protocol" }
     ];
     
     // Add legend title
     const legendTitle = document.createElementNS(svgNS, "text");
+    legendTitle.setAttribute("id", "legend-title");
     legendTitle.setAttribute("x", "0");
     legendTitle.setAttribute("y", "0");
     legendTitle.setAttribute("font-family", "Arial, sans-serif");
     legendTitle.setAttribute("font-size", "14px");
     legendTitle.setAttribute("font-weight", "bold");
-    legendTitle.textContent = "Legend:";
+    legendTitle.textContent = "Protocols:";
     legendGroup.appendChild(legendTitle);
     
-    // Add legend items
+    // Add protocol legend items
     legendItems.forEach((item, index) => {
       const g = document.createElementNS(svgNS, "g");
+      g.setAttribute("id", `legend-${item.id}`);
+      g.setAttribute("class", "legend-item");
       g.setAttribute("transform", `translate(0, ${index * 25 + 20})`);
       
       const rect = document.createElementNS(svgNS, "rect");
@@ -1154,11 +1401,121 @@ CMPortal.benchmarkRadar.downloadEditableSVG = function() {
       legendGroup.appendChild(g);
     });
     
-    svg.appendChild(legendGroup);
+    // Add data type legend items
+    const dataTypeTitle = document.createElementNS(svgNS, "text");
+    dataTypeTitle.setAttribute("id", "data-type-title");
+    dataTypeTitle.setAttribute("x", "0");
+    dataTypeTitle.setAttribute("y", "80");
+    dataTypeTitle.setAttribute("font-family", "Arial, sans-serif");
+    dataTypeTitle.setAttribute("font-size", "14px");
+    dataTypeTitle.setAttribute("font-weight", "bold");
+    dataTypeTitle.textContent = "Data Types:";
+    legendGroup.appendChild(dataTypeTitle);
     
-    // Convert SVG to string
+    // Create data type legend items
+    const dataTypes = [
+      { id: "predicted", name: "Predicted Data", yourColor: "rgba(255,255,255,1)", yourBorder: "rgba(54,162,235,1)", refColor: "rgba(255,255,255,1)", refBorder: "rgba(255,99,132,1)" },
+      { id: "experimental", name: "Experimental Data", yourColor: "rgba(30,120,190,1)", yourBorder: "rgba(30,120,190,1)", refColor: "rgba(255,99,132,1)", refBorder: "rgba(255,99,132,1)" },
+      { id: "exceeds", name: "Exceeds Best Bound", yourColor: "rgba(10,60,110,1)", yourBorder: "rgba(10,60,110,1)", refColor: "rgba(180,50,80,1)", refBorder: "rgba(180,50,80,1)" },
+      { id: "below", name: "Below Worst Bound", yourColor: "rgba(100,180,235,1)", yourBorder: "rgba(100,180,235,1)", refColor: "rgba(255,170,192,1)", refBorder: "rgba(255,170,192,1)" }
+    ];
+    
+    dataTypes.forEach((type, index) => {
+      const g = document.createElementNS(svgNS, "g");
+      g.setAttribute("id", `legend-type-${type.id}`);
+      g.setAttribute("class", "legend-data-type");
+      g.setAttribute("transform", `translate(0, ${index * 25 + 100})`);
+      
+      // Your protocol marker
+      const yourCircle = document.createElementNS(svgNS, "circle");
+      yourCircle.setAttribute("cx", "10");
+      yourCircle.setAttribute("cy", "10");
+      yourCircle.setAttribute("r", "6");
+      yourCircle.setAttribute("fill", type.yourColor);
+      yourCircle.setAttribute("stroke", type.yourBorder);
+      yourCircle.setAttribute("stroke-width", "1");
+      g.appendChild(yourCircle);
+      
+      // Reference protocol marker
+      const refCircle = document.createElementNS(svgNS, "circle");
+      refCircle.setAttribute("cx", "30");
+      refCircle.setAttribute("cy", "10");
+      refCircle.setAttribute("r", "6");
+      refCircle.setAttribute("fill", type.refColor);
+      refCircle.setAttribute("stroke", type.refBorder);
+      refCircle.setAttribute("stroke-width", "1");
+      g.appendChild(refCircle);
+      
+      // Label text
+      const text = document.createElementNS(svgNS, "text");
+      text.setAttribute("x", "50");
+      text.setAttribute("y", "15");
+      text.setAttribute("font-family", "Arial, sans-serif");
+      text.setAttribute("font-size", "12px");
+      text.textContent = type.name;
+      g.appendChild(text);
+      
+      legendGroup.appendChild(g);
+    });
+    
+    // Add category legends
+    const categoryTitle = document.createElementNS(svgNS, "text");
+    categoryTitle.setAttribute("id", "category-title");
+    categoryTitle.setAttribute("x", "0");
+    categoryTitle.setAttribute("y", "220");
+    categoryTitle.setAttribute("font-family", "Arial, sans-serif");
+    categoryTitle.setAttribute("font-size", "14px");
+    categoryTitle.setAttribute("font-weight", "bold");
+    categoryTitle.textContent = "Categories:";
+    legendGroup.appendChild(categoryTitle);
+    
+    // Add each category to the legend
+    let categoryIndex = 0;
+    for (const [categoryName, category] of Object.entries(CMPortal.benchmarkRadar.categories)) {
+      const g = document.createElementNS(svgNS, "g");
+      g.setAttribute("id", `legend-category-${categoryName.toLowerCase().replace(/\s+/g, '-')}`);
+      g.setAttribute("class", "legend-category");
+      g.setAttribute("transform", `translate(0, ${categoryIndex * 25 + 240})`);
+      
+      // Category color indicator
+      const rect = document.createElementNS(svgNS, "rect");
+      rect.setAttribute("width", "20");
+      rect.setAttribute("height", "20");
+      rect.setAttribute("fill", category.color);
+      g.appendChild(rect);
+      
+      // Category icon (as text)
+      const icon = document.createElementNS(svgNS, "text");
+      icon.setAttribute("x", "30");
+      icon.setAttribute("y", "15");
+      icon.setAttribute("font-family", "Arial, sans-serif");
+      icon.setAttribute("font-size", "14px");
+      icon.textContent = category.icon;
+      g.appendChild(icon);
+      
+      // Category name
+      const text = document.createElementNS(svgNS, "text");
+      text.setAttribute("x", "50");
+      text.setAttribute("y", "15");
+      text.setAttribute("font-family", "Arial, sans-serif");
+      text.setAttribute("font-size", "12px");
+      text.textContent = categoryName;
+      g.appendChild(text);
+      
+      legendGroup.appendChild(g);
+      categoryIndex++;
+    }
+    
+    chartContainer.appendChild(legendGroup);
+    
+    // Add the chart container to the SVG
+    svg.appendChild(chartContainer);
+    
+    // Convert SVG to string with proper XML declaration
     const serializer = new XMLSerializer();
-    const svgString = serializer.serializeToString(svg);
+    let svgString = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n';
+    svgString += '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n';
+    svgString += serializer.serializeToString(svg);
     
     // Create download link
     const blob = new Blob([svgString], {type: 'image/svg+xml'});
