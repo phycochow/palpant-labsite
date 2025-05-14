@@ -123,6 +123,7 @@ CMPortal.benchmarkRadar.init = function(benchmarkData) {
   
   // Check if already initialized
   if (CMPortal.benchmarkRadar.initialized) {
+    // For existing charts, update the data and redraw
     CMPortal.benchmarkRadar.updateChart();
     return;
   }
@@ -324,41 +325,73 @@ CMPortal.benchmarkRadar.customRadarPlugin = function() {
 };
 
 // Custom tooltips to handle "?" in the quantile values
+// Fixed customTooltips function to correctly differentiate between datasets
 CMPortal.benchmarkRadar.customTooltips = function() {
   return {
     callbacks: {
       label(ctx) {
         const idx = ctx.dataIndex;
         const indicator = CMPortal.benchmarkRadar.indicators[idx];
-        const isRef = ctx.dataset.label.includes("Reference");
+        const datasetIndex = ctx.datasetIndex; // This is the key - using datasetIndex instead of checking the label
         
         let dataArray;
         let protocolName;
         
-        if (isRef) {
+        // Get the correct protocol data based on the dataset index
+        // datasetIndex 0 = user protocol, datasetIndex 1 = reference protocol
+        if (datasetIndex === 1) {
+          // For reference protocol datapoints (dataset index 1)
           const refIndex = CMPortal.benchmarkRadar.currentRefIndex + 1;
-          const referenceProtocol = CMPortal.benchmarkRadar.benchmarkData[refIndex];
-          dataArray = referenceProtocol[1][indicator.label];
-          protocolName = referenceProtocol[0];
+          if (refIndex < CMPortal.benchmarkRadar.benchmarkData.length) {
+            const referenceProtocol = CMPortal.benchmarkRadar.benchmarkData[refIndex];
+            
+            // Normalize key if needed for lookup
+            const normalizedKey = CMPortal.benchmarkRadar.normalizeFieldName(indicator.label);
+            
+            // Check both the original and normalized keys
+            dataArray = referenceProtocol[1][indicator.label] || 
+                       referenceProtocol[1][normalizedKey];
+            protocolName = referenceProtocol[0];
+          } else {
+            // Fallback if reference index is out of bounds
+            dataArray = ["?", 0];
+            protocolName = "Reference Protocol";
+          }
         } else {
+          // For user protocol datapoints (dataset index 0)
           const userProtocol = CMPortal.benchmarkRadar.benchmarkData[0];
-          dataArray = userProtocol[1][indicator.label];
+          
+          // Normalize key if needed for lookup
+          const normalizedKey = CMPortal.benchmarkRadar.normalizeFieldName(indicator.label);
+          
+          // Check both the original and normalized keys
+          dataArray = userProtocol[1][indicator.label] || 
+                     userProtocol[1][normalizedKey];
           protocolName = userProtocol[0];
         }
         
-        // Better handling for missing or malformed data
+        // Handle missing or malformed data
         if (!dataArray || !Array.isArray(dataArray)) {
-          console.warn(`Missing or invalid data for ${indicator.label}: ${JSON.stringify(dataArray)}`);
+          console.warn(`Missing or invalid data for ${indicator.label} in ${protocolName}: ${JSON.stringify(dataArray)}`);
           return `${protocolName}: Missing Data`;
         }
         
         const [qv, flag] = dataArray;
         
-        // Handle unknown quantile value (the "?" issue)
+        // Handle unknown or decimal quantile value
         let quantileDisplay = qv;
         if (qv === undefined || qv === null || qv === "?") {
           quantileDisplay = "?";
-          console.warn(`Unknown quantile for ${indicator.label}: ${qv}`);
+          console.warn(`Unknown quantile for ${indicator.label} in ${protocolName}: ${qv}`);
+        } else {
+          // Ensure we properly display decimal quantiles (like Q1.5)
+          // Convert to string if it's not already, and preserve decimal places
+          quantileDisplay = typeof qv === 'string' ? qv : qv.toString();
+          
+          // If it doesn't start with 'Q', add it
+          if (!quantileDisplay.startsWith('Q')) {
+            quantileDisplay = 'Q' + quantileDisplay;
+          }
         }
         
         // Get descriptive text for flag
@@ -383,8 +416,11 @@ CMPortal.benchmarkRadar.customTooltips = function() {
         // Get category info for the indicator
         const categoryInfo = CMPortal.benchmarkRadar.getCategoryInfo(indicator.label);
         
-        // Include category in tooltip with clear indication of value
-        return `${protocolName}: ${kind}: Quantile ${quantileDisplay} of ${indicator.rings} (${categoryInfo.icon} ${categoryInfo.name})`;
+        // Debug output to console to help diagnose issues
+        console.log(`Tooltip for dataset ${datasetIndex} (${protocolName}), indicator ${indicator.label}: ${quantileDisplay}`);
+        
+        // Return the final tooltip text with all relevant information
+        return `${protocolName}: ${kind}: ${quantileDisplay} of ${indicator.rings} quantiles (${categoryInfo.icon} ${categoryInfo.name})`;
       }
     }
   };
@@ -510,7 +546,17 @@ CMPortal.benchmarkRadar.prepareChartData = function() {
     const userFlag = userValue[1];
     
     // Calculate the ring position (value from 0 to 1)
-    const userQNum = parseFloat(userQuantile.replace('Q', ''));
+    // Handle decimal quantiles properly
+    let userQNum = 1; // Default to Q1
+    if (typeof userQuantile === 'string' && userQuantile.startsWith('Q')) {
+      userQNum = parseFloat(userQuantile.substring(1));
+    } else {
+      userQNum = parseFloat(userQuantile);
+    }
+    
+    // Handle NaN case
+    if (isNaN(userQNum)) userQNum = 1;
+    
     const userRingPos = (rings - (userQNum - 1)) / rings;
     
     // Add to your data arrays
@@ -528,7 +574,17 @@ CMPortal.benchmarkRadar.prepareChartData = function() {
     const refFlag = refValue[1];
     
     // Calculate the ring position (value from 0 to 1)
-    const refQNum = parseFloat(refQuantile.replace('Q', ''));
+    // Handle decimal quantiles properly
+    let refQNum = 1; // Default to Q1
+    if (typeof refQuantile === 'string' && refQuantile.startsWith('Q')) {
+      refQNum = parseFloat(refQuantile.substring(1));
+    } else {
+      refQNum = parseFloat(refQuantile);
+    }
+    
+    // Handle NaN case
+    if (isNaN(refQNum)) refQNum = 1;
+    
     const refRingPos = (rings - (refQNum - 1)) / rings;
     
     // Add to reference data arrays
@@ -697,6 +753,7 @@ CMPortal.benchmarkRadar.nextReference = function() {
 };
 
 // Update the chart with new data - with smooth transitions
+// Update chart function to update both datasets
 CMPortal.benchmarkRadar.updateChart = function() {
   if (!CMPortal.benchmarkRadar.chart) return;
   
@@ -718,32 +775,38 @@ CMPortal.benchmarkRadar.updateChart = function() {
     }
   }
   
+  // Update user protocol label
+  const userLabel = document.getElementById('userProtocolLabel');
+  if (userLabel && benchmarkData && benchmarkData.length > 0) {
+    userLabel.textContent = benchmarkData[0][0];
+  }
+  
   // Prepare updated chart data
   const chartData = CMPortal.benchmarkRadar.prepareChartData();
   
-  // Update only the reference dataset values with animation
+  // Update BOTH datasets with animation
   if (chartData && CMPortal.benchmarkRadar.chart) {
-    // Only update the reference dataset (index 1) properties
-    const dataset = CMPortal.benchmarkRadar.chart.data.datasets[1];
+    // Update both datasets - first the user protocol dataset (index 0)
+    const userDataset = CMPortal.benchmarkRadar.chart.data.datasets[0];
+    userDataset.data = chartData.datasets[0].data;
+    userDataset.label = chartData.datasets[0].label;
+    userDataset.pointBackgroundColor = chartData.datasets[0].pointBackgroundColor;
+    userDataset.pointBorderColor = chartData.datasets[0].pointBorderColor;
+    userDataset.pointRadius = chartData.datasets[0].pointRadius;
     
-    // First update dataset label
-    dataset.label = chartData.datasets[1].label;
+    // Then update the reference dataset (index 1)
+    const refDataset = CMPortal.benchmarkRadar.chart.data.datasets[1];
+    refDataset.data = chartData.datasets[1].data;
+    refDataset.label = chartData.datasets[1].label;
+    refDataset.pointBackgroundColor = chartData.datasets[1].pointBackgroundColor;
+    refDataset.pointBorderColor = chartData.datasets[1].pointBorderColor;
+    refDataset.pointRadius = chartData.datasets[1].pointRadius;
     
-    // Then animate the data points positions
-    dataset.data = chartData.datasets[1].data;
-    
-    // Update the styling with a slight delay for staggered animation
-    setTimeout(() => {
-      dataset.pointBackgroundColor = chartData.datasets[1].pointBackgroundColor;
-      dataset.pointBorderColor = chartData.datasets[1].pointBorderColor;
-      dataset.pointRadius = chartData.datasets[1].pointRadius;
-      
-      // Force chart update with specific animation options
-      CMPortal.benchmarkRadar.chart.update({
-        duration: 800,
-        easing: 'easeInOutQuart',
-      });
-    }, 100);
+    // Force chart update with specific animation options
+    CMPortal.benchmarkRadar.chart.update({
+      duration: 800,
+      easing: 'easeInOutQuart',
+    });
   }
 };
 

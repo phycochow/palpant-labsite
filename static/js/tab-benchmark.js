@@ -802,6 +802,23 @@ CMPortal.benchmark.submitAndDisplayResults = function() {
         // Update UI with success message
         CMPortal.benchmark.showStatusMessage('✅ Protocol benchmarking completed successfully', true);
         
+        // For a new submission, reset the radar chart initialization state
+        if (typeof CMPortal.benchmarkRadar !== 'undefined') {
+            // If the chart already exists and needs to be completely reset
+            if (CMPortal.benchmarkRadar.chart) {
+                CMPortal.benchmarkRadar.chart.destroy();
+                CMPortal.benchmarkRadar.chart = null;
+                CMPortal.benchmarkRadar.initialized = false;
+                
+                // Also remove the existing chart container to ensure clean redraw
+                const chartContainer = document.querySelector('.chart-container canvas');
+                if (chartContainer) {
+                    const parent = chartContainer.parentNode;
+                    parent.innerHTML = '<canvas id="maturityChart"></canvas>';
+                }
+            }
+        }
+        
         // Initialize the radar chart visualization if available
         if (typeof CMPortal.benchmarkRadar !== 'undefined' && 
             typeof CMPortal.benchmarkRadar.visualizeResults === 'function') {
