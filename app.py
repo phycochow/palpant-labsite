@@ -14,6 +14,9 @@ import time
 from werkzeug.utils import secure_filename
 from PyPDF2 import PdfReader
 
+# clustering test
+import clustering_test
+
 # Set up dedicated uploads directory
 import os
 import tempfile
@@ -691,6 +694,263 @@ def teardown_app(exception=None):
     global _benchmark_results_cache
     _benchmark_results_cache.clear()
     clear_memory_cache()
+
+
+# -- Clustering test ---
+# Add these imports to the top of your existing app.py
+import clustering_test
+
+# Add these routes to your existing app.py
+
+@app.route('/clustering-test')
+def clustering_signup():
+    """Main questionnaire page"""
+    questions = clustering_test.load_questions_from_csv()
+    if not questions:
+        return "Error: Could not load questions from CSV file", 500
+    
+    return render_template('clustering_signup.html', questions=questions)
+
+@app.route('/clustering-test/submit', methods=['POST'])
+def clustering_submit():
+    """Handle questionnaire submission"""
+    try:
+        name = request.form.get('name', '').strip()
+        if not name:
+            return jsonify({'status': 'error', 'message': 'Name is required'}), 400
+        
+        # Get answers (convert to integers)
+        answers = []
+        questions = clustering_test.load_questions_from_csv()
+        
+        for i in range(len(questions)):
+            answer_key = f'question_{i}'
+            answer = request.form.get(answer_key)
+            if answer is not None:
+                answers.append(int(answer))
+            else:
+                return jsonify({'status': 'error', 'message': f'Please answer all questions'}), 400
+        
+        # Save response and get user ID
+        user_id = clustering_test.save_user_response(name, answers)
+        
+        return jsonify({
+            'status': 'success',
+            'user_id': user_id,
+            'message': 'Response saved successfully'
+        })
+        
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f'Error saving response: {str(e)}'}), 500
+
+@app.route('/clustering-test/results/<user_id>')
+def clustering_results(user_id):
+    """Results page with countdown and matches"""
+    # Verify user exists
+    data = clustering_test.load_responses_json()
+    if user_id not in data['responses']:
+        return "User not found", 404
+    
+    user_name = data['responses'][user_id]['name']
+    return render_template('clustering_results.html', user_id=user_id, user_name=user_name)
+
+@app.route('/clustering-test/activateresults1131')
+def secret_activation():
+    """Secret URL to view and toggle results activation"""
+    # Check if this is a toggle request (POST) or just viewing (GET)
+    if request.method == 'GET':
+        # Just show current state with toggle buttons
+        current_state = clustering_test.get_current_activation_state()
+        
+        if current_state['activated']:
+            button_text = "🔴 DEACTIVATE Results"
+            button_color = "#dc3545"
+            status_color = "#28a745"
+            status_icon = "✅"
+            status_text = "ACTIVE"
+        else:
+            button_text = "🟢 ACTIVATE Results" 
+            button_color = "#28a745"
+            status_color = "#6c757d"
+            status_icon = "⏸️"
+            status_text = "INACTIVE"
+            
+        return f"""
+        <html>
+        <head>
+            <title>Results Control Panel</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body {{ font-family: Arial, sans-serif; padding: 30px; text-align: center; background: #f8f9fa; }}
+                .container {{ max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }}
+                .status {{ color: {status_color}; font-size: 1.5em; margin-bottom: 20px; }}
+                .stats {{ background: #f1f3f4; padding: 20px; border-radius: 8px; margin: 20px 0; }}
+                .toggle-btn {{ background: {button_color}; color: white; border: none; padding: 15px 30px; font-size: 1.1em; border-radius: 8px; cursor: pointer; margin: 10px; }}
+                .toggle-btn:hover {{ opacity: 0.9; transform: translateY(-1px); }}
+                .admin-links {{ margin-top: 30px; }}
+                .admin-links a {{ color: #007bff; text-decoration: none; margin: 0 15px; }}
+                .admin-links a:hover {{ text-decoration: underline; }}
+                .info {{ color: #6c757d; font-size: 0.9em; margin-top: 20px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h2>🎛️ Results Control Panel</h2>
+                <div class="status">{status_icon} System Status: {status_text}</div>
+                
+                <div class="stats">
+                    <strong>📊 Current Statistics</strong><br>
+                    Total Participants: <strong>{current_state['user_count']}</strong><br>
+                    Matches Calculated: <strong>{'Yes' if current_state.get('matches_calculated', False) else 'No'}</strong>
+                </div>
+                
+                <form method="POST" style="display: inline;">
+                    <button type="submit" class="toggle-btn">
+                        {button_text}
+                    </button>
+                </form>
+                
+                <div class="admin-links">
+                    <a href="/clustering-test/admin-stats">📈 View Statistics</a> | 
+                    <a href="/clustering-test">📝 View Questionnaire</a>
+                </div>
+                
+                <div class="info">
+                    💡 Click the button above to toggle the system state
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+@app.route('/clustering-test/activateresults1131', methods=['POST'])
+def secret_activation_toggle():
+    """Handle the actual toggle action"""
+    result = clustering_test.activate_results()
+    
+    if result['status'] == 'success':
+        # Determine button text and color based on NEW state
+        if result['activated']:
+            status_color = "#28a745"
+            status_icon = "✅"
+            status_message = "Results have been ACTIVATED!"
+            user_message = "Users will automatically see the countdown within 3 seconds"
+        else:
+            status_color = "#6c757d"
+            status_icon = "⏸️"
+            status_message = "Results have been DEACTIVATED!"
+            user_message = "Users are now in waiting mode"
+            
+        return f"""
+        <html>
+        <head>
+            <title>Toggle Complete</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body {{ font-family: Arial, sans-serif; padding: 30px; text-align: center; background: #f8f9fa; }}
+                .container {{ max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }}
+                .status {{ color: {status_color}; font-size: 1.5em; margin-bottom: 20px; }}
+                .message {{ font-size: 1.1em; margin-bottom: 30px; color: #333; }}
+                .stats {{ background: #f1f3f4; padding: 20px; border-radius: 8px; margin: 20px 0; }}
+                .btn {{ background: #007bff; color: white; border: none; padding: 12px 24px; font-size: 1em; border-radius: 8px; cursor: pointer; margin: 10px; text-decoration: none; display: inline-block; }}
+                .btn:hover {{ opacity: 0.9; }}
+                .info {{ color: #6c757d; font-size: 0.9em; margin-top: 20px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="status">{status_icon} {status_message}</div>
+                <div class="message">{result['message']}</div>
+                
+                <div class="stats">
+                    <strong>📊 Updated Status</strong><br>
+                    Total Participants: <strong>{result['user_count']}</strong><br>
+                    System State: <strong>{'ACTIVE' if result['activated'] else 'INACTIVE'}</strong>
+                </div>
+                
+                <a href="/clustering-test/activateresults1131" class="btn">🔄 Back to Control Panel</a>
+                <a href="/clustering-test/admin-stats" class="btn">📈 View Statistics</a>
+                
+                <div class="info">
+                    💡 {user_message}
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+    else:
+        return f"""
+        <html>
+        <head><title>Toggle Error</title></head>
+        <body style="font-family: Arial; padding: 50px; text-align: center;">
+        <h2>❌ Toggle Failed</h2>
+        <p>{result['message']}</p>
+        <a href="/clustering-test/activateresults1131">🔄 Try Again</a>
+        </body>
+        </html>
+        """, 500
+
+@app.route('/clustering-test/admin-stats')
+def admin_stats():
+    """Simple admin statistics page"""
+    stats = clustering_test.get_admin_stats()
+    
+    return f"""
+    <html>
+    <head><title>Clustering Test Statistics</title></head>
+    <body style="font-family: Arial; padding: 30px;">
+    <h2>Clustering Test Statistics</h2>
+    <ul>
+        <li><strong>Total Responses:</strong> {stats['total_responses']}</li>
+        <li><strong>Results Activated:</strong> {'Yes' if stats['activated'] else 'No'}</li>
+        <li><strong>Matches Calculated:</strong> {'Yes' if stats['matches_calculated'] else 'No'}</li>
+        <li><strong>Activation Time:</strong> {stats['activation_time'] or 'Not activated'}</li>
+    </ul>
+    
+    <h3>Recent Participants:</h3>
+    <ul>
+    {''.join([f"<li>{r['name']} (ID: {r['id']}) - {r['timestamp']}</li>" for r in stats['sample_responses']])}
+    </ul>
+    
+    <hr>
+    <p><a href="/clustering-test/activateresults1131">🚀 Activate Results</a></p>
+    </body>
+    </html>
+    """
+
+# API Routes
+@app.route('/api/clustering/check-activation')
+def api_check_activation():
+    """API endpoint to check if results are activated"""
+    try:
+        result = clustering_test.check_activation_status()
+        app.logger.info(f"Activation check API called, returning: {result}")
+        return jsonify(result)
+    except Exception as e:
+        app.logger.error(f"Error in check-activation API: {str(e)}")
+        import traceback
+        app.logger.error(f"Traceback: {traceback.format_exc()}")
+        return jsonify({
+            "activated": False,
+            "activation_time": None,
+            "user_count": 0,
+            "matches_calculated": False,
+            "error": str(e)
+        }), 500
+
+@app.route('/api/clustering/get-matches/<user_id>')
+def api_get_matches(user_id):
+    """API endpoint to get matches for a user"""
+    try:
+        app.logger.info(f"Get matches API called for user: {user_id}")
+        result = clustering_test.get_user_matches(user_id)
+        app.logger.info(f"Returning matches result: {result}")
+        return jsonify(result)
+    except Exception as e:
+        app.logger.error(f"Error in get-matches API: {str(e)}")
+        import traceback
+        app.logger.error(f"Traceback: {traceback.format_exc()}")
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
