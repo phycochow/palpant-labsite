@@ -786,11 +786,13 @@ def secret_activation():
                 .status {{ color: {status_color}; font-size: 1.5em; margin-bottom: 20px; }}
                 .stats {{ background: #f1f3f4; padding: 20px; border-radius: 8px; margin: 20px 0; }}
                 .toggle-btn {{ background: {button_color}; color: white; border: none; padding: 15px 30px; font-size: 1.1em; border-radius: 8px; cursor: pointer; margin: 10px; }}
-                .toggle-btn:hover {{ opacity: 0.9; transform: translateY(-1px); }}
+                .clear-btn {{ background: #dc3545; color: white; border: none; padding: 12px 25px; font-size: 1em; border-radius: 8px; cursor: pointer; margin: 10px; }}
+                .toggle-btn:hover, .clear-btn:hover {{ opacity: 0.9; transform: translateY(-1px); }}
                 .admin-links {{ margin-top: 30px; }}
                 .admin-links a {{ color: #007bff; text-decoration: none; margin: 0 15px; }}
                 .admin-links a:hover {{ text-decoration: underline; }}
                 .info {{ color: #6c757d; font-size: 0.9em; margin-top: 20px; }}
+                .warning {{ color: #856404; background: #fff3cd; padding: 10px; border-radius: 8px; margin: 10px 0; border: 1px solid #ffeaa7; }}
             </style>
         </head>
         <body>
@@ -810,6 +812,17 @@ def secret_activation():
                     </button>
                 </form>
                 
+                <div class="warning">
+                    <strong>⚠️ Danger Zone</strong><br>
+                    Clear all user responses and reset the system
+                </div>
+                
+                <form method="POST" action="/clustering-test/clear-responses" style="display: inline;">
+                    <button type="submit" class="clear-btn" onclick="return confirm('Are you sure? This will delete ALL responses and cannot be undone!')">
+                        🗑️ Clear All Responses
+                    </button>
+                </form>
+                
                 <div class="admin-links">
                     <a href="/clustering-test/admin-stats">📈 View Statistics</a> | 
                     <a href="/clustering-test">📝 View Questionnaire</a>
@@ -822,7 +835,6 @@ def secret_activation():
         </body>
         </html>
         """
-
 @app.route('/clustering-test/activateresults1131', methods=['POST'])
 def secret_activation_toggle():
     """Handle the actual toggle action"""
@@ -951,6 +963,40 @@ def api_get_matches(user_id):
         import traceback
         app.logger.error(f"Traceback: {traceback.format_exc()}")
         return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+@app.route('/clustering-test/clear-responses', methods=['POST'])
+def clear_responses():
+    """Clear all responses - admin function"""
+    try:
+        result = clustering_test.clear_all_responses()
+        
+        if result['status'] == 'success':
+            return f"""
+            <html>
+            <head><title>Responses Cleared</title></head>
+            <body style="font-family: Arial; padding: 30px; text-align: center; background: #f8f9fa;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <h2 style="color: #28a745;">✅ All Responses Cleared!</h2>
+                <p style="font-size: 1.1em; margin-bottom: 30px;">{result['message']}</p>
+                <a href="/clustering-test/activateresults1131" style="background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">🔙 Back to Control Panel</a>
+                <a href="/clustering-test" style="background: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin-left: 10px;">📝 Go to Questionnaire</a>
+            </div>
+            </body>
+            </html>
+            """
+        else:
+            return f"""
+            <html>
+            <head><title>Clear Failed</title></head>
+            <body style="font-family: Arial; padding: 50px; text-align: center;">
+            <h2>❌ Clear Failed</h2>
+            <p>{result['message']}</p>
+            <a href="/clustering-test/activateresults1131">🔄 Back to Control Panel</a>
+            </body>
+            </html>
+            """, 500
+    except Exception as e:
+        return f"Error: {str(e)}", 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

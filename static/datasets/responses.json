@@ -1,0 +1,221 @@
+{
+  "system": {
+    "activated": true,
+    "activation_time": "2025-08-04T12:01:33.639397",
+    "matches_calculated": true
+  },
+  "responses": {
+    "ccd725a5": {
+      "name": "1_Chris",
+      "answers": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "timestamp": "2025-08-04T10:56:41.338312"
+    },
+    "b5382bb1": {
+      "name": "1_Me",
+      "answers": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "timestamp": "2025-08-04T10:57:02.551967"
+    },
+    "b5be11b8": {
+      "name": "1_Ben",
+      "answers": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "timestamp": "2025-08-04T10:57:29.622709"
+    },
+    "aed0e192": {
+      "name": "2_Mary",
+      "answers": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "timestamp": "2025-08-04T10:57:44.740154"
+    },
+    "0d7666dd": {
+      "name": "2_Nathan",
+      "answers": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "timestamp": "2025-08-04T11:48:18.140726"
+    },
+    "0f7006c7": {
+      "name": "2_Chris",
+      "answers": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "timestamp": "2025-08-04T12:01:02.759553"
+    }
+  },
+  "matches": {
+    "ccd725a5": {
+      "group_ids": [
+        "b5382bb1",
+        "b5be11b8"
+      ],
+      "names": [
+        "1_Me",
+        "1_Ben"
+      ],
+      "reasons": [
+        "🎯 Compatibility Score: 100%",
+        "📊 Top Areas of Alignment:",
+        "• What's your ideal weekend activity?: 100% match (all prefer 'Reading a book at home')",
+        "• How do you prefer to work?: 100% match (all prefer 'Working alone and focused')",
+        "• What's your communication style?: 100% match (all prefer 'Direct and concise')",
+        "• Which environment energizes you most?: 100% match (all prefer 'Quiet spaces like libraries')",
+        "• What's your approach to problem-solving?: 100% match (all prefer 'Think it through carefully')",
+        "• How do you handle stress?: 100% match (all prefer 'Take time alone to recharge')",
+        "🔗 Excellent compatibility! You share very similar preferences."
+      ]
+    },
+    "b5382bb1": {
+      "group_ids": [
+        "ccd725a5",
+        "b5be11b8"
+      ],
+      "names": [
+        "1_Chris",
+        "1_Ben"
+      ],
+      "reasons": [
+        "🎯 Compatibility Score: 100%",
+        "📊 Top Areas of Alignment:",
+        "• What's your ideal weekend activity?: 100% match (all prefer 'Reading a book at home')",
+        "• How do you prefer to work?: 100% match (all prefer 'Working alone and focused')",
+        "• What's your communication style?: 100% match (all prefer 'Direct and concise')",
+        "• Which environment energizes you most?: 100% match (all prefer 'Quiet spaces like libraries')",
+        "• What's your approach to problem-solving?: 100% match (all prefer 'Think it through carefully')",
+        "• How do you handle stress?: 100% match (all prefer 'Take time alone to recharge')",
+        "🔗 Excellent compatibility! You share very similar preferences."
+      ]
+    },
+    "b5be11b8": {
+      "group_ids": [
+        "ccd725a5",
+        "b5382bb1"
+      ],
+      "names": [
+        "1_Chris",
+        "1_Me"
+      ],
+      "reasons": [
+        "🎯 Compatibility Score: 100%",
+        "📊 Top Areas of Alignment:",
+        "• What's your ideal weekend activity?: 100% match (all prefer 'Reading a book at home')",
+        "• How do you prefer to work?: 100% match (all prefer 'Working alone and focused')",
+        "• What's your communication style?: 100% match (all prefer 'Direct and concise')",
+        "• Which environment energizes you most?: 100% match (all prefer 'Quiet spaces like libraries')",
+        "• What's your approach to problem-solving?: 100% match (all prefer 'Think it through carefully')",
+        "• How do you handle stress?: 100% match (all prefer 'Take time alone to recharge')",
+        "🔗 Excellent compatibility! You share very similar preferences."
+      ]
+    },
+    "aed0e192": {
+      "group_ids": [
+        "0d7666dd",
+        "0f7006c7"
+      ],
+      "names": [
+        "2_Nathan",
+        "2_Chris"
+      ],
+      "reasons": [
+        "🎯 Compatibility Score: 100%",
+        "📊 Top Areas of Alignment:",
+        "• What's your ideal weekend activity?: 100% match (all prefer 'Going to parties and events')",
+        "• How do you prefer to work?: 100% match (all prefer 'Small team collaboration')",
+        "• What's your communication style?: 100% match (all prefer 'Friendly and detailed')",
+        "• Which environment energizes you most?: 100% match (all prefer 'Busy places like cafes')",
+        "• What's your approach to problem-solving?: 100% match (all prefer 'Brainstorm with others')",
+        "• How do you handle stress?: 100% match (all prefer 'Talk it out with friends')",
+        "🔗 Excellent compatibility! You share very similar preferences."
+      ]
+    },
+    "0d7666dd": {
+      "group_ids": [
+        "aed0e192",
+        "0f7006c7"
+      ],
+      "names": [
+        "2_Mary",
+        "2_Chris"
+      ],
+      "reasons": [
+        "🎯 Compatibility Score: 100%",
+        "📊 Top Areas of Alignment:",
+        "• What's your ideal weekend activity?: 100% match (all prefer 'Going to parties and events')",
+        "• How do you prefer to work?: 100% match (all prefer 'Small team collaboration')",
+        "• What's your communication style?: 100% match (all prefer 'Friendly and detailed')",
+        "• Which environment energizes you most?: 100% match (all prefer 'Busy places like cafes')",
+        "• What's your approach to problem-solving?: 100% match (all prefer 'Brainstorm with others')",
+        "• How do you handle stress?: 100% match (all prefer 'Talk it out with friends')",
+        "🔗 Excellent compatibility! You share very similar preferences."
+      ]
+    },
+    "0f7006c7": {
+      "group_ids": [
+        "aed0e192",
+        "0d7666dd"
+      ],
+      "names": [
+        "2_Mary",
+        "2_Nathan"
+      ],
+      "reasons": [
+        "🎯 Compatibility Score: 100%",
+        "📊 Top Areas of Alignment:",
+        "• What's your ideal weekend activity?: 100% match (all prefer 'Going to parties and events')",
+        "• How do you prefer to work?: 100% match (all prefer 'Small team collaboration')",
+        "• What's your communication style?: 100% match (all prefer 'Friendly and detailed')",
+        "• Which environment energizes you most?: 100% match (all prefer 'Busy places like cafes')",
+        "• What's your approach to problem-solving?: 100% match (all prefer 'Brainstorm with others')",
+        "• How do you handle stress?: 100% match (all prefer 'Talk it out with friends')",
+        "🔗 Excellent compatibility! You share very similar preferences."
+      ]
+    }
+  }
+}

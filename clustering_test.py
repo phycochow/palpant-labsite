@@ -7,6 +7,7 @@ from datetime import datetime
 from sklearn.cluster import KMeans
 import pandas as pd
 import numpy as np
+import math
 
 # Configuration
 GROUP_SIZE = 3
@@ -147,8 +148,9 @@ def create_dataframe_from_responses(responses):
     return df
 
 def calculate_optimal_clusters(n_users):
-    """Calculate optimal number of clusters based on group size"""
-    return max(1, n_users // GROUP_SIZE)
+    """Calculate optimal number of clusters to get groups of exactly GROUP_SIZE"""
+    # Use ceiling division to ensure we don't merge small groups
+    return math.ceil(n_users / GROUP_SIZE)
 
 def calculate_match_distance(answers1, answers2):
     """Calculate distance based on number of different answers (categorical)"""
@@ -198,27 +200,17 @@ def perform_categorical_clustering(responses):
     
     return list(clusters.values())
 
-def balance_small_groups(groups):
-    """Merge groups smaller than GROUP_SIZE with larger groups"""
-    large_groups = [g for g in groups if len(g) >= GROUP_SIZE]
-    small_groups = [g for g in groups if len(g) < GROUP_SIZE]
-    
-    # Merge small groups with large ones
-    for small_group in small_groups:
-        if large_groups:
-            # Add to smallest large group
-            smallest = min(large_groups, key=len)
-            smallest.extend(small_group)
-        else:
-            # If no large groups, keep small group as is
-            large_groups.append(small_group)
-    
-    return large_groups
+def keep_all_groups_unchanged(groups):
+    """Keep all groups as they are - no merging of small groups"""
+    print(f"DEBUG: Keeping all {len(groups)} groups unchanged")
+    for i, group in enumerate(groups):
+        print(f"DEBUG: Group {i+1}: {len(group)} people - {group}")
+    return groups
 
-def create_user_groups_mapping(balanced_groups):
+def create_user_groups_mapping(groups):
     """Create mapping from user_id to their group"""
     user_groups = {}
-    for group in balanced_groups:
+    for group in groups:
         for user_id in group:
             user_groups[user_id] = group
     return user_groups
@@ -240,19 +232,19 @@ def perform_sklearn_clustering():
     groups = perform_categorical_clustering(responses)
     print(f"DEBUG: Clustering returned {len(groups)} groups: {groups}")
     
-    # Balance groups to target GROUP_SIZE
-    balanced_groups = balance_small_groups(groups)
-    print(f"DEBUG: After balancing: {len(balanced_groups)} groups: {balanced_groups}")
+    # Keep all groups unchanged - no balancing/merging
+    final_groups = keep_all_groups_unchanged(groups)
     
     # Create user-to-group mapping
-    user_groups = create_user_groups_mapping(balanced_groups)
+    user_groups = create_user_groups_mapping(final_groups)
+    
     print(f"DEBUG: Final user_groups mapping: {user_groups}")
     
     print("=== DEBUG: perform_sklearn_clustering completed ===\n")
     return user_groups
 
 def generate_compatibility_reasons(user_id, group_members):
-    """Generate simple compatibility reasons"""
+    """Generate compatibility score and reasons"""
     data = load_responses_json()
     responses = data['responses']
     questions = load_questions_from_csv()
@@ -260,43 +252,73 @@ def generate_compatibility_reasons(user_id, group_members):
     if user_id not in responses or not group_members:
         return ["You were matched based on your questionnaire responses."]
     
-    user_answers = responses[user_id]['answers']
-    reasons = []
+    # Get all group answers including the user
+    group_answers = []
+    for member_id in group_members:
+        if member_id in responses:
+            group_answers.append(responses[member_id]['answers'])
     
-    # Count similar answers across the group
-    similar_questions = []
+    if not group_answers:
+        return ["You were matched based on your questionnaire responses."]
+    
+    # Calculate compatibility for each question
+    question_scores = []
     for q_idx, question in enumerate(questions):
-        if q_idx < len(user_answers):
-            user_answer = user_answers[q_idx]
+        if q_idx < len(group_answers[0]):  # Ensure question exists
+            # Get all answers for this question
+            question_answers = [answers[q_idx] for answers in group_answers if q_idx < len(answers)]
             
-            # Check how many group members have the same answer
-            same_answer_count = sum(1 for member_id in group_members 
-                                  if member_id in responses 
-                                  and q_idx < len(responses[member_id]['answers'])
-                                  and responses[member_id]['answers'][q_idx] == user_answer)
+            if not question_answers:
+                continue
+                
+            # Count most common answer
+            from collections import Counter
+            answer_counts = Counter(question_answers)
+            most_common_count = answer_counts.most_common(1)[0][1]
+            most_common_answer = answer_counts.most_common(1)[0][0]
             
-            if same_answer_count >= len(group_members) * 0.6:  # 60% or more have same answer
-                similar_questions.append((q_idx, question['question'], 
-                                        question['choices'][user_answer] if user_answer < len(question['choices']) else 'N/A'))
+            # Calculate percentage
+            compatibility_percent = (most_common_count / len(question_answers)) * 100
+            
+            # Generate description
+            if compatibility_percent == 100:
+                description = f"all prefer '{question['choices'][most_common_answer]}'"
+            elif compatibility_percent > 60:
+                description = f"most chose '{question['choices'][most_common_answer]}'"
+            else:
+                description = "mixed responses"
+            
+            question_scores.append({
+                'question': question['question'],
+                'score': compatibility_percent,
+                'description': description
+            })
     
-    # Generate reasons based on similarities
-    if len(similar_questions) >= 3:
-        reasons.append(f"You answered {len(similar_questions)} questions very similarly")
-        
-        # Add specific examples
-        for q_idx, question, choice in similar_questions[:2]:  # Show top 2 examples
-            reasons.append(f"You all chose '{choice}' for: {question}")
-    
-    elif len(similar_questions) >= 1:
-        reasons.append("You share some key preferences with your group")
-        for q_idx, question, choice in similar_questions[:1]:
-            reasons.append(f"You all prefer: {choice}")
-    
+    # Calculate overall score
+    if question_scores:
+        overall_score = sum(item['score'] for item in question_scores) / len(question_scores)
     else:
-        reasons.append("You were matched to create a diverse and interesting group")
-        reasons.append("Sometimes the best connections come from different perspectives!")
+        overall_score = 0
     
-    return reasons[:3]  # Limit to 3 reasons max
+    # Get top 6 best matches (highest scores)
+    top_matches = sorted(question_scores, key=lambda x: x['score'], reverse=True)[:6]
+    
+    # Create compatibility reasons
+    reasons = [f"🎯 Compatibility Score: {overall_score:.0f}%"]
+    reasons.append("📊 Top Areas of Alignment:")
+    
+    for match in top_matches:
+        reasons.append(f"• {match['question']}: {match['score']:.0f}% match ({match['description']})")
+    
+    # Add summary based on overall score
+    if overall_score >= 80:
+        reasons.append("🔗 Excellent compatibility! You share very similar preferences.")
+    elif overall_score >= 60:
+        reasons.append("🔗 Great compatibility with some interesting diversity!")
+    else:
+        reasons.append("🔗 Diverse group that will bring different perspectives together!")
+    
+    return reasons
 
 def calculate_all_matches():
     """Calculate matches for all users using sklearn clustering - WITH DEBUG PRINTS"""
@@ -468,15 +490,20 @@ def get_user_matches(user_id):
     user_info = data['responses'].get(user_id, {})
     match_info = data['matches'][user_id]
     
+    # Include the user themselves in the group display
+    user_name = user_info.get('name', 'Unknown')
+    all_group_names = [user_name] + match_info['names']  # Add user's name first
+    
     print(f"DEBUG: Found user_info: {user_info}")
     print(f"DEBUG: Found match_info: {match_info}")
+    print(f"DEBUG: Including user themselves in group: {all_group_names}")
     print("DEBUG: Successfully returning matches")
     
     return {
-        "user_name": user_info.get('name', 'Unknown'),
-        "matches": match_info['names'],
+        "user_name": user_name,
+        "matches": all_group_names,  # Now includes the user themselves
         "reasons": match_info['reasons'],
-        "group_size": len(match_info['names']) + 1  # +1 for the user themselves
+        "group_size": len(all_group_names)  # Total group size including user
     }
 
 def get_admin_stats():
@@ -501,6 +528,19 @@ def get_admin_stats():
             })
     
     return stats
+
+def clear_all_responses():
+    """Delete the responses file to clear all data"""
+    try:
+        if os.path.exists(RESPONSES_JSON_PATH):
+            os.remove(RESPONSES_JSON_PATH)
+            print(f"DEBUG: Deleted responses file: {RESPONSES_JSON_PATH}")
+            return {"status": "success", "message": "All responses cleared successfully"}
+        else:
+            return {"status": "success", "message": "No responses file found - already clear"}
+    except Exception as e:
+        print(f"DEBUG: Error clearing responses: {e}")
+        return {"status": "error", "message": f"Error clearing responses: {str(e)}"}
 
 def check_activation_status():
     """Check if results have been activated - WITH DEBUG PRINTS"""
