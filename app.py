@@ -835,6 +835,7 @@ def secret_activation():
         </body>
         </html>
         """
+        
 @app.route('/clustering-test/activateresults1131', methods=['POST'])
 def secret_activation_toggle():
     """Handle the actual toggle action"""
