@@ -22,132 +22,58 @@ palpant-labsite/
 │       └── css/
 │           └── main.css            # Homepage styling
 │
-└── dashboard/                      # Dashboard and research tools
-    ├── core/                       # Dashboard infrastructure
-    │   ├── templates/
-    │   │   └── dashboard.html      # Base dashboard layout
-    │   ├── static/
-    │   │   └── css/
-    │   │       └── dashboard.css   # Dashboard styling
-    │   └── dashboard_routes.py     # Dashboard routes
-    │
-    └── tools/                      # Research tools
-        └── cmportal/               # CMPortal tool
-            ├── templates/
-            │   ├── cmportal.html   # Main CMPortal page
-            │   └── tabs/
-            │       ├── tab-video.html
-            │       ├── tab-viewer.html
-            │       ├── tab-search.html
-            │       ├── tab-enrichment.html
-            │       └── tab-benchmark.html
-            │
-            ├── static/
-            │   ├── css/
-            │   │   ├── cmportal.css
-            │   │   ├── tab-search.css
-            │   │   ├── tab-enrichment.css
-            │   │   ├── tab-benchmark.css
-            │   │   ├── tab-viewer.css
-            │   │   └── tab-video.css
-            │   ├── js/
-            │   │   ├── cmportal-base.js
-            │   │   ├── tab-search.js
-            │   │   ├── tab-enrichment.js
-            │   │   ├── tab-viewer.js
-            │   │   ├── tab-benchmark.js
-            │   │   └── tab-benchmark-radar.js
-            │   └── datasets/
-            │       ├── 0_TargetParameters_12Apr25.csv
-            │       ├── 0_FeatureCategories_01Mar25.csv
-            │       ├── 0_CausalFeatureCategories_04Mar25.csv
-            │       ├── 1_PermutatedImportancesTRUE_02May25.csv
-            │       ├── 0_CleanedDatabase_25Feb25.csv
-            │       ├── 1_BinaryFeatures_25Feb25.csv
-            │       └── 1_PositiveOddsEnrichments_03May25.csv
-            │
-            └── core/
-                ├── cmportal_routes.py       # Route definitions
-                ├── cmportal_config.py       # Configuration
-                ├── cmportal_data_manager.py # Data pipeline
-                ├── cmportal_utils.py        # Helper functions
-                └── uploads/                 # Temp files (gitignored)
-
-venv/                               # Python virtualenv (gitignored)
-.gitignore
-README.md
-```# Palpant Lab Website
-
-Flask-based website for Palpant Lab featuring CMPortal research dashboard.
-
----
-
-## Project Structure
-
-```
-palpant-labsite/
+├── dashboard/                      # Dashboard and research tools
+│   ├── core/                       # Dashboard infrastructure
+│   │   ├── templates/
+│   │   │   └── dashboard.html      # Base dashboard layout
+│   │   ├── static/
+│   │   │   └── css/
+│   │   │       └── dashboard.css   # Dashboard styling
+│   │   └── dashboard_routes.py     # Dashboard routes
+│   │
+│   └── tools/                      # Research tools
+│       └── cmportal/               # CMPortal tool
+│           ├── templates/
+│           │   ├── cmportal.html   # Main CMPortal page
+│           │   └── tabs/
+│           │       ├── tab-video.html
+│           │       ├── tab-viewer.html
+│           │       ├── tab-search.html
+│           │       ├── tab-enrichment.html
+│           │       └── tab-benchmark.html
+│           │
+│           ├── static/
+│           │   ├── css/
+│           │   │   ├── cmportal.css
+│           │   │   ├── tab-search.css
+│           │   │   ├── tab-enrichment.css
+│           │   │   ├── tab-benchmark.css
+│           │   │   ├── tab-viewer.css
+│           │   │   └── tab-video.css
+│           │   ├── js/
+│           │   │   ├── cmportal-base.js
+│           │   │   ├── tab-search.js
+│           │   │   ├── tab-enrichment.js
+│           │   │   ├── tab-viewer.js
+│           │   │   ├── tab-benchmark.js
+│           │   │   └── tab-benchmark-radar.js
+│           │   └── datasets/
+│           │       ├── 0_TargetParameters_12Apr25.csv
+│           │       ├── 0_FeatureCategories_01Mar25.csv
+│           │       ├── 0_CausalFeatureCategories_04Mar25.csv
+│           │       ├── 1_PermutatedImportancesTRUE_02May25.csv
+│           │       ├── 0_CleanedDatabase_25Feb25.csv
+│           │       ├── 1_BinaryFeatures_25Feb25.csv
+│           │       └── 1_PositiveOddsEnrichments_03May25.csv
+│           │
+│           └── core/
+│               ├── cmportal_routes.py       # Route definitions
+│               ├── cmportal_config.py       # Configuration
+│               ├── cmportal_data_manager.py # Data pipeline
+│               ├── cmportal_utils.py        # Helper functions
+│               └── uploads/                 # Temp files (gitignored)
 │
-├── core/
-│   ├── app.py                      # Flask app entrypoint
-│   ├── flaskapp                    # Nginx config
-│   └── flaskapp.service            # Systemd service config
-│
-├── home/
-│   ├── templates/
-│   │   ├── main.html               # Landing page
-│   │   └── testcase.html           # Test page
-│   └── static/
-│       ├── css/
-│       │   └── main.css            # Homepage styling
-│       └── js/
-│           └── (empty)             # Placeholder for future JS
-│
-├── tools/
-│   └── cmportal/
-│       ├── templates/
-│       │   ├── cmportal.html       # Main CMPortal page
-│       │   ├── dashboard.html      # Base dashboard layout
-│       │   └── tabs/
-│       │       ├── tab-video.html
-│       │       ├── tab-viewer.html
-│       │       ├── tab-search.html
-│       │       ├── tab-enrichment.html
-│       │       └── tab-benchmark.html
-│       │
-│       ├── static/
-│       │   ├── css/
-│       │   │   ├── cmportal.css
-│       │   │   ├── dashboard.css
-│       │   │   ├── tab-search.css
-│       │   │   ├── tab-enrichment.css
-│       │   │   ├── tab-benchmark.css
-│       │   │   ├── tab-viewer.css
-│       │   │   └── tab-video.css
-│       │   ├── js/
-│       │   │   ├── cmportal-base.js
-│       │   │   ├── tab-search.js
-│       │   │   ├── tab-enrichment.js
-│       │   │   ├── tab-viewer.js
-│       │   │   ├── tab-benchmark.js
-│       │   │   └── tab-benchmark-radar.js
-│       │   └── datasets/
-│       │       ├── 0_TargetParameters_12Apr25.csv
-│       │       ├── 0_FeatureCategories_01Mar25.csv
-│       │       ├── 0_CausalFeatureCategories_04Mar25.csv
-│       │       ├── 1_PermutatedImportancesTRUE_02May25.csv
-│       │       ├── 0_CleanedDatabase_25Feb25.csv
-│       │       ├── 1_BinaryFeatures_25Feb25.csv
-│       │       └── 1_PositiveOddsEnrichments_03May25.csv
-│       │
-│       └── core/
-│           ├── cmportal_routes.py       # Route definitions
-│           ├── cmportal_config.py       # CMPortal configuration
-│           ├── cmportal_data_manager.py # Data pipeline/caching
-│           ├── cmportal_utils.py        # Helper functions
-│           └── uploads/                 # Temporary file staging (gitignored)
-│
-├── venv/                           # Python virtual environment (gitignored)
-│
+├── venv/                           # Python virtualenv (gitignored)
 ├── .gitignore
 └── README.md
 ```
@@ -532,4 +458,4 @@ ls -la /home/ubuntu/palpant-labsite/dashboard/tools/cmportal/templates
 
 ## Contact
 
-For issues or questions, contact the Palpant Lab team.
+For issues or questions, contact the chris.chow@uq.edu.au
