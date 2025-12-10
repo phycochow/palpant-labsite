@@ -15,9 +15,9 @@ import threading
 import time
 from werkzeug.utils import secure_filename
 
-# Import CMPortal-specific modules
-from tools.cmportal.core.cmportal_config import DATASET_PATHS, UPLOAD_FOLDER, MAX_CONTENT_LENGTH
-from tools.cmportal.core.cmportal_data_manager import (
+# Import CMPortal-specific modules with updated paths
+from dashboard.tools.cmportal.core.cmportal_config import DATASET_PATHS, UPLOAD_FOLDER, MAX_CONTENT_LENGTH
+from dashboard.tools.cmportal.core.cmportal_data_manager import (
     load_lookup_tables,
     load_viewer_data,
     load_enrichment_data,
@@ -30,7 +30,7 @@ from tools.cmportal.core.cmportal_data_manager import (
     get_causal_categories_dict,
     get_candidates
 )
-from tools.cmportal.core.cmportal_utils import (
+from dashboard.tools.cmportal.core.cmportal_utils import (
     NpEncoder,
     getUserProtocolFeatures,
     getUserData,
@@ -42,7 +42,6 @@ _benchmark_results_cache = {}
 FeatureCategories_dict = {}
 TargetParameters_dict = {}
 CausalFeatureCategories_dict = {}
-
 
 def register_cmportal_routes(app):
     """

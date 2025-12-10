@@ -26,9 +26,17 @@ server {
         proxy_buffer_size 32k;
     }
 
-    # Home static files
-    location /static/home/ {
-        alias /home/ubuntu/palpant-labsite/home/static/;
+    # Labsite static files
+    location /static/labsite/ {
+        alias /home/ubuntu/palpant-labsite/labsite/static/;
+        access_log off;
+        expires 2d;
+        add_header Cache-Control "public";
+    }
+
+    # Dashboard core static files
+    location /static/dashboard/ {
+        alias /home/ubuntu/palpant-labsite/dashboard/core/static/;
         access_log off;
         expires 2d;
         add_header Cache-Control "public";
@@ -36,10 +44,9 @@ server {
 
     # CMPortal static files
     location /static/cmportal/ {
-        alias /home/ubuntu/palpant-labsite/tools/cmportal/static/;
+        alias /home/ubuntu/palpant-labsite/dashboard/tools/cmportal/static/;
         access_log off;
         expires 2d;
         add_header Cache-Control "public";
     }
 }
-

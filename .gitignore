@@ -24,8 +24,8 @@ Thumbs.db
 .idea/
 *.Identifier
 
-# Upload directories (NEW)
-tools/cmportal/core/uploads/
+# Upload directories (UPDATED PATH)
+dashboard/tools/cmportal/core/uploads/
 uploads/
 
 # Temporary files

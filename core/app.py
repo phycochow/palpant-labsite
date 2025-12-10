@@ -1,6 +1,6 @@
 """
 Palpant Lab Website - Main Flask Application
-Serves homepage and coordinates tool modules
+Serves labsite and coordinates dashboard modules
 """
 
 from flask import Flask, render_template, send_from_directory
@@ -26,22 +26,28 @@ app.logger.info('Flask application startup')
 
 # Configure template loading from multiple directories
 app.jinja_loader = ChoiceLoader([
-    FileSystemLoader(os.path.join(BASE_DIR, 'home', 'templates')),
-    FileSystemLoader(os.path.join(BASE_DIR, 'tools', 'cmportal', 'templates'))
+    FileSystemLoader(os.path.join(BASE_DIR, 'labsite', 'templates')),
+    FileSystemLoader(os.path.join(BASE_DIR, 'dashboard', 'core', 'templates')),
+    FileSystemLoader(os.path.join(BASE_DIR, 'dashboard', 'tools', 'cmportal', 'templates'))
 ])
 
 # ===== Static File Routes =====
-# Serve home static files
-@app.route('/static/home/<path:filename>')
-def home_static(filename):
-    return send_from_directory(os.path.join(BASE_DIR, 'home', 'static'), filename)
+# Serve labsite static files
+@app.route('/static/labsite/<path:filename>')
+def labsite_static(filename):
+    return send_from_directory(os.path.join(BASE_DIR, 'labsite', 'static'), filename)
+
+# Serve dashboard core static files
+@app.route('/static/dashboard/<path:filename>')
+def dashboard_static(filename):
+    return send_from_directory(os.path.join(BASE_DIR, 'dashboard', 'core', 'static'), filename)
 
 # Serve CMPortal static files
 @app.route('/static/cmportal/<path:filename>')
 def cmportal_static(filename):
-    return send_from_directory(os.path.join(BASE_DIR, 'tools', 'cmportal', 'static'), filename)
+    return send_from_directory(os.path.join(BASE_DIR, 'dashboard', 'tools', 'cmportal', 'static'), filename)
 
-# ===== Home Page Routes =====
+# ===== Labsite Routes =====
 @app.route('/')
 def home():
     """Main landing page"""
@@ -52,10 +58,21 @@ def test():
     """Test page"""
     return render_template('testcase.html')
 
-# ===== Register Tool Modules =====
+# ===== Register Dashboard Module =====
+# Import and register dashboard routes
+try:
+    from dashboard.core.dashboard_routes import register_dashboard_routes
+    register_dashboard_routes(app)
+    app.logger.info('Dashboard routes registered successfully')
+except Exception as e:
+    app.logger.error(f'Failed to register dashboard routes: {e}')
+    import traceback
+    app.logger.error(traceback.format_exc())
+
+# ===== Register Dashboard Tools =====
 # Import and register CMPortal routes
 try:
-    from tools.cmportal.core.cmportal_routes import register_cmportal_routes
+    from dashboard.tools.cmportal.core.cmportal_routes import register_cmportal_routes
     register_cmportal_routes(app)
     app.logger.info('CMPortal routes registered successfully')
 except Exception as e:
