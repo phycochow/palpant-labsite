@@ -23,3 +23,11 @@ Thumbs.db
 .vscode/
 .idea/
 *.Identifier
+
+# Upload directories (NEW)
+tools/cmportal/core/uploads/
+uploads/
+
+# Temporary files
+*.tmp
+*.temp

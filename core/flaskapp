@@ -9,6 +9,7 @@ server {
     listen 80;
     server_name palpantlab.com 13.213.1.161 _;
 
+    # Proxy to Flask/Gunicorn
     location / {
         proxy_pass http://127.0.0.1:8000;
         include proxy_params;
@@ -19,17 +20,26 @@ server {
         proxy_send_timeout 10s;
         proxy_read_timeout 10s;
 
-        # Optional: buffer size tuning (for larger responses)
+        # Buffer size tuning
         proxy_buffering on;
         proxy_buffers 8 16k;
         proxy_buffer_size 32k;
     }
 
-    location /static/ {
-        alias /home/ubuntu/palpant-labsite/static/;
+    # Home static files
+    location /static/home/ {
+        alias /home/ubuntu/palpant-labsite/home/static/;
         access_log off;
         expires 2d;
         add_header Cache-Control "public";
     }
 
+    # CMPortal static files
+    location /static/cmportal/ {
+        alias /home/ubuntu/palpant-labsite/tools/cmportal/static/;
+        access_log off;
+        expires 2d;
+        add_header Cache-Control "public";
+    }
 }
+
