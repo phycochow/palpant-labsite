@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="/static/cmportal/css/tab-benchmark.css">
 <link rel="stylesheet" href="/static/cmportal/css/tab-viewer.css">
 <link rel="stylesheet" href="/static/cmportal/css/tab-video.css"> 
+<link rel="stylesheet" href="/static/cmportal/css/tab-qa.css">
 
 <!-- Required JavaScript -->
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -60,6 +61,7 @@
                 <div class="tab-link" data-tab="tab-search">Variable Search</div>
                 <div class="tab-link" data-tab="tab-enrichment">Enrichment Browser</div>
                 <div class="tab-link" data-tab="tab-benchmark">Benchmark Protocols</div>
+                <div class="tab-link" data-tab="tab-qa">Q&A</div>  <!-- ADD THIS LINE -->
             </div>
 
             <!-- Tab Contents (in the same order) -->
@@ -82,7 +84,11 @@
             <div id="tab-benchmark" class="tab-content">
                 {% include 'tabs/tab-benchmark.html' %}
             </div>
-    
+
+            <div id="tab-qa" class="tab-content">
+                {% include 'tabs/tab-qa.html' %}
+            </div>
+            
     <!-- Custom JavaScript -->
     <script src="/static/cmportal/js/cmportal-base.js"></script>
     <script src="/static/cmportal/js/tab-search.js"></script>
