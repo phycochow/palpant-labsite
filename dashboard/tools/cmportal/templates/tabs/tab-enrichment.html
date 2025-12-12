@@ -2,9 +2,10 @@
 <div class="well">
   <h4>How To Use The Enrichment Browser</h4>
   <ul>
-      <li><strong>Step 1:</strong> Select a target parameter/outcome from the dropdown menu (e.g., "Best Contractile Force" or "Disease Modeling").</li>
-      <li><strong>Step 2:</strong> Review the enrichment results table showing protocol features significantly associated with your selected outcome.</li>
-      <li><strong>Step 3:</strong> Use the "Filter records" search box to narrow down results by specific terms or values.</li>
+      <li><strong>Step 1:</strong> Choose your search method - search by target outcomes (physiological endpoints and study applications) or by specific protocol features you're interested in.</li>
+      <li><strong>Step 2:</strong> Select one or more items from the appropriate panel based on your chosen search method.</li>
+      <li><strong>Step 3:</strong> Click "Find Enrichments" to view protocol features significantly associated with your selections.</li>
+      <li><strong>Step 4:</strong> Use the "Filter records" search box to narrow down results by specific terms or values.</li>
       <li><strong>Important Note:</strong> The enrichment analysis may include protocols that don't directly report your selected metric. This is intentional and part of the data mining approach—we analyze which features are statistically overrepresented across the entire dataset, even in studies that measure related but different outcomes.</li>
       <li><strong>Results Explanation:</strong>
           <ul>
@@ -20,14 +21,44 @@
   </ul>
 </div>
 
-&nbsp;
+<!-- Search Mode Selection (match search tab exactly) -->
+<div class="search-ui-full-container" id="enrichment-mode-container">
+  <h3>What do you want to search by?</h3>
+  <div class="search-mode-options">
+    <div class="search-mode-option active" data-mode="target">
+      <input type="radio" id="mode-target" name="enrichment-mode" value="target" checked>
+      <label for="mode-target">
+        <h4>Physiological Endpoints and Study Applications</h4>
+        <p>Find enriched features associated with specific outcomes and applications</p>
+      </label>
+    </div>
+    
+    <div class="search-mode-option" data-mode="features">
+      <input type="radio" id="mode-features" name="enrichment-mode" value="features">
+      <label for="mode-features">
+        <h4>Protocol Variables and Non-causal Features</h4>
+        <p>Find enrichments where specific protocol features and associative features appear</p>
+      </label>
+    </div>
+  </div>
+  
+  <div class="mode-info-box" id="current-mode-info">
+    <span class="current-mode-label">Current Mode: </span>
+    <span class="current-mode-value">Target Mode - Search by physiological endpoints and study applications</span>
+  </div>
+</div>
 
-<!-- Full-width form container with flex layout removed -->
-<div class="enrichment-form-container">
+<!-- Dual Panel Layout -->
+
+<!-- Left Panel: Target Parameters -->
+<div class="search-ui-container" id="target-panel">
+  <div class="panel-header">
+    <h4>Target Parameters</h4>
+  </div>
   <form id="parameter-form">
-    <div class="enrichment-form-group">
-      <label for="parameter-dropdown" class="enrichment-label">Select Target Parameter:</label>
-      <select id="parameter-dropdown" name="category" class="enrichment-select">
+    <div class="search-ui-form-group">
+      <label for="parameter-dropdown" class="search-ui-label">Parameter Category:</label>
+      <select id="parameter-dropdown" name="category" class="search-ui-select">
         <option value="">-- Select a Category --</option>
         {% for category in TargetParameters %}
           <option value="{{ category }}">{{ category }}</option>
@@ -35,22 +66,37 @@
       </select>
     </div>
 
-    <div class="enrichment-form-group">
-      <label class="enrichment-label">Select Features:</label>
-      <div id="parameter-container" class="enrichment-checkbox-container enrichment-hidden">
+    <div class="search-ui-form-group">
+      <label class="search-ui-label">Select Parameters:</label>
+      <div id="parameter-container" class="search-ui-checkbox-container search-ui-hidden">
         <p>Please select a category first...</p>
       </div>
-      <div class="enrichment-selection-summary" id="parameter-summary"></div>
+      <div class="search-ui-selection-summary" id="parameter-summary"></div>
     </div>
   </form>
 </div>
 
-<!-- Submit button -->
-<div class="enrichment-submit-container">
-  <button id="enrichment-submit-button" class="enrichment-button" disabled>Find Enrichments</button>
+<!-- Right Panel: Protocol Features -->
+<div class="search-ui-container search-ui-hidden" id="features-panel">
+  <div class="panel-header">
+    <h4>Protocol Features</h4>
+  </div>
+  <div class="search-ui-form-group">
+    <label for="feature-search" class="search-ui-label">Search Features:</label>
+    <input type="text" id="feature-search" class="search-ui-select" placeholder="Type to filter features..." style="margin-bottom: 10px;">
+    <div id="feature-container" class="search-ui-checkbox-container">
+      <p>Loading features...</p>
+    </div>
+    <div class="search-ui-selection-summary" id="feature-summary"></div>
+  </div>
 </div>
 
-<!-- ↑→ New “debug” UI, copied from Search tab style →↓ -->
+<!-- Submit button -->
+<div class="global-submit-container">
+  <button id="enrichment-submit-button" id="search-ui-submit-button" disabled>Find Enrichments</button>
+</div>
+
+<!-- Result display -->
 <div class="well">
   <div id="enrichment-result-display" class="enrichment-hidden">
     <h3>Submission Result:</h3>
@@ -58,14 +104,10 @@
   </div>
 </div>
 
-<!-- DataTable results (hidden until data is loaded) -->
+<!-- DataTable results -->
 <div class="enrichment-results">
   <div id="enrichment-table-container" class="enrichment-hidden">
-    <table
-      id="enrichment-data-table"
-      class="table table-striped table-bordered table-compact"
-      style="width:100%">
+    <table id="enrichment-data-table" class="table table-striped table-bordered table-compact" style="width:100%">
     </table>
   </div>
 </div>
-
