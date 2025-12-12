@@ -427,6 +427,63 @@ ls -la /home/ubuntu/palpant-labsite/dashboard/tools/cmportal/templates
 
 ---
 
+### Tool-Specific Code Placement
+
+**Route Registration Pattern:**
+All tool routes must be defined in a `register_<toolname>_routes(app)` function within `dashboard/tools/<toolname>/core/<toolname>_routes.py`, then imported and called in `core/app.py`.
+
+**File Structure Verification:**
+```
+dashboard/tools/<toolname>/
+├── core/
+│   ├── <toolname>_routes.py      # register_<toolname>_routes(app)
+│   ├── <toolname>_config.py      # DATASET_PATHS, constants
+│   ├── <toolname>_data_manager.py # Data loading, caching
+│   └── <toolname>_utils.py       # Helper functions, algorithms
+├── static/
+│   ├── css/
+│   │   └── tab-*.css             # Tab-specific styles
+│   └── js/
+│       └── tab-*.js              # Tab-specific logic
+└── templates/
+    ├── <toolname>.html           # Main page (extends dashboard.html)
+    └── tabs/
+        └── tab-*.html            # Tab content (included in main)
+```
+
+**Critical Rules:**
+1. **Never define routes in `core/app.py`** - only import and register
+2. **Backend logic belongs in `_routes.py`** - keep algorithms in `_utils.py`
+3. **Use existing data loaders** - check `_data_manager.py` before creating new ones
+4. **API endpoints** - prefix with `/api/<endpoint>`, define in `register_*` function
+5. **POST endpoints** - use `request.form.get('key')` and URLEncoded format
+6. **GET endpoints** - use `request.args.get('param')` or `request.args.getlist('param[]')`
+
+**Example Route Registration:**
+```python
+# In dashboard/tools/newtool/core/newtool_routes.py
+def register_newtool_routes(app):
+    @app.route('/newtool')
+    def newtool():
+        return render_template('newtool.html', data=load_data())
+    
+    @app.route('/api/newtool_data', methods=['GET'])
+    def get_newtool_data():
+        return jsonify({'data': process_data()})
+
+# In core/app.py
+from dashboard.tools.newtool.core.newtool_routes import register_newtool_routes
+register_newtool_routes(app)
+```
+
+**Common Mistakes to Avoid:**
+- Defining routes directly in `app.py` instead of tool-specific `_routes.py`
+- Using GET query params when POST form data is expected
+- Hardcoding file paths instead of using `DATASET_PATHS` config
+- Not adding static file route in `core/app.py` for new tools
+
+---
+
 ## Technologies
 
 - **Backend:** Flask, Gunicorn
