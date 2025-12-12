@@ -21,12 +21,12 @@ from dashboard.tools.cmportal.core.cmportal_config import DATASET_PATHS, UPLOAD_
 from dashboard.tools.cmportal.core.cmportal_data_manager import (
     load_lookup_tables, load_viewer_data, load_enrichment_data, get_search_table,
     clear_memory_cache, get_binary_df, get_cleaned_df, get_target_feature_dict,
-    get_categories_dict, get_causal_categories_dict, get_candidates
+    get_categories_dict, get_causal_categories_dict, get_candidates,
+    load_selected_variables  # ADD THIS LINE
 )
 from dashboard.tools.cmportal.core.cmportal_utils import (
     NpEncoder, getUserProtocolFeatures, getUserData, process_maturity_indicators
 )
-
 # Global variables for CMPortal
 _benchmark_results_cache = {}
 FeatureCategories_dict = {}
@@ -50,7 +50,9 @@ def register_cmportal_routes(app):
         DATASET_PATHS['target_param_filepath'],
         DATASET_PATHS['causal_feature_categories_filepath']
     )
-    
+    SelectedVariables_lst = load_selected_variables(DATASET_PATHS['selected_vars_filepath'])
+    print(f"Loaded {len(SelectedVariables_lst)} selected variables")
+
     # Start background cleanup thread
     cleanup_thread = threading.Thread(target=cleanup_temp_files, daemon=True)
     cleanup_thread.start()
@@ -72,20 +74,17 @@ def register_cmportal_routes(app):
         return render_template('dashboard.html')
     
     # ===== API Routes =====
-    
     @app.route('/api/enrichment_data', methods=['GET'])
     def get_enrichment_data():
         """Serve enrichment records, filtered by target parameters or protocol features"""
         try:
             search_mode = request.args.get('search_mode', 'target')
             
-            # Load as pandas DataFrame for efficient filtering
-            enrichment_df = pd.read_csv(DATASET_PATHS['enrich_filepath'], low_memory=False)
+            enrichment_df = pd.read_csv(DATASET_PATHS['enrich_filepath'], low_memory=False)  # CHANGED
             if enrichment_df.empty:
                 return jsonify({'error': 'Enrichment data not available'}), 404
             
             if search_mode == 'target':
-                # Support multiselect: parameter[] or single parameter
                 parameters = request.args.getlist('parameter[]')
                 if not parameters:
                     param = request.args.get('parameter', '')
@@ -94,16 +93,13 @@ def register_cmportal_routes(app):
                 if not parameters:
                     return jsonify({'error': 'No target parameters selected'}), 400
                 
-                # Filter using pandas: check Target Label column
                 filtered_df = enrichment_df[enrichment_df['Target Label'].isin(parameters)]
                 
             elif search_mode == 'features':
-                # Filter by protocol features
                 features = request.args.getlist('protocol_features[]')
                 if not features:
                     return jsonify({'error': 'No protocol features selected'}), 400
                 
-                # Filter using pandas: check if Feature column contains any selected feature
                 pattern = '|'.join([re.escape(f) for f in features])
                 filtered_df = enrichment_df[enrichment_df['Prioritised Features'].str.contains(pattern, case=False, na=False)]
             
@@ -118,7 +114,60 @@ def register_cmportal_routes(app):
         except Exception as e:
             app.logger.error(f"Error in get_enrichment_data: {str(e)}")
             return jsonify({'error': str(e)}), 500
-    
+
+    @app.route('/api/enrichment_data_filtered', methods=['GET'])
+    def get_enrichment_data_filtered():
+        """Serve enrichment records filtered by target parameters AND selected variables"""
+        try:
+            search_mode = request.args.get('search_mode', 'target')
+            
+            if search_mode != 'target':
+                return jsonify({'error': 'Filtered search only available in target mode'}), 400
+            
+            enrichment_df = pd.read_csv(DATASET_PATHS['enrich_filepath'], low_memory=False)  # CHANGED
+            if enrichment_df.empty:
+                return jsonify({'error': 'Enrichment data not available'}), 404
+            
+            parameters = request.args.getlist('parameter[]')
+            if not parameters:
+                param = request.args.get('parameter', '')
+                parameters = [param] if param else []
+            
+            if not parameters:
+                return jsonify({'error': 'No target parameters selected'}), 400
+            
+            filtered_df = enrichment_df[enrichment_df['Target Label'].isin(parameters)]
+            
+            if SelectedVariables_lst:
+                filtered_df = filtered_df[filtered_df['Prioritised Features'].isin(SelectedVariables_lst)]
+            
+            records = filtered_df.to_dict('records')
+            columns = filtered_df.columns.tolist()
+            
+            return jsonify({
+                'columns': columns,
+                'data': records,
+                'filtered_count': len(SelectedVariables_lst)
+            })
+            
+        except Exception as e:
+            print(f"Error in get_enrichment_data_filtered: {str(e)}")
+            traceback.print_exc()
+            return jsonify({'error': str(e)}), 500    
+
+    @app.route('/api/target_parameters', methods=['GET'])
+    def get_target_parameters():
+        """Get parameters for a specific category"""
+        try:
+            category = request.args.get('category', '')
+            if not category or category not in TargetParameters_dict:
+                return jsonify({'error': 'Invalid category'}), 400
+            
+            parameters = TargetParameters_dict[category]
+            return jsonify({'parameters': parameters})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
     @app.route('/api/protocol_features', methods=['GET'])
     def get_protocol_features():
         """Return all protocol features from binary_df columns"""

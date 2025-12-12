@@ -193,3 +193,23 @@
 .search-ui-container {
     width: 100% !important;
 }
+
+/* Disabled button styling */
+.search-ui-submit-button:disabled {
+  background-color: #6c757d !important;  /* Dark gray */
+  color: #adb5bd !important;  /* Light gray text */
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+.search-ui-submit-button:disabled:hover {
+  background-color: #6c757d !important;  /* No hover effect */
+}
+
+/* Button spacing */
+.global-submit-container {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin: 20px 0;
+}

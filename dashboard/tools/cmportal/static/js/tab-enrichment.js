@@ -1,4 +1,4 @@
-// tab-enrichment.js - Dual search mode enrichment browser
+// tab-enrichment.js - Dual search mode enrichment browser with filtered option
 (function() {
   'use strict';
   
@@ -39,7 +39,6 @@
     const modeInfo = document.getElementById('current-mode-info');
     const modeValue = modeInfo.querySelector('.current-mode-value');
 
-    // Remove all mode classes
     modeInfo.classList.remove('mode-target', 'mode-features');
     
     if (mode === 'target') {
@@ -54,7 +53,7 @@
       modeInfo.classList.add('mode-features');
     }
     
-    updateSubmitButton();
+    updateSubmitButtons();
   }
 
   // Load protocol features
@@ -74,17 +73,19 @@
   // Render feature checkboxes
   function renderFeatureCheckboxes(features) {
     const container = document.getElementById('feature-container');
-    container.innerHTML = features.map((f, idx) => `
+    if (!container || features.length === 0) return;
+    
+    container.innerHTML = features.map(f => `
       <div class="search-ui-checkbox-item">
-        <label for="feature-${idx}">${f}</label>
-        <input type="checkbox" id="feature-${idx}" value="${f}" class="feature-checkbox">
+        <label for="feature-${f.replace(/\s+/g, '_')}">${f}</label>
+        <input type="checkbox" class="feature-checkbox" id="feature-${f.replace(/\s+/g, '_')}" value="${f}">
       </div>
     `).join('');
-
+    
     container.querySelectorAll('.feature-checkbox').forEach(cb => {
       cb.addEventListener('change', () => {
         updateFeatureSummary();
-        updateSubmitButton();
+        updateSubmitButtons();
       });
     });
   }
@@ -101,7 +102,59 @@
     });
   }
 
-  // Update feature summary
+  // Parameter form
+  function initializeParameterForm() {
+    const dropdown = document.getElementById('parameter-dropdown');
+    const container = document.getElementById('parameter-container');
+    
+    if (!dropdown || !container) return;
+    
+    dropdown.addEventListener('change', function() {
+      const category = this.value;
+      if (!category) {
+        container.innerHTML = '<p>Please select a category first...</p>';
+        container.classList.add('search-ui-hidden');
+        return;
+      }
+      
+      fetch(`/api/target_parameters?category=${encodeURIComponent(category)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.parameters && data.parameters.length > 0) {
+            container.innerHTML = data.parameters.map(p => `
+              <div class="search-ui-checkbox-item">
+                <label for="param-${p.replace(/\s+/g, '_')}">${p}</label>
+                <input type="checkbox" name="parameter" value="${p}" id="param-${p.replace(/\s+/g, '_')}">
+              </div>
+            `).join('');
+            container.classList.remove('search-ui-hidden');
+            
+            container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+              cb.addEventListener('change', () => {
+                updateParameterSummary();
+                updateSubmitButtons();
+              });
+            });
+          } else {
+            container.innerHTML = '<p>No parameters found.</p>';
+            container.classList.remove('search-ui-hidden');
+          }
+        })
+        .catch(err => {
+          console.error('Error loading parameters:', err);
+          container.innerHTML = '<p class="text-danger">Error loading parameters.</p>';
+        });
+    });
+  }
+
+  // Update summaries
+  function updateParameterSummary() {
+    const summary = document.getElementById('parameter-summary');
+    if (!summary) return;
+    const count = document.querySelectorAll('#parameter-container input[type="checkbox"]:checked').length;
+    summary.textContent = count > 0 ? `${count} parameter(s) selected` : '';
+  }
+
   function updateFeatureSummary() {
     const summary = document.getElementById('feature-summary');
     if (!summary) return;
@@ -109,115 +162,68 @@
     summary.textContent = count > 0 ? `${count} feature(s) selected` : '';
   }
 
-  // Initialize target parameter form
-  function initializeParameterForm() {
-    const dropdown = document.getElementById('parameter-dropdown');
-    const container = document.getElementById('parameter-container');
-    if (!dropdown || !container) return;
-
-    dropdown.addEventListener('change', function() {
-      container.innerHTML = '';
-      container.classList.add('search-ui-hidden');
-      updateSelectionSummary();
-      updateSubmitButton();
-
-      const selectedKey = this.value;
-      if (!selectedKey) return;
-
-      container.classList.remove('search-ui-hidden');
-      container.innerHTML = '<p>Loading parameters...</p>';
-
-      const payload = new URLSearchParams();
-      payload.append('selected_key', selectedKey);
-
-      fetch('/api/get_TargetParameters', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-        body: payload.toString()
-      })
-      .then(res => res.json())
-      .then(data => {
-        const vals = (data.values || []).filter(v => v && v.trim());
-        if (!vals.length) {
-          container.innerHTML = '<p>No parameters available.</p>';
-          return;
-        }
-
-        container.innerHTML = vals.map((v, idx) => `
-          <div class="search-ui-checkbox-item">
-            <label for="param-${idx}">${v}</label>
-            <input type="checkbox" id="param-${idx}" name="parameter" value="${v}">
-          </div>
-        `).join('');
-
-        container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-          cb.addEventListener('change', () => {
-            updateSelectionSummary();
-            updateSubmitButton();
-          });
-        });
-      })
-      .catch(err => {
-        console.error('Error loading parameters:', err);
-        container.innerHTML = '<p class="text-danger">Error loading parameters.</p>';
-      });
-    });
-  }
-
-  // Update target parameter summary
-  function updateSelectionSummary() {
-    const summary = document.getElementById('parameter-summary');
-    if (!summary) return;
-    const count = document.querySelectorAll('#parameter-container input[type="checkbox"]:checked').length;
-    summary.textContent = count > 0 ? `${count} parameter(s) selected` : '';
-  }
-
-  // Update submit button
-  function updateSubmitButton() {
-    const btn = document.getElementById('enrichment-submit-button');
-    if (!btn) return;
+  // Update submit buttons
+  function updateSubmitButtons() {
+    const btnRegular = document.getElementById('enrichment-submit-button');
+    const btnFiltered = document.getElementById('enrichment-submit-filtered-button');
+    if (!btnRegular || !btnFiltered) return;
     
     let hasSelection = false;
 
     if (currentMode === 'target') {
       hasSelection = document.querySelectorAll('#parameter-container input[type="checkbox"]:checked').length > 0;
+      btnRegular.disabled = !hasSelection;
+      btnFiltered.disabled = !hasSelection;  // Enable in target mode
     } else if (currentMode === 'features') {
       hasSelection = document.querySelectorAll('.feature-checkbox:checked').length > 0;
+      btnRegular.disabled = !hasSelection;
+      btnFiltered.disabled = true;  // Always disabled in features mode
     }
-
-    btn.disabled = !hasSelection;
   }
 
-  // Submit handler
+  // Submit handlers
   function initializeSubmit() {
-    const btn = document.getElementById('enrichment-submit-button');
-    if (!btn) return;
+    const btnRegular = document.getElementById('enrichment-submit-button');
+    const btnFiltered = document.getElementById('enrichment-submit-filtered-button');
     
-    btn.addEventListener('click', function(e) {
-      e.preventDefault();
+    if (btnRegular) {
+      btnRegular.addEventListener('click', function(e) {
+        e.preventDefault();
+        submitEnrichment(false);  // Regular search
+      });
+    }
+    
+    if (btnFiltered) {
+      btnFiltered.addEventListener('click', function(e) {
+        e.preventDefault();
+        submitEnrichment(true);  // Filtered search
+      });
+    }
+  }
 
-      let url = '/api/enrichment_data?search_mode=' + currentMode;
-      let count = 0;
-      let type = '';
+  function submitEnrichment(useFilter) {
+    let endpoint = useFilter ? '/api/enrichment_data_filtered' : '/api/enrichment_data';
+    let url = endpoint + '?search_mode=' + currentMode;
+    let count = 0;
+    let type = '';
 
-      if (currentMode === 'target') {
-        const selected = Array.from(document.querySelectorAll('#parameter-container input[type="checkbox"]:checked')).map(cb => cb.value);
-        selected.forEach(p => url += '&parameter[]=' + encodeURIComponent(p));
-        count = selected.length;
-        type = 'target parameter(s)';
-      } else if (currentMode === 'features') {
-        const selected = Array.from(document.querySelectorAll('.feature-checkbox:checked')).map(cb => cb.value);
-        selected.forEach(f => url += '&protocol_features[]=' + encodeURIComponent(f));
-        count = selected.length;
-        type = 'protocol feature(s)';
-      }
+    if (currentMode === 'target') {
+      const selected = Array.from(document.querySelectorAll('#parameter-container input[type="checkbox"]:checked')).map(cb => cb.value);
+      selected.forEach(p => url += '&parameter[]=' + encodeURIComponent(p));
+      count = selected.length;
+      type = 'target parameter(s)';
+    } else if (currentMode === 'features') {
+      const selected = Array.from(document.querySelectorAll('.feature-checkbox:checked')).map(cb => cb.value);
+      selected.forEach(f => url += '&protocol_features[]=' + encodeURIComponent(f));
+      count = selected.length;
+      type = 'protocol feature(s)';
+    }
 
-      loadEnrichmentTable(url, count, type);
-    });
+    loadEnrichmentTable(url, count, type, useFilter);
   }
 
   // Load enrichment table
-  function loadEnrichmentTable(url, count, type) {
+  function loadEnrichmentTable(url, count, type, isFiltered) {
     const tableContainer = document.getElementById('enrichment-table-container');
     const tableEl = document.getElementById('enrichment-data-table');
     const resultDisplay = document.getElementById('enrichment-result-display');
@@ -225,7 +231,8 @@
 
     if (resultDisplay && submissionResult) {
       resultDisplay.classList.remove('enrichment-hidden');
-      submissionResult.textContent = `🔍 Fetching enrichment data for ${count} ${type}...`;
+      const filterMsg = isFiltered ? ' (filtered to protocol variables)' : '';
+      submissionResult.textContent = `🔍 Fetching enrichment data for ${count} ${type}${filterMsg}...`;
     }
 
     if ($.fn.dataTable.isDataTable(tableEl)) {
@@ -239,7 +246,8 @@
         if (json.error) throw new Error(json.error);
 
         if (submissionResult) {
-          submissionResult.textContent = `✅ Success! Found ${json.data.length} enriched protocol characteristics.`;
+          const filterMsg = isFiltered ? ` (${json.filtered_count} protocol variables)` : '';
+          submissionResult.textContent = `✅ Success! Found ${json.data.length} enriched protocol characteristics${filterMsg}.`;
         }
 
         tableContainer.classList.remove('enrichment-hidden');
