@@ -30,7 +30,7 @@
     margin-bottom: 50px;
 }
 
-.section-title {
+.qa-section-title {  /* RENAMED from .section-title */
     font-size: 20px;
     font-weight: 600;
     color: var(--dark);
@@ -39,7 +39,6 @@
     border-bottom: 2px solid var(--light-gray);
 }
 
-/* Variant 2: Subtle Card with Left Accent */
 .qa-card {
     border: 1px solid #f0f0f0;
     border-left: 3px solid transparent;
@@ -61,7 +60,7 @@
     box-shadow: 0 1px 4px rgba(102, 126, 234, 0.08);
 }
 
-.card-header {
+.qa-card-header {  /* RENAMED from .card-header */
     background: transparent;
     color: var(--dark);
     padding: 16px 20px;
@@ -73,7 +72,7 @@
     gap: 12px;
 }
 
-.card-header::before {
+.qa-card-header::before {
     content: "›";
     font-size: 20px;
     color: #999;
@@ -81,28 +80,28 @@
     width: 16px;
 }
 
-.qa-card:hover .card-header::before {
+.qa-card:hover .qa-card-header::before {
     color: #667eea;
 }
 
-.qa-card.open .card-header::before {
+.qa-card.open .qa-card-header::before {
     transform: rotate(90deg);
     color: #667eea;
 }
 
-.card-body {
+.qa-card-body {  /* RENAMED from .card-body */
     padding: 0;
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.3s ease, padding 0.3s;
 }
 
-.qa-card.open .card-body {
+.qa-card.open .qa-card-body {
     padding: 0 20px 20px 48px;
     max-height: 2000px;
 }
 
-.answer-content {
+.qa-answer-content {  /* RENAMED from .answer-content */
     background: transparent;
     padding: 0;
     color: #555;
@@ -110,16 +109,16 @@
     line-height: 1.7;
 }
 
-.answer-content strong {
+.qa-answer-content strong {
     color: var(--dark);
     font-weight: 600;
 }
 
-.answer-content p {
+.qa-answer-content p {
     margin-bottom: 12px;
 }
 
-.answer-content p:last-child {
+.qa-answer-content p:last-child {
     margin-bottom: 0;
 }
 
@@ -129,16 +128,16 @@
         font-size: 24px;
     }
     
-    .section-title {
+    .qa-section-title {
         font-size: 18px;
     }
     
-    .card-header {
+    .qa-card-header {
         font-size: 14px;
         padding: 14px 16px;
     }
     
-    .qa-card.open .card-body {
+    .qa-card.open .qa-card-body {
         padding: 0 16px 16px 36px;
     }
 }
