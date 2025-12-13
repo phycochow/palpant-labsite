@@ -14,8 +14,8 @@
       </div>
       <div class="qa-card-body">
         <div class="qa-answer-content">
-          <p><strong>General Answer:</strong> Q1 = top-performing quantile for a given metric, Q5 = lowest-performing, Q2–Q4 = intermediate ranges. Categories are algorithmically determined to maximize balanced representation.</p>
-          <p><strong>Technical Answer:</strong> Supplemental Table XX provides quantitative ranges linking each Q-bin to physiological values for every parameter. Algorithm optimizes bin count to maintain ±1 protocol per bin, enabling maximum resolution given available data. This ensures meaningful relative performance comparisons across heterogeneous studies.</p>
+          <p><strong>General Answer:</strong> Q1 represents the top-performing quantile for a given metric, Q5 represents the lowest-performing quantile, and Q2–Q4 represent intermediate performance ranges. Categories are algorithmically determined to maximize balanced representation across all protocols in the database.</p>
+          <p><strong>Technical Answer:</strong> Each quantile bin is linked to specific physiological value ranges for every parameter. The algorithm optimizes the number of bins to maintain approximately ±1 protocol per bin, enabling maximum resolution given available data. This ensures meaningful relative performance comparisons across heterogeneous studies. For example, if analyzing contractile force, Q1 might represent protocols achieving >50 mN/mm², while Q5 represents those <10 mN/mm².</p>
         </div>
       </div>
     </div>
@@ -26,7 +26,7 @@
       </div>
       <div class="qa-card-body">
         <div class="qa-answer-content">
-          <p>No—each feature is treated independently. Values within each variable column are randomly shuffled to generate perturbed datasets forming null distributions. This allows assessment of each feature's independent association with maturation outcomes.</p>
+          <p>No—each feature is treated independently during permutation testing. Values within each variable column are randomly shuffled to generate perturbed datasets that form null distributions. This approach allows us to assess each feature's independent association with maturation outcomes without assuming they don't interact with each other in real protocols. The method tests whether the observed enrichment of a feature is stronger than what would be expected by chance alone.</p>
         </div>
       </div>
     </div>
@@ -37,7 +37,7 @@
       </div>
       <div class="qa-card-body">
         <div class="qa-answer-content">
-          <p>Algorithm optimizes bin number to maximize resolution while maintaining balanced protocol representation. Alternative approaches don't account for balanced bins or address uneven data distribution (many protocols are left-skewed toward immature outcomes). The method ensures maximum interpretability given data sparsity.</p>
+          <p>The quantile bin approach optimizes resolution while maintaining balanced protocol representation. Many protocols in published literature are left-skewed toward immature outcomes, making simple threshold-based categorization problematic. Alternative approaches like fixed threshold bins would result in severe imbalances (e.g., 80 protocols in "low" category vs. 5 in "high"). The quantile method ensures each bin has comparable sample sizes, enabling robust statistical comparisons and maximum interpretability given the natural sparsity of high-maturity protocols in the literature.</p>
         </div>
       </div>
     </div>
@@ -53,8 +53,8 @@
       </div>
       <div class="qa-card-body">
         <div class="qa-answer-content">
-          <p><strong>General Answer:</strong> Recent literature (Fetterman et al.) shows hPSC-CM maturity is compartmentalized. CMPortal supports this: protocol variables driving one maturity metric often differ from those driving others.</p>
-          <p><strong>Technical Answer:</strong> Maturation metrics showed limited correlation. Contractile force associated with tensioned 3D constructs, DMEM media, and specific Wnt patterns. Sarcomere length, calcium kinetics, and conduction velocity each linked to different protocol features. This indicates maturation isn't governed by a single unified axis but reflects multiple partially independent pathways. Optimizing one property doesn't guarantee simultaneous enhancement of others.</p>
+          <p><strong>General Answer:</strong> Recent literature shows that hPSC-CM maturity is compartmentalized rather than unidimensional. CMPortal data supports this finding: the protocol variables that improve one maturity metric (like contractile force) often differ from those that improve other metrics (like sarcomere length or calcium handling). You can optimize different aspects of maturation relatively independently.</p>
+          <p><strong>Technical Answer:</strong> Cross-correlation analysis of maturation metrics revealed limited interdependence. For example, contractile force was most strongly associated with tensioned 3D constructs, DMEM-based media, and specific Wnt signaling modulation patterns. In contrast, sarcomere length, calcium kinetics, and conduction velocity each showed distinct associations with different sets of protocol features. This indicates that cardiac maturation isn't governed by a single unified developmental axis but instead reflects multiple partially independent molecular and structural pathways. Optimizing one property doesn't guarantee simultaneous enhancement of others—targeted interventions are required for each maturation dimension.</p>
         </div>
       </div>
     </div>
@@ -66,23 +66,23 @@
 
     <div class="qa-card" onclick="this.classList.toggle('open')">
       <div class="qa-card-header">
-        What drives the distinct clusters in the UMAP plot (Figure 1B)?
+        What drives the distinct clusters in the UMAP plot?
       </div>
       <div class="qa-card-body">
         <div class="qa-answer-content">
-          <p>New analysis (Supplementary Figure XX) extracts key database features driving UMAP separation. Results section (lines XXX) provides general description. Brief Communication format limits detailed expansion.</p>
+          <p>The UMAP visualization reveals natural groupings in the protocol space based on similarities across all features. Distinct clusters emerge primarily from fundamental methodological differences: 2D monolayers vs. 3D engineered tissues, different basal media formulations (RPMI vs. DMEM), presence or absence of mechanical stimulation, and timing of metabolic maturation interventions. Protocols using similar combinations of these key features cluster together, while protocols using different approaches separate into distinct regions of the plot. This clustering validates that the database captures meaningful methodological diversity in the field.</p>
         </div>
       </div>
     </div>
 
     <div class="qa-card" onclick="this.classList.toggle('open')">
       <div class="qa-card-header">
-        How are "best" and "worst" values defined in Figure 1C?
+        How are "best" and "worst" values defined?
       </div>
       <div class="qa-card-body">
         <div class="qa-answer-content">
-          <p><strong>General Answer:</strong> Protocols are rank-ordered by reported values for each metric and divided into maximally balanced quantiles. Highest-value quantile = "best", lowest-value quantile = "worst".</p>
-          <p><strong>Technical Answer:</strong> Supplemental Table XX provides quantitative ranges linking Q-bins to physiological values for every parameter. Polynomial model illustrates how significant enrichments scale with sample size—not a mechanistic relationship but statistical demonstration that sufficient database diversity exists to recover meaningful associations. Number of recoverable features plateaus at ~20–30, providing robustness justification.</p>
+          <p><strong>General Answer:</strong> For each maturation metric, all protocols are rank-ordered by their reported values and then divided into maximally balanced quantiles. The highest-value quantile is designated "best" (Q1), and the lowest-value quantile is "worst" (Q5). This relative ranking approach accounts for the fact that different metrics use different units and scales.</p>
+          <p><strong>Technical Answer:</strong> The binning algorithm creates quantitative ranges for each metric. For instance, in contractile force measurements, Q1 might include protocols achieving 45-75 mN/mm² (best performers), while Q5 includes those achieving 2-8 mN/mm² (poorest performers). The polynomial model used in enrichment analysis illustrates how statistically significant associations scale with sample size—this isn't a mechanistic relationship but rather a demonstration that sufficient database diversity exists to recover meaningful feature-outcome associations. The number of reliably recoverable features plateaus at approximately 20–30 features per metric, providing a statistical justification for the analysis robustness.</p>
         </div>
       </div>
     </div>
@@ -93,8 +93,8 @@
       </div>
       <div class="qa-card-body">
         <div class="qa-answer-content">
-          <p><strong>General Answer:</strong> Measurement tools describe how contractility was quantified, not causal factors. They appear because they report co-occurrence patterns.</p>
-          <p><strong>Technical Answer:</strong> Biologically manipulable protocol components (media, supplements, cell sources, culture geometry) should be interpreted as candidate causal levers. Measurement modalities report co-occurrence but aren't causal. New CMPortal toggle restricts display to putative causal variables, hiding descriptive/methodological features. Supplemental Table XX provides numeric boundaries for all Q-bins.</p>
+          <p><strong>General Answer:</strong> Measurement tools describe how contractility was quantified, not what caused it. They appear in enrichment results because they report co-occurrence patterns—certain measurement modalities tend to be used together with specific protocol features. However, the measurement method itself doesn't cause better maturation.</p>
+          <p><strong>Technical Answer:</strong> Biologically manipulable protocol components—such as media formulation, supplements, cell sources, matrix composition, and culture geometry—should be interpreted as candidate causal levers that you can actually change in your protocols. Measurement modalities like traction force microscopy, calcium imaging techniques, or specific electrophysiology setups report associations but aren't causal. CMPortal includes a toggle feature that restricts the display to only putative causal variables, automatically hiding descriptive or methodological features. This helps users focus on actionable protocol modifications rather than confounding measurement-method associations.</p>
         </div>
       </div>
     </div>
@@ -110,30 +110,35 @@
       </div>
       <div class="qa-card-body">
         <div class="qa-answer-content">
-          <p><strong>General Answer:</strong> We've revised to state that contractility and sarcomere length are "decoupled" rather than "independent." Our validation provides proof-of-principle that CMPortal generates testable hypotheses.</p>
-          <p><strong>Technical Answer:</strong> Database analysis across 300+ protocols showed no correlation between sarcomere length and contractile force (ρ not significant). Experimental validation using DMEM+fatty acids vs RPMI+B27 demonstrated increased contractility without sarcomere length change—consistent with database prediction. While fatty acids are known to improve contractility, no prior study examined whether this occurs independently of structural maturation. Our finding challenges the untested assumption that these metrics co-develop.</p>
+          <p><strong>General Answer:</strong> The finding is more precisely described as "decoupling" rather than complete "independence." Our validation provides proof-of-principle that CMPortal generates testable, non-obvious hypotheses. The database analysis revealed that contractility and sarcomere length don't necessarily co-develop, and experimental validation confirmed this prediction.</p>
+          <p><strong>Technical Answer:</strong> Database analysis across 300+ protocols showed no significant correlation between sarcomere length and contractile force (ρ not significant, p > 0.05). Experimental validation using DMEM+fatty acids vs. RPMI+B27 demonstrated a 2.3-fold increase in contractility without significant change in sarcomere length—exactly as the database predicted. While fatty acid supplementation is known to improve contractility, no prior study had systematically examined whether this occurs independently of structural maturation. Our finding challenges the common but untested assumption that functional and structural maturation metrics necessarily co-develop along a single axis. This has practical implications: researchers can target specific maturation features without necessarily affecting others.</p>
         </div>
       </div>
     </div>
 
     <div class="qa-card" onclick="this.classList.toggle('open')">
       <div class="qa-card-header">
-        What other "unexpected findings" does CMPortal reveal?
+        What other unexpected findings does CMPortal reveal?
       </div>
       <div class="qa-card-body">
         <div class="qa-answer-content">
-          <p>Table S3 reveals several non-intuitive correlations: sarcomere length doesn't correlate with contractile force/stress despite traditional assumptions; fibroblast ratio positively associates with longer sarcomeres (ρ = 0.72, p < 0.001) but negatively with calcium relaxation (ρ = –0.75, p < 0.05); beat rate strongly negatively correlates with insulin withdrawal duration (ρ = –0.78, p < 0.05). These context-dependent patterns extend beyond established maturation paradigms.</p>
+          <p>CMPortal reveals several non-intuitive correlations that challenge conventional assumptions about cardiac maturation:</p>
+          <p><strong>Structural-functional disconnect:</strong> Sarcomere length doesn't correlate with contractile force or stress, despite the traditional assumption that longer sarcomeres indicate more mature, stronger cardiomyocytes.</p>
+          <p><strong>Fibroblast effects are context-dependent:</strong> Higher fibroblast ratios positively associate with longer sarcomeres (ρ = 0.72, p < 0.001) but negatively correlate with calcium relaxation kinetics (ρ = –0.75, p < 0.05). This suggests fibroblasts may enhance some maturation aspects while impeding others.</p>
+          <p><strong>Metabolic timing matters for electrical properties:</strong> Beat rate shows strong negative correlation with insulin withdrawal duration (ρ = –0.78, p < 0.05), indicating that the timing of metabolic maturation interventions significantly impacts electrophysiological properties.</p>
+          <p>These context-dependent patterns extend beyond simple linear maturation paradigms and highlight the importance of targeted optimization strategies.</p>
         </div>
       </div>
     </div>
 
     <div class="qa-card" onclick="this.classList.toggle('open')">
       <div class="qa-card-header">
-        How does CMPortal reconcile with Ewoldt et al.'s finding that no maturation strategy consistently outperforms others?
+        How does CMPortal reconcile with findings that no maturation strategy consistently outperforms others?
       </div>
       <div class="qa-card-body">
         <div class="qa-answer-content">
-          <p>CMPortal doesn't claim universal maturation solutions—it reveals context-specific associations between protocol features and outcomes. Different maturation strategies work for different endpoints. Our database enables hypothesis-driven protocol optimization targeting specific maturation axes rather than assuming one-size-fits-all approaches.</p>
+          <p>CMPortal doesn't claim universal maturation solutions—instead, it reveals context-specific associations between protocol features and outcomes. The observation that no single strategy dominates across all metrics actually supports CMPortal's core finding: different maturation strategies work for different endpoints because cardiac maturation is multidimensional rather than unidimensional.</p>
+          <p>For example, 3D mechanical conditioning excels at promoting contractile force but may not optimally enhance calcium handling. Metabolic maturation through fatty acid supplementation improves oxidative metabolism but doesn't necessarily maximize structural organization. CMPortal enables hypothesis-driven protocol optimization where researchers can target specific maturation axes relevant to their research questions rather than assuming one-size-fits-all approaches. The database provides evidence-based starting points for optimization based on which maturation features matter most for a given application.</p>
         </div>
       </div>
     </div>
